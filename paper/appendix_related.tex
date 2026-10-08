@@ -15,9 +15,11 @@ $D$, and value matrix $V$, its guarantee is
  \le \epsilon\|D^{-1}A\|_{\rm op}\|V\|_{\rm op}.
 \]
 For $N$ rows, its sample count is
-$m=O(\epsilon^{-2}\log N\,[\operatorname{srank}(D^{-1}A)
-+\operatorname{srank}(V)])$, where
-$\operatorname{srank}(M)=\|M\|_F^2/\|M\|_{\rm op}^2$.
+\[
+ m=O\bigl(\epsilon^{-2}\log N\,[\operatorname{srank}(D^{-1}A)
+ +\operatorname{srank}(V)]\bigr),\qquad
+ \operatorname{srank}(M)=\|M\|_F^2/\|M\|_{\rm op}^2.
+\]
 Constructing $\Pi$ and $\widetilde D$ requires the KDE work;
 materializing the approximate product adds $O(Nmd)$ operations
 at width $d$. The theorem concerns all rows.
@@ -49,7 +51,9 @@ uses inclusion probabilities $u_i$ in the ratio
 \]
 For $L$ tables of $K$ hash bits, retrieving a key after at least
 two table collisions gives
-$u_i=1-(1-\zeta_i^K)^L-L\zeta_i^K(1-\zeta_i^K)^{L-1}$,
+\[
+ u_i=1-(1-\zeta_i^K)^L-L\zeta_i^K(1-\zeta_i^K)^{L-1},
+\]
 where $\zeta_i$ is its one-bit collision probability.
 Such ratios are generally biased. For example, take
 weights $(1,2)$, values $(0,1)$, and one uniformly included

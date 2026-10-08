@@ -11,6 +11,7 @@
 \usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric,fit,backgrounds}
 \pgfplotsset{compat=1.18}
 \usepackage[unicode,colorlinks=true,linkcolor=blue!40!black,citecolor=blue!40!black,urlcolor=blue!40!black]{hyperref}
+\mathchardef\UrlBigBreakPenalty=10000
 \hypersetup{pdftitle={Exact Sampling from Neural Networks: Depth, Attention, and Decoding},pdfauthor={Samuel Mausberg}}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -207,7 +208,7 @@ Full decoder, fixed key-map rank & One prompt pass; see Theorem~\ref{thm:main-de
 Same polynomial per token, including maintenance & Polynomial degree depends on rank\\
 \addlinespace
 Additive pre-norm, relative floor & Weights and floor certificate &
-$O(B^4(2+L)(1+\log R)R^{m-1})$ for a stream sign & Sharp exponents remain open for the full class\\
+$O(B^4{(2+L)}\allowbreak{(1+\log R)}R^{m-1})$ for a stream sign & Sharp exponents remain open for the full class\\
 \addlinespace
 Explicit carrier family & $O_s((D+1)n^2B^6)$ &
 $O_s(B^4\min(R^{2\nu_\eta},n))$ & Matching probe order; $\eta$ is the group fraction in Theorem~\ref{thm:main-carrier}\\
@@ -288,12 +289,14 @@ Learned coordinate gains can be absorbed into the following
 linear maps by using their resulting row norms.
 A pre-norm block normalizes before every additive update:
 \begin{equation}
+\begin{gathered}
  a_\ell=h_{\ell-1}
       +\alpha_{\ell,A}\operatorname{Att}_{\ell}
-          (\RMS_{\varepsilon_{\ell,A}}(h_{\ell-1})),\qquad
+          (\RMS_{\varepsilon_{\ell,A}}(h_{\ell-1})),\\
  h_\ell=a_\ell
       +\alpha_{\ell,F}\tanh(b_\ell+W_\ell
           \RMS_{\varepsilon_{\ell,F}}(a_\ell)).
+\end{gathered}
  \label{eq:main-prenorm}
 \end{equation}
 The step sizes $\alpha_{\ell,A},\alpha_{\ell,F}$ are known nonnegative
@@ -396,6 +399,7 @@ inequality when $\rho\ge1$, and the transition from $\rho$ to $\rho^2$
 measures the difficulty of amplifying an unknown mean.
 
 \subsection{Why constant scalar cost is insufficient}
+\input{figures/recursion}
 
 For a whole network, each child sign can itself require a factory
 (Figure~\ref{fig:recursion}).
@@ -538,7 +542,6 @@ an entire bounded random vector with the required mean. A corrected
 empirical average and sampled fourth derivatives give the exact coin.
 The large bit exponent is a conservative implementation bound.
 
-\input{figures/recursion}
 
 \section{What an input lower bound measures}
 \label{sec:lower-main}
