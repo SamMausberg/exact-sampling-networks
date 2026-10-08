@@ -377,9 +377,10 @@ theorem rank_two_start (c n M₂ M₃ M₄ M₅ M₆ : ℝ) (hc : 0 ≤ c) (hn :
       _ ≤ K ^ 3 * n ^ 3 := by nlinarith [pow_nonneg (by linarith : (0 : ℝ) ≤ n) 3]
       _ = (K * n) ^ 3 := by ring
 
-/-- Paper: `thm:rank-two-critical` (tanh_rank_two.tex): with the gate
-`q ≤ 6/√n` and the conditional source count `2 m_0 ≤ 4 K n`, the expected
-number of input probes is at most `24 K √n = O(√(D+1))`. -/
+/-- Paper: the closing arithmetic step of the probe bound in the proof of
+`thm:rank-two-critical` (tanh_rank_two.tex): if the gate satisfies `q ≤ 6/√n` and the
+conditional source count satisfies `2 m_0 ≤ 4 K n`, then `q · 2 m_0 ≤ 24 K √n`. The gate,
+the factory, its exactness and `m_0 = O(D+1)` are not formalized in this statement. -/
 theorem probe_bound (q m0 K n : ℝ) (hn : 0 < n) (hq : q ≤ 6 / Real.sqrt n)
     (hm0 : 0 ≤ m0) (hm : m0 ≤ 2 * (K * n)) : q * (2 * m0) ≤ 24 * K * Real.sqrt n := by
   have hs : 0 < Real.sqrt n := Real.sqrt_pos.mpr hn

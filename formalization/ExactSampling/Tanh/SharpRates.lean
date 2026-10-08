@@ -916,9 +916,10 @@ theorem final_radius_le {g ε : ℝ} (hg0 : 0 ≤ g) (hg1 : g ≤ 1) (hε0 : 0 �
     _ = idealRadius g D * √((D : ℝ) + 1) + 3 * D * ε * √((D : ℝ) + 1) := by ring
     _ ≤ 2 := by linarith
 
-/-- The call bound `E N_calls ≤ 80 (D+1)²` of `eq:maincall` for reference gain `0 ≤ g ≤ 1`,
-from the generation bound `eq:generalcost` with stored radii obeying `eq:rounded` and the
-precision bound of `eq:precision`. The left side is the right side of `eq:generalcost` (that
+/-- The analytic half of `eq:maincall` for reference gain `0 ≤ g ≤ 1`: the right side of the
+generation bound `eq:generalcost` is at most `80 (D+1)²`, with stored radii obeying
+`eq:rounded` and the precision bound of `eq:precision`. The left side is the right side of
+`eq:generalcost` (that
 inequality is not derived here).
 Paper: `thm:upper` (`tanh_model.tex`), `eq:maincall`; proof in `tanh_rates.tex`. -/
 theorem maincall_critical {g ε : ℝ} (hg0 : 0 ≤ g) (hg1 : g ≤ 1) (hε0 : 0 < ε) (D : ℕ)

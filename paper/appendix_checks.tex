@@ -132,9 +132,12 @@ Theorem~\ref{thm:residualupper}.\\
 \end{tabularx}
 \end{center}
 
-The formalization covers the probability laws, exactness identities,
-stopping estimates and quantitative inequalities of these proofs, with the
-paper's constants. It does not cover the bit-operation cost model, data
+The formalization covers many of the probability laws, exactness
+identities, stopping estimates and quantitative inequalities of these proofs,
+with the paper's constants. Some results are formalized in full. For others
+the Lean statement covers the analytic core while a probabilistic or
+algorithmic step enters as an explicit hypothesis, and for a few only the
+closing arithmetic is checked. It does not cover the bit-operation cost model, data
 structures, the certified arithmetic routines, or the complexity-theoretic
 reductions and hypotheses. When a proof uses a fact from outside the paper,
 such as the cosh product of~\cite{dlmf} or a coefficient bound from complex

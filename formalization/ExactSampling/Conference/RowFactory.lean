@@ -451,8 +451,8 @@ with probability `exp(Y u - A)` (Poisson series with `N ∼ Pois(2A)`); with the
 `m(1) + m(-1) = s = e^{-A} cosh u ≥ e^{-A}`, the accepted sign is `y` with probability
 `e^{yu} / (e^u + e^{-u})` and has mean `tanh u`; and the renewal bound on input requests is
 `2 ∑ⱼ |wⱼ| / s ≤ 2A e^A ≤ 4e^2`. The same law and request count for independent trials on a
-probability space are `row_sampler_iid`. Related full-version result: `thm:new-single-row-law`
-(tanh_single_row.tex), which uses a different tanh factory. -/
+probability space are `row_sampler_iid`. The single-row theorem of the full version
+(tanh_single_row.tex) uses a different tanh factory and is not formalized here. -/
 theorem prop_conf_row {n : ℕ} (c : ℝ) (w x : Fin n → ℝ) (hc : |c| ≤ 1) (hw : ∑ j, |w j| ≤ 1)
     (hx : ∀ j, x j = 1 ∨ x j = -1) (hA : 0 < amplitude c w) :
     ∑ o, choiceProb c w o * choiceSign c w x o = preact c w x / amplitude c w ∧
@@ -614,8 +614,9 @@ theorem rational_factor_bound {lam : ℝ} (h0 : 0 ≤ lam) (h4 : lam ≤ 4) (K :
 probability `e^{-λ}(2λ)^K/(128K!)` lies in `[0, e^4/128]` with `e^4/128 < 1`; the accepted mass
 is `e^{-λ}λ^K/(256K!)`; a trial succeeds with probability `1/256`; the accepted count is
 Poisson; the expected number of trials is `256`; and the rational factor is below
-`e^8/128 < 52`. Full version: `lem:smallpoissonattention` (attention_primitives.tex), the same
-construction with `θ ≤ 1`, factor `4` and success probability `1/8`. -/
+`e^8/128 < 52`. The small-Poisson lemma of the full version (attention_primitives.tex) uses the
+same construction with `θ ≤ 1`, factor `4` and success probability `1/8`; it is not formalized
+here, and neither is the bit work. -/
 theorem finite_bit_poisson (r : ℝ≥0) (hr : (r : ℝ) ≤ 4) :
     HasSum geomProposal 1 ∧
     (∀ K, 0 ≤ poissonAccept r K ∧ poissonAccept r K ≤ exp 4 / 128) ∧ exp 4 / 128 < 1 ∧

@@ -1191,10 +1191,12 @@ theorem least_starting_level (κ D M₂ M₃ M₄ : ℝ) (hκ : 1 ≤ κ) (hD : 
   have : (2 : ℝ) ^ Nat.find hex ≤ 2 ^ k := pow_le_pow_right₀ (by norm_num) hle
   linarith
 
-/-- Paper: `eq:column-source-count` and `eq:column-top-gate`
-(tanh_column_envelope.tex): for `D ≥ 32`, the gate `q` of `top_gate` and the least
-valid starting level `m_0 = 2^{k_0}` satisfy `q m_0 < 27648 κ^2 √D`. The
-probabilistic step `E Q ≤ q m_0` (the gate opens with probability `q`, and the
+/-- Paper: the closing arithmetic of the query bound after `eq:column-source-count`
+(tanh_column_envelope.tex), with the derivative masses and the top-gate range taken as
+hypotheses: for `D ≥ 32`, the gate `q` of `top_gate` and the least valid starting level
+`m_0 = 2^{k_0}` satisfy `q m_0 < 27648 κ^2 √D`. The displayed source-count inequality
+`E N ≤ m_0` is not stated here. The probabilistic step `E Q ≤ q m_0` (the gate opens with
+probability `q`, and the
 conditional source count is at most `m_0` by `conditional_source_count`) is not
 formalized. -/
 theorem column_query_bound (D : ℕ) (hD : 32 ≤ D) (κ M₂ M₃ M₄ rD q F : ℝ) (hκ : 1 ≤ κ)

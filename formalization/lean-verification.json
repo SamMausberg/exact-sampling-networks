@@ -505,7 +505,6 @@
       "ExactSampling.ColumnEnvelope.telescope_exactness"
     ],
     "eq:column-top-gate": [
-      "ExactSampling.ColumnEnvelope.column_query_bound",
       "ExactSampling.ColumnEnvelope.tanh_sq_ge",
       "ExactSampling.ColumnEnvelope.top_gate",
       "ExactSampling.ColumnEnvelope.top_radius_sq_ge"
@@ -2210,7 +2209,6 @@
     ],
     "lem:smallpoissonattention": [
       "ExactSampling.RejectionLoop.first_success_law",
-      "ExactSampling.RowFactory.finite_bit_poisson",
       "ExactSampling.RowFactory.poissonAccept_bounds",
       "ExactSampling.RowFactory.poisson_sampler_law",
       "ExactSampling.RowFactory.poisson_trial",
@@ -3169,8 +3167,7 @@
       "ExactSampling.MajorityArity.row_request_bound_integral",
       "ExactSampling.MajorityArity.score_integrand_ge",
       "ExactSampling.MajorityArity.tanh_ge_half_min",
-      "ExactSampling.RowFactory.choice_mean",
-      "ExactSampling.RowFactory.prop_conf_row"
+      "ExactSampling.RowFactory.choice_mean"
     ],
     "thm:newrankone": [
       "ExactSampling.DynamicIndex.rounded_monotone_envelope",
