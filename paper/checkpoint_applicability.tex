@@ -1,0 +1,104 @@
+\section{Quantities to check on a model}
+\label{sec:checkpoint}
+
+The positive results give sufficient conditions that can be checked
+against a specified model. Their current dependence on rank is severe.
+The maintained decoder is polynomial in width when its rank bound is
+fixed independently of width; both its feature count and the polynomial
+degree grow with that rank. These bounds currently supply no useful
+speed prediction at large key ranks.
+
+For this section, $n$ is residual width, $d$ is one head's key
+dimension, and $a$ is its value dimension. Scores are
+$\beta\langle q,k_j\rangle/d$, with $\beta=\sqrt d$ at standard
+scaling. RMSNorm still averages over $n$ coordinates.
+If its learned gain is $g$, use the effective following matrix
+$W^{\rm eff}=W\operatorname{diag}(g)$. Its row budgets are
+$s_i=\sum_j|W_{ij}g_j|$.
+These conventions match the inside-root stabilizer, learned gain,
+and head-dimension scaling of the reference implementation
+\cite{llama3reference2026}. Corollary~\ref{cor:checkpoint-rectangular}
+proves the rectangular-dimension extension used here.
+Table~\ref{tab:checkpoint-quantities} lists the quantities to record.
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}YY@{}}
+\toprule
+Quantity & What to record & Where it enters\\
+\midrule
+Affine key rank $r$ &
+An exact common containing space over allowed positions and histories;
+the full effective key matrix includes all learned updates. &
+Cell count $(5+O(r\beta Q_{\max}K))^r$; moment count
+$\binom{m+r}{r}$.\\
+Score and coordinate ranges &
+Certified query/key bounds $Q_{\max},K$, value bound $U$, and score radius.
+Record empirical extrema separately. &
+The unindexed source factor is $2e^{2A_{\rm coin}}-1$;
+the moment degree uses the chart bound $H$.\\
+Row budgets &
+Effective absolute row sums, biases, and weighted radii
+$\rho_i=\sum_j|W_{ij}|R_j$. &
+A tanh row with $|b_i|\le1$ uses at most
+$2\rho_i(1+\rho_i)$ predecessor requests
+(Corollary~\ref{cor:comptanhrow}).\\
+Normalization floor &
+The inside-root $\varepsilon$, input radius $R_{j-1}$, and a
+certificate $\lambda_j\le\varepsilon_j+\|H_{j-1}\|_2^2/n$. &
+$\kappa_j=\max\{1,R_{j-1}^2/\lambda_j\}$ for the floor factory;
+$(1+\sqrt n)/\sqrt{\lambda_j}$ in the precision guard.\\
+\bottomrule
+\end{tabularx}
+\caption{Quantities to record for a model and where they enter the bounds.}
+\label{tab:checkpoint-quantities}
+\end{table}
+
+\paragraph{Rank and an appendable cache.}
+Without positional transforms, $b_K+\operatorname{image}(W_K^{\rm eff})$
+is a common key space. With rotations, the containing space must
+include every rotated image and the differences of rotated biases.
+Separate ranks of the transformed matrices do not certify its dimension.
+Even a rank-one unrotated key image can acquire a full common span
+(Proposition~\ref{prop:checkpoint-rotary-span}). The unrotated score
+rank $\operatorname{rank}[(W_Q^{\rm eff})^TW_K^{\rm eff};
+b_Q^TW_K^{\rm eff}]$ can sometimes replace the key rank
+(Corollary~\ref{cor:checkpoint-score-rank}).
+
+\paragraph{Formulas to evaluate.}
+For supplied finite records with $M_T$ occupied index cells, the index
+of Theorem~\ref{thm:main-fixed-rank} has append work
+$O_r((d+a+\log(T+2))B^3)$ and query work
+$O_r((d+M_T+\log(T+2))B^4)$, with
+$M_T\le\min\{T,(r+1)(5+32r\bar\beta Q_{\max}K)^r\}$.
+For the moment decoder with a chart bound $H$
+(Appendix~\ref{app:checkpoint}) and attention precision $p$, one valid
+degree and its exact feature count are $m=\lceil8(p+3H+7)\rceil$ and
+$N_m=\binom{m+r}{r}$, with $(a+1)N_m$ integer counters per head and
+precision index. At illustrative degree $m=256$, $N_m$ is
+$2{,}862{,}209$ for rank three and exceeds $5\cdot10^{14}$ for rank
+eight. For additive updates with radius increments $u_j$ (including
+step sizes), source bounds $m_j$, local arithmetic factors $L_j$, an
+initial radius $R_0$, $R_j=R_0+\sum_{k\le j}u_k$, and
+$P_j=\prod_{k\le j}(1+u_km_k/R_{k-1})$,
+Corollary~\ref{cor:checkpoint-initial-radius} gives
+\[
+ W_{\rm add}\le C_0B^4\frac{P_J}{R_J}
+ \left(2R_0+\sum_{j=1}^J\frac{u_j(1+L_j)}{P_j}\right).
+\]
+Appendix~\ref{app:checkpoint} also defines the coin radius
+$A_{\rm coin}$, gives the stage-by-stage precision guard
+(Lemma~\ref{lem:checkpoint-precision}), and treats floors that cover
+only some histories. For the critical tanh subclasses, the exact
+first-layer rank and the column envelope enter
+Theorems~\ref{thm:main-bottleneck} and~\ref{thm:column-envelope-critical}.
+
+\paragraph{Interpreting measurements.}
+Exact weight ranks and row budgets can be certified from the stored
+parameters. A score maximum or energy minimum measured on selected
+texts describes those texts. A universal claim requires a bound for
+all allowed histories, or a certificate checked as records enter the
+cache. Verification that reads the current context is charged to
+online work. The accompanying worksheet reports construction sizes
+and symbolic bit-work bounds. Timing, energy, and speedup require
+an implementation and calibration at the same target law.

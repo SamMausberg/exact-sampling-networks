@@ -1,0 +1,86 @@
+{
+  "input_scope": "Illustrative structural tanh network, not measurements from a trained checkpoint.",
+  "interpretation": "Critical-tanh certificate arithmetic only. No checkpoint was verified and no timing is predicted.",
+  "critical_tanh": {
+    "certificate_status": "Supplied exact structural identities for the Sylvester Hadamard family; this worksheet does not inspect a matrix.",
+    "interpretation": "Symbolic sufficient upper-bound growth proxies, not an instance complexity law, a numerical work upper bound with fitted constants, or a practical runtime forecast.",
+    "n": 32,
+    "D": 5,
+    "parameter_bits": 100,
+    "first_layer_rank": 32,
+    "row_norm_max_exact": "1",
+    "column_envelope_exact": "1",
+    "supplied_zero_bias_certificate": true,
+    "supplied_unit_row_certificate_holds": true,
+    "unit_row_zero_bias_conditions_hold": true,
+    "proxy_applicability": "The supplied zero-bias and unit-row conditions hold; further theorem scope applies.",
+    "depth_equals_ceil_log2_n": true,
+    "preprocessing_scope": "The stated original preprocessing budget uses D=ceil(log2 n) and b=O(log n). A single supplied b does not certify a family-wide asymptotic precision bound.",
+    "family_certificates": {
+      "first_layer_rank_is_uniform_constant": false,
+      "column_envelope_is_uniform_constant": true
+    },
+    "B": 124,
+    "B_definition": "16+b+ceil(log2(n*D+2))",
+    "probe_envelope_without_absolute_constant": {
+      "rational_coefficient_exact": "1",
+      "square_root_radicand_exact": 6,
+      "squared_value_exact": "6",
+      "log10_display_approx": 0.3890756251918218,
+      "value_display_approx": 2.449489742783178,
+      "formula": "max(1,C_col^2)*sqrt(D+1)",
+      "omitted_constant": "An absolute proof constant; unfitted."
+    },
+    "selected_probe_growth_proxy": {
+      "rational_coefficient_exact": "1",
+      "square_root_radicand_exact": 6,
+      "squared_value_exact": "6",
+      "log10_display_approx": 0.3890756251918218,
+      "value_display_approx": 2.449489742783178,
+      "formula": "min(D+1,max(1,C_col)^2*sqrt(D+1))",
+      "selected_construction": "column-envelope sampler",
+      "selection_comparison": {
+        "K_col_fourth_power_exact": "1",
+        "D_plus_one": 6
+      },
+      "omitted_constant": "Absolute proof constants are unfitted; this compares asymptotic probe envelopes, not measured times or optimal instance complexity."
+    },
+    "fixed_rank_bit_growth_proxy": {
+      "integer_base_B": 124,
+      "integer_exponent": 34,
+      "square_root_radicand_exact": 6,
+      "rational_prefactor_exact": "1",
+      "coefficient_exact_expression": "(1)*124^34",
+      "log10_display_approx": 71.56541292070781,
+      "coefficient_exact": "150085002058281581458072291540156117240876172193967923701022785196261376",
+      "value_display_approx": 3.6763167308735295e+71,
+      "formula": "sqrt(D+1)*B^max(4,r+2)",
+      "omitted_constant": "The rank-dependent proof constant C_r is omitted and unfitted. This is a uniform bound in width only with a family-wide fixed-rank certificate."
+    },
+    "bounded_column_bit_growth_proxy": {
+      "integer_base_B": 124,
+      "integer_exponent": 40,
+      "square_root_radicand_exact": 6,
+      "rational_prefactor_exact": "1",
+      "coefficient_exact_expression": "(1)*124^40",
+      "log10_display_approx": 84.12594303168123,
+      "coefficient_exact": "545591262370273198401701912190950249946911401932129805437275608377566325301760229376",
+      "value_display_approx": 1.3364202009281306e+84,
+      "formula": "sqrt(D+1)*B^40",
+      "omitted_constant": "The fixed-envelope factor and remaining absolute proof constant are omitted and unfitted. A family-wide bounded-envelope certificate is needed to omit K_col^7."
+    },
+    "uniform_column_bit_growth_proxy": {
+      "integer_base_B": 124,
+      "integer_exponent": 40,
+      "square_root_radicand_exact": 6,
+      "rational_prefactor_exact": "1",
+      "coefficient_exact_expression": "(1)*124^40",
+      "log10_display_approx": 84.12594303168123,
+      "coefficient_exact": "545591262370273198401701912190950249946911401932129805437275608377566325301760229376",
+      "value_display_approx": 1.3364202009281306e+84,
+      "formula": "max(1,C_col)^7*sqrt(D+1)*B^40",
+      "omitted_constant": "An absolute proof constant is omitted and unfitted. The arbitrary-radius majority implementation gives the displayed polynomial dependence on the column envelope."
+    },
+    "illustrative_descriptor": "W_1=H_32/32 for the Sylvester Hadamard matrix, W_l=I_32 for l>=2, and every bias is zero. H_32 H_32^T=32 I_32 gives first-layer rank 32. Every first-layer entry has absolute value 1/32, so each row has l1 norm 1 and C_col=1. In the family of orders n=2^k, the rank grows as n while C_col stays 1."
+  }
+}

@@ -1,0 +1,229 @@
+\subsection{The gain created by pre-normalization}
+\label{sec:pn-normalized-gain}
+
+The row norm alone understates the amplification in an additive
+pre-norm block. Deterministic carrier coordinates can keep the
+normalization denominator proportional to the residual radius while
+leaving its proportionality constant below one. The following lower
+bound retains that constant.
+
+\begin{theorem}[An additive lower bound from normalized gain]
+\label{thm:pn-normalized-gain}
+Put $c=\tanh 1$. Fix a legal dyadic row bound
+$s>c/\sqrt2$, and define
+\[
+ \nu=\frac{\sqrt2\,s}{c}-1>0.
+\]
+For every width $n\ge4$, every depth $D\ge0$, and every prescribed
+dyadic block-step schedule $a_j\in[0,1]$, there is a one-position
+pre-norm additive tanh network with row norms at most $s$, biases at
+most one, zero attention, and fixed stabilizer $3$ whose exact binary
+output requires
+\[
+ \Omega_s\!\left(\min\{(1+\tau_D)^{2\nu},n\}\right),
+ \qquad \tau_D=\sum_{j<D}a_j,
+\]
+expected fresh-query probes in the worst input. Preprocessing
+independent of the query is arbitrary. On the entire input sign cube,
+every pre-norm and final-normalization denominator satisfies
+\[
+ v_j\ge\gamma_0(1+\tau_j)^2,
+ \qquad
+ \gamma_0=\frac{3c^2}{12+(1+c)^2}>\frac1{12}.
+\]
+The fixed output logits are
+$\pm\mathcal N_3(h_D)_1/4$ and have magnitude below one on the
+entire sign cube. The constant in the lower bound is positive and
+depends only on $s$; an explicit choice is given in the proof.
+\end{theorem}
+
+\paragraph{Proof idea.}
+Half of a dyadic-sized group carries the unknown mean, and an equally
+large group moves deterministically at speed $\tanh1$. Unused
+coordinates remain fixed. After dividing the state by its residual
+radius, the scalar gain approaches $s/(\sqrt\eta\tanh1)\ge\sqrt2s/\tanh1$,
+where $\eta\le1/2$ is the fraction of carrier coordinates. The proof
+bounds the gain below by $\sqrt2s/\tanh1-O(1/R)$, and the error term
+has a summable contribution along the residual step schedule. A
+reciprocal-square comparison controls
+the nonlinear saturation. The transcript score turns the resulting
+mean sensitivity into a query lower bound.
+
+\begin{proof}
+Let $N$ be the largest power of two at most $n/2$, and put
+$\eta=N/n\in(1/4,1/2]$. Use $N$ feature coordinates and $N$ carrier
+coordinates. All remaining coordinates are inert. A feature row has
+weight $s/N$ on each normalized feature coordinate and zero bias.
+A carrier row has zero weights and bias $-1$. An inert row is zero.
+All attention maps are zero. These parameters are legal, and every
+coordinate has magnitude at most
+$r_j=1+\tau_j$, where $\tau_j=\sum_{k<j}a_k$.
+
+For arbitrary initial carrier signs $e_i$, their values are
+$e_i-c\tau_j$. Thus
+\[
+ v_j\ge3+\eta(c\tau_j-1)^2
+       \ge3+\tfrac14(c\tau_j-1)^2.
+\]
+For $\theta>0$ and every real $\tau$, completing a square gives
+\begin{equation}
+ 3+\theta(c\tau-1)^2
+ \ge\frac{3\theta c^2}{3+\theta(1+c)^2}(1+\tau)^2.
+ \label{eq:pn-carrier-floor}
+\end{equation}
+Indeed, after multiplication by $A=3+\theta(1+c)^2$, the difference
+is $[A-\theta c(1+c)(1+\tau)]^2$. Taking $\theta=1/4$ proves
+the stated full-cube floor. The inequality $c>3/4$ follows from
+$e^2>7$, for example by summing the first five terms of its series.
+It gives $35c^2-2c-13>0$, which implies $\gamma_0>1/12$.
+
+On the lower-bound subdomain, let the features be unknown signs
+$x_1,\ldots,x_N$, set every carrier to $-1$, and fix the inert
+coordinates to signs. Write $M=N^{-1}\sum_i x_i$. After $j$ blocks,
+the feature coordinates are $x_i-M+F_j(M)$, where $F_0(z)=z$ and
+\[
+ F_{j+1}(z)=F_j(z)+a_j\tanh\!\left(
+ \frac{sF_j(z)}{
+ \sqrt{4-\eta-\eta z^2+\eta F_j(z)^2+
+                      \eta(1+c\tau_j)^2}}\right).
+\]
+The functions are odd, and $F_j(z)\ge z$ for $z\ge0$. Put
+$u_j=F_j/r_j$ and $q_j=a_j/r_{j+1}$. The squared normalized
+denominator is $b_j(z)+\eta u_j^2$, where
+\[
+ b_j(z)\le\frac{c^2}{2}
+       +\frac{c(1-c)}{r_j}+\frac4{r_j^2}
+ \le A_0+\frac{A_1}{r_j},
+ \qquad A_0=c^2/2,\quad A_1=4+c(1-c).
+\]
+Set $\kappa=s/\sqrt{A_0}=1+\nu$ and
+$K=\kappa A_1/(2A_0)$. The gains
+\[
+ t_j=\frac{s}{\sqrt{A_0+A_1/r_j}}
+\]
+satisfy $0\le\kappa-t_j\le K/r_j$. This follows from
+$1-(1+x)^{-1/2}\le x/2$ for $x\ge0$.
+
+Choose
+\[
+ R_*=\left\lceil\max\{4,2K/\nu\}\right\rceil,
+ \qquad M_*=R_*+1,
+ \qquad C=\frac{\kappa(s^2+1/2)}{A_0\nu}.
+\]
+First suppose $r_D\ge R_*$. Let $j_0$ be the first index with
+$r_{j_0}\ge R_*$. Since $a_j\le1$,
+$R_*\le r_{j_0}\le M_*$ and $u_{j_0}(z)\ge z/M_*$.
+For $j\ge j_0$, put $\nu_j=t_j-1$, so
+$\nu/2\le\nu_j\le\nu$, and $g_j=1+\nu_jq_j$.
+Run the comparison in the proof of Theorem~\ref{thm:pn-scaled-lower}
+with the gain $t_j$ in place of $s$ and
+$B_j=(s^2+1/2)/(A_0+A_1/r_j)$ in place of $s^2+1/2$. Its tanh bound
+and its convexity step, now with weights $(1-q_j)/g_j$ and
+$q_jt_j/g_j$, give
+\[
+ u_{j+1}\ge\frac{g_ju_j}{\sqrt{1+d_ju_j^2}},
+ \qquad d_j=\frac{q_jt_jB_j}{g_j}
+              \le C(g_j^2-1),
+\]
+since $d_j\le q_j\kappa(s^2+1/2)/A_0$ and $g_j^2-1\ge\nu q_j$.
+Its reciprocal-square summation, started from
+$u_{j_0}(z)\ge z/M_*$, gives for $G=\prod_{j=j_0}^{D-1}g_j$
+\begin{equation}
+ u_D(z)\ge
+ \frac{G(z/M_*)}{\sqrt{1+C(G^2-1)(z/M_*)^2}},
+ \qquad z\ge0.
+ \label{eq:pn-normalized-gain-comparison}
+\end{equation}
+The bound holds by continuity at $z=0$; the comparison also
+allows the empty product when $j_0=D$.
+
+The schedule needs no regularity beyond $0\le a_j\le1$.
+Telescoping and integrating $1/r$ give
+\[
+ \sum_{j=j_0}^{D-1}q_j^2\le\frac1{r_{j_0}},\qquad
+ \sum_{j=j_0}^{D-1}q_j
+       \ge\log\frac{r_D}{r_{j_0}}-\frac1{r_{j_0}},\qquad
+ \sum_{j=j_0}^{D-1}\frac{q_j}{r_j}
+       \le\frac1{r_{j_0}}.
+\]
+The last sum is exactly $1/r_{j_0}-1/r_D$. Using
+$\log(1+x)\ge x-x^2/2$ and
+$0\le\nu-\nu_j\le K/r_j$, one obtains
+\[
+ G\ge e^{-E_*}(r_D/M_*)^\nu,
+ \qquad E_*=(\nu+K+\nu^2/2)/R_*.
+\]
+
+We verify the readout on the entire sign cube. Feature coordinates
+always have the form $x_i-M+F$, even when the initial carrier and
+inert signs vary. Hence $|h_i|\le |F|+2$ and
+$v\ge3+\eta F^2\ge3+F^2/4$. The identity
+\[
+ \frac{16}{3}(3+F^2/4)-(|F|+2)^2
+       =(|F|-6)^2/3
+\]
+shows $|h_i|/(4\sqrt v)\le1/\sqrt3<1$.
+
+On the lower-bound subdomain, conditional on $M=z$, set
+$L(z)=4\sqrt{v_D(z)}$. Since $v_D(z)\le3+r_D^2\le4r_D^2$,
+one has $L(z)\le8r_D$. The conditional shift argument in the proof
+of Corollary~\ref{cor:pn-scaled-finalnorm-lower} applies, because the
+readout bound above keeps every intermediate head argument in
+$[-1,1]$. It shows that the conditional output-sign mean $\bar g$ is
+odd and satisfies
+\[
+ \bar g(z)\ge\frac{F_D(z)}{4L(z)}\ge\frac{u_D(z)}{32},
+ \qquad z\ge0.
+\]
+Let $H(t)$ be the output-sign mean when the unknown signs have common
+mean $t$. The score calculation in the proof of
+Theorem~\ref{thm:pn-scaled-lower}, with
+\eqref{eq:pn-normalized-gain-comparison} and this head bound in place
+of \eqref{eq:pn-scaled-comparison} and
+\eqref{eq:pn-scaled-coordinatehead}, gives
+\[
+ H'(0)\ge\frac{G}{32M_*\sqrt{1+3CG^2/(M_*^2N)}},
+ \qquad
+ \mathbb EQ\ge
+ \frac{\min\{G^2,N\}}{1024M_*^2+3072C}.
+\]
+Since $N>n/4$, this proves the theorem in the present case with
+constant
+\[
+ c_1=\frac{e^{-2E_*}M_*^{-2\nu}}
+                 {4096M_*^2+12288C}.
+\]
+If $r_D<R_*$, the same head calculation and $F_D(z)\ge z$ give
+$H'(0)\ge1/(32r_D)$. Thus
+$\mathbb EQ\ge1/(1024R_*^2)$, which proves the required lower
+bound with constant $c_2=1/(1024R_*^{2\nu+2})$.
+Taking $c_s=\min\{c_1,c_2\}$ handles every schedule and depth.
+The average lower bound yields a worst-query lower bound.
+\end{proof}
+
+\paragraph{Dependence on the normalization floor.}
+The same construction gives a parameterized form. At compatible
+power-of-two widths, use half the coordinates for features, a fixed
+dyadic fraction $\theta\in(0,1/2]$ for carriers, and leave the rest
+inert. Give carriers a fixed negative dyadic bias $-b$, where
+$0<b\le1$, and put $c_b=\tanh b$. The full-cube certificate and
+normalized gain are
+\[
+ \gamma(\theta,b)=
+ \frac{3\theta c_b^2}{3+\theta(1+c_b)^2},\qquad
+ \kappa(\theta,b)=\frac{s}{c_b\sqrt\theta}.
+\]
+Whenever $\kappa(\theta,b)>1$, this argument gives a lower bound
+with exponent $2(\kappa(\theta,b)-1)$. The proof above applies with
+$A_0=\theta c_b^2$,
+$A_1=4+2\theta c_b(1-c_b)$, and the same reciprocal-square
+calculation. In particular,
+\[
+ \kappa(\theta,b)
+ =\frac{s}{\sqrt{\gamma(\theta,b)}}
+   \sqrt{\frac3{3+\theta(1+c_b)^2}}.
+\]
+This identifies the source of the amplification: the relevant
+gain in these lower examples is the row gain divided by the
+asymptotic normalization scale. The next two subsections prove a
+matching law for this explicit carrier family.

@@ -1,0 +1,72 @@
+{
+  "precision_decimal_digits": 120,
+  "total_checks": 1380,
+  "counts": {
+    "geometric_majority": 81,
+    "geometric_mass": 81,
+    "geometric_arity": 81,
+    "gated_exactness": 405,
+    "second_derivative": 405,
+    "curvature_constant": 36,
+    "bernstein_second_derivative": 75,
+    "vector_radius_thinning": 216
+  },
+  "max_absolute_residuals": {
+    "geometric_majority": "8.388784769503412e-109",
+    "geometric_mass": "8.388784769494698e-109",
+    "geometric_arity": "4.398239854648057e-105",
+    "gated_exactness": "9.681479787123296e-122",
+    "second_derivative": "3.872591914849318e-121",
+    "curvature_constant": "3.872591914849318e-121",
+    "bernstein_second_derivative": "4.840739893561648e-121",
+    "vector_radius_thinning": "1.210184973390412e-122"
+  },
+  "geometric_truncations": [
+    {
+      "kappa": "0.0001",
+      "cutoff": 27,
+      "tail_bound": "9.972040559431445e-113"
+    },
+    {
+      "kappa": "0.01",
+      "cutoff": 54,
+      "tail_bound": "5.785280784242709e-111"
+    },
+    {
+      "kappa": "0.1",
+      "cutoff": 104,
+      "tail_bound": "4.505760032628298e-110"
+    },
+    {
+      "kappa": "0.25",
+      "cutoff": 155,
+      "tail_bound": "9.134385233318143e-110"
+    },
+    {
+      "kappa": "0.5",
+      "cutoff": 227,
+      "tail_bound": "1.645712333584855e-109"
+    },
+    {
+      "kappa": "1.0",
+      "cutoff": 359,
+      "tail_bound": "4.257959840008151e-109"
+    },
+    {
+      "kappa": "2.0",
+      "cutoff": 614,
+      "tail_bound": "5.056798875640532e-109"
+    },
+    {
+      "kappa": "4.0",
+      "cutoff": 1115,
+      "tail_bound": "7.053838027058319e-109"
+    },
+    {
+      "kappa": "10.0",
+      "cutoff": 2610,
+      "tail_bound": "8.388784769498458e-109"
+    }
+  ],
+  "status": "passed; deterministic formula checks; not interval certified; no sampler benchmark"
+}

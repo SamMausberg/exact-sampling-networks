@@ -1,0 +1,409 @@
+\subsubsection{The improved critical exponent survives residual mixing}
+\label{sec:residualfused}
+
+The fixed potential of Appendix~\ref{app:fused} also controls
+residual networks. The skip branch costs one child when it is
+examined, but its effect on the potential has a useful concavity
+term. That term prevents an additional factor from appearing in
+the quadratic growth coefficient.
+
+\begin{lemma}[Mixing a potential estimate with an identity step]
+\label{lem:respotentialmix}
+Let $0<\eta\le1/4$, $\phi(v)=\sqrt{1+\eta-v^2}$,
+$u,w\in[-1,1]$, $0\le\omega\le1$, and $0\le\xi\le1$.
+Then
+\begin{equation}\label{eq:respotentialmix}
+\log\frac{(1-\omega)\phi(u)+\omega e^\xi\phi(w)}
+              {\phi((1-\omega)u+\omega w)}
+\le\omega\xi+4\eta^{-3/2}\omega\xi^2.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+The concavity gap of the potential absorbs the mismatch between skip and
+update means. A quadratic completion bounds the remaining product term
+uniformly over the mixing probability.
+
+\begin{proof}
+Put $A=1+\eta$, $v=(1-\omega)u+\omega w$, and
+$\Delta=|u-w|$. Direct differentiation gives
+$|\phi'|\le\eta^{-1/2}$ and $-\phi''\ge A^{-1/2}$.
+Thus the Jensen gap is at least
+\[
+\phi(v)-(1-\omega)\phi(u)-\omega\phi(w)
+\ge\frac{\omega(1-\omega)}{2\sqrt A}\Delta^2.
+\]
+For example, this follows by applying concavity to
+$\phi(x)+x^2/(2\sqrt A)$.
+Also $|\phi(w)-\phi(v)|\le(1-\omega)\Delta/\sqrt\eta$.
+Writing $t=e^\xi-1$, subtraction of
+$(1+\omega t)\phi(v)$ from the numerator in
+\eqref{eq:respotentialmix} therefore gives at most
+\[
+\omega(1-\omega)
+ \left(\frac{t\Delta}{\sqrt\eta}
+               -\frac{\Delta^2}{2\sqrt A}\right)
+\le\frac{\omega t^2\sqrt A}{2\eta}.
+\]
+Divide by $\phi(v)\ge\sqrt\eta$.
+For $0\le\xi\le1$, positivity of the exponential series gives
+$e^\xi-1\le\xi+\xi^2\le2\xi$.
+The resulting ratio is at most
+$1+\omega\xi+4\eta^{-3/2}\omega\xi^2$.
+Taking logarithms and using $\log(1+x)\le x$ proves the claim.
+\end{proof}
+
+For this variant, retain the radii from \eqref{eq:resrounded},
+but use centers within $\alpha\varepsilon$ of the residual
+midpoint $M$. Project these centers only onto $[-1,1]$.
+The normalized interval invariant still holds, and the center
+shift is now small enough for the potential estimate.
+The root is implemented separately: draw the last active
+nonlinear layer by a reverse geometric waiting time with parameter
+$\alpha$. If there is no such layer, return $x_i$.
+Otherwise use the raw tanh-row sampler at that layer.
+This implements the exact identity
+\begin{equation}\label{eq:resrawrootidentity}
+h_{D,i}=(1-\alpha)^D x_i+
+\alpha\sum_{j=1}^D(1-\alpha)^{D-j}
+ \tanh\!\left(b_{j,i}+\sum_kw_{j,ik}h_{j-1,k}\right).
+\end{equation}
+All internal requests still use normalized residual signs and
+compressed skips.
+
+\begin{theorem}[Improved critical residual bound]
+\label{thm:residualfused}
+For row norms at most one, there is one uniform exact residual
+sampler with the stated preprocessing budget and expected online
+bit cost
+\[
+O\!\left(\bits^4(1+\alpha D)^{35/32}\right).
+\]
+Its expected number of compressed proposals and input leaves,
+together with one root operation, is
+\begin{equation}\label{eq:residualfused}
+O((1+\alpha D)^{35/32}).
+\end{equation}
+The parameter $\alpha=0$ returns $x_1$ directly.
+\end{theorem}
+\paragraph{Proof idea.}
+Expand the raw output along its last active residual update, preserving its
+output gate. Above an effective-depth cutoff, the mixed potential estimate
+controls each active branch; below it, the original residual sampler bounds
+the remaining subtree.
+
+\begin{proof}
+Fix
+\[
+\eta=1/64,\quad \phi(v)=\sqrt{65/64-v^2},\quad
+c_0=17/16,\quad M_0=2^{22},\quad
+\kappa=3c_0=51/16,\quad J=2^{28}.
+\]
+For $\alpha>0$, let $K=\min\{D,\lceil J/\alpha\rceil\}$.
+Use the original majority and race below or at layer $K$.
+Above $K$, use the fused factory when its rational eligibility
+conditions hold and the original large-bias factory otherwise.
+The cutoff depends only on the weights and $\alpha$.
+
+Consider a normalized request at layer $j+1$ above the cutoff.
+Write $r=r_j$, $q_*=\tanh r$, and
+$f=(1-\alpha)r+\alpha q_*$. For the actual row let
+$q=\tanh\rho\le q_*$ and write
+$v_0=kF(z)$ for its normalized tanh mean before radius scaling.
+Put
+\[
+\omega=\alpha q_*/f\le\alpha,\qquad
+\theta=f/r_{j+1}\le1,\qquad
+w=(q/q_*)v_0,\qquad
+u=(h_{j,i}-c_{j,i})/r_j.
+\]
+The normalized residual mean is
+$v=\theta[(1-\omega)u+\omega w]+\delta_j$ with
+$|\delta_j|\le\alpha\varepsilon/r_{j+1}$.
+Lemma~\ref{lem:fusedlocal}, concavity, and evenness give an
+expected sum of child potentials at most
+\[
+\theta\{(1-\omega)\phi(u)+\omega e^{\xi_j}\phi(w)\},
+\qquad
+\xi_j=c_0r_j^2+M_0r_j^4.
+\]
+Indeed, the actual-row factor $q/q_*$ can be absorbed using
+$(q/q_*)\phi(v_0)\le\phi((q/q_*)v_0)$.
+A zero row has no nonlinear child requests and satisfies the
+same upper bound by setting $w=0$.
+The ratio $\theta/\phi(\theta v)$ increases with $\theta$,
+and $|\frac d{dv}\log\phi(v)|\le64$.
+Thus \eqref{eq:respotentialmix} bounds the weighted offspring
+factor by the exponential of
+\begin{equation}\label{eq:resweightedlocal}
+\alpha c_0r_j^2+
+\alpha(M_0+8192)r_j^4+
+64\alpha\varepsilon/r_{j+1},
+\end{equation}
+provided $\xi_j\le2r_j^2\le1$.
+
+If the upper region is nonempty, then $D\ge K\ge J$.
+The ideal critical radius comparison and the rounding bound give,
+for $j\ge K$,
+\begin{equation}\label{eq:rescutoffbounds}
+r_j^2\le3/J,
+\qquad
+\alpha\sum_{j=K}^{D-1}r_j^4\le14/J.
+\end{equation}
+For the second inequality, the ideal sum is at most
+$25/(4J^2)+25/(4J)$. The rounding contribution is at most
+$6\varepsilon D^2<1/J$. The first follows from
+$R_j^2\le(1+2\alpha j/5)^{-1}$ and
+$r_j^2-R_j^2\le6D\alpha\varepsilon$.
+These bounds imply $\rho\le1/32$ and
+$\xi_j\le(c_0+3M_0/J)r_j^2<2r_j^2<1$.
+
+Set $d_j=1-\tanh(r_j)/r_j$.
+Since $d_j\ge r_j^2/3-r_j^4/5$,
+\[
+\alpha c_0r_j^2
+\le\kappa\alpha d_j+(\kappa/5)\alpha r_j^4
+\le\kappa\log\frac{r_j}{f_{\alpha,1}(r_j)}
+       +(\kappa/5)\alpha r_j^4.
+\]
+Replacing $f_{\alpha,1}(r_j)$ by $r_{j+1}$ costs at most
+$3\kappa\alpha\varepsilon/f_{\alpha,1}(r_j)$.
+Consequently a suffix of weighted offspring factors, from level
+$\ell$ to level $k\ge K$, is at most
+\begin{equation}\label{eq:resweightedsuffix}
+e^2(r_k/r_\ell)^\kappa.
+\end{equation}
+To check the constant, the fourth-order coefficient in
+\eqref{eq:resweightedlocal} and the preceding display is less
+than $2^{23}$. Its total is at most
+$2^{23}\cdot14/J=7/16<1$.
+The center and radius rounding terms total at most
+\[
+74\alpha D\varepsilon\sqrt{1+\alpha D}<1.
+\]
+
+Let $C_\ell(i,x)$ denote the expected number of proposals and
+input leaves from one normalized request. The original sampler
+below the cutoff obeys
+\begin{equation}\label{eq:reslowersubtree}
+C_\ell(i,x)\le7e^{21}r_\ell^{-5}\qquad(\ell\le K),
+\end{equation}
+by the proof of \eqref{eq:rescriticalupper} before its root gate.
+The proof depends only on interval validity, so it also applies
+to these midpoint centers.
+Since $1/8\le\phi\le\sqrt{65}/8$, weighted charging above the
+cutoff gives
+\[
+\frac{C_\ell(i,x)}{\phi(v_{\ell,i})}
+\le e^2r_\ell^{-\kappa}
+ \left(56e^{21}r_K^{\kappa-5}
+       +16\alpha\sum_{k=K+1}^{\ell}r_k^\kappa\right).
+\]
+Here the factor $16\alpha$ charges a proposal at a reached call:
+its proposal probability is at most $2\alpha$ and its potential
+is at least $1/8$.
+The sum obeys $\alpha\sum r_k^\kappa\le7$.
+One may bound it by the third-power sum, whose ideal integral is
+five, and then use the rounding estimate.
+Also $r_K^{\kappa-5}\ge1$ and
+\[
+r_K^{\kappa-5}\le(1+\alpha K)^{29/32}
+\le(J+2)^{29/32}.
+\]
+Together with \eqref{eq:reslowersubtree}, this proves, for every
+layer including those below the cutoff,
+\begin{equation}\label{eq:resuniformnormalized}
+C_\ell(i,x)\le A_0\phi(v_{\ell,i})r_\ell^{-\kappa},
+\qquad A_0=64e^{24}(J+2)^{29/32}.
+\end{equation}
+
+Finally condition on the raw root's last active layer $j$.
+Its source radius is $r=r_{j-1}$.
+Above the cutoff, Lemma~\ref{lem:fusedlocal} bounds the expected
+sum of child potentials by
+$r e^{\xi_{j-1}}\max\phi<4r$.
+Below the cutoff the original joint bound gives at most
+$r\chi_1(r)\max\phi<12r$, since
+$\chi_1(r)\le1+4d_1(r)+5r^4\le10$.
+Thus $16r$ is valid in both regions.
+Equation \eqref{eq:resuniformnormalized} bounds the expected
+descendant cost of this root by
+\[
+16 A_0 r^{1-\kappa}
+\le16 A_0(1+\alpha D)^{35/32}.
+\]
+The case with no active layer costs one input probe.
+Averaging over the reverse geometric choice and adding the root
+operation proves \eqref{eq:residualfused}:
+$J+2\le2^{29}$, $(J+2)^{29/32}<2^{27}$,
+$e^{24}<2^{36}$, and $16\cdot64=2^{10}$ leave room in
+the constant $2^{76}$.
+
+The exactness induction, geometric jump implementation, and
+predictable scalar-cost charging are unchanged. The fixed-precision
+oracle for the fused tail has geometric index and precision tails,
+so its expected scalar work per reached proposal is $O(\bits^4)$.
+No extra coefficient table is stored.
+\end{proof}
+
+\begin{lemma}[A residual radius envelope above unit norm]
+\label{lem:residualsuperradius}
+For $s=1+\delta$ with $0\le\delta\le1$, let
+$R_0=1$ and $R_{j+1}=f_{\alpha,s}(R_j)$. Then
+\begin{equation}\label{eq:residualsuperradius}
+R_j^2\le10\delta+\frac1{1+\alpha j/5}.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+Compare the squared radius with its supercritical equilibrium scale. Above
+that scale each residual step decreases its excess by a reciprocal-square
+recurrence, giving the stated effective-depth decay.
+
+\begin{proof}
+The ideal radius sequence decreases and remains in $[0,1]$.
+For $0\le r\le1$, the unit Lipschitz bound and the critical
+radius inequality give
+\[
+f_{\alpha,s}(r)\le r(1+\alpha\delta-\alpha r^2/5).
+\]
+If $v=r^2\ge10\delta$, the right side is at most
+$r(1-\alpha v/10)$. Since
+$(1-x)^2(1+2x)\le1$ for $0\le x\le1/10$,
+the next squared radius is at most $v/(1+\alpha v/5)$.
+Put $w_j=(R_j^2-10\delta)_+$.
+If $w_j=0$, monotonicity of the radius sequence gives
+$w_{j+1}=0$. Otherwise the preceding bound and direct rational
+algebra give
+$w_{j+1}\le w_j/(1+\alpha w_j/5)$.
+Since $w_0\le1$, induction proves
+$w_j\le(1+\alpha j/5)^{-1}$.
+\end{proof}
+
+\begin{proposition}[A fixed supercritical residual rate]
+\label{prop:residualfusedrate}
+Fix $s=1+\delta$ with $0<\delta\le2^{-16}$, let
+$r_*\in(0,1)$ solve $r_*=\tanh(sr_*)$, and set
+$u_*=sr_*$. There is an explicitly computable rate
+$\Gamma_s=(17/16)u_*^2+O(u_*^4)$ such that the midpoint-centered
+residual sampler satisfies, for every actual row norm bound $S\le s$,
+\begin{equation}\label{eq:residualfusedrate}
+\E J_{\mathrm f}=O_s(e^{\alpha D\Gamma_s}),\qquad
+\frac{51}{16}\delta\le\Gamma_s
+\le\frac{51}{16}\delta+O(\delta^2).
+\end{equation}
+Its expected bit cost is $O_s(\bits^4e^{\alpha D\Gamma_s})$.
+The constants in the rate estimate are absolute; the prefactor is
+uniform in $\alpha$. Explicit choices are given in the proof.
+The sampler computes the actual reference gain and need not
+receive the real comparison parameter $s$.
+\end{proposition}
+\paragraph{Proof idea.}
+Above the cutoff, compare the weighted cost polynomial with its value at the
+limiting radius. Contraction makes the excess summable, and the compressed
+residual branches contribute the effective depth to the exponential rate.
+
+\begin{proof}
+Take $J=2^{28}$ and
+\[
+\Gamma_s=\frac{17}{16}u_*^2+2^{32}u_*^4,\qquad H_0=2^{22},
+\qquad E_\delta=1+\frac{3H_0}{200}+\frac{8H_0}{\delta},
+\]
+\begin{equation}\label{eq:residualrateconstant}
+C_\delta=2+2^{13}e^{E_\delta}
+             \left(\exp(2^{26})+2+\frac{32}{51\delta}\right).
+\end{equation}
+Write $M_* =\exp(2^{26})$. We prove the explicit bound
+$\E J_{\mathrm f}\le C_\delta e^{\alpha D\Gamma_s}$.
+Let $K=\min\{D,\lceil J/\alpha\rceil\}$ for $\alpha>0$.
+The case $\alpha=0$ is immediate.
+By comparison with the ideal radii for gain $s$,
+Lemma~\ref{lem:residualsuperradius}, and the rounding estimate,
+every squared row radius above the cutoff is bounded by
+\[
+x_j=s^2r_j^2\le11\delta+7/J<2^{-12}.
+\]
+Here $s^2<11/10$, $\alpha j\ge J$, and $D\ge J$;
+the radius-rounding term is less than $1/J$.
+The fused factory is eligible whenever its bias is small, and
+the original large-bias branch has the same weighted estimate.
+For $x\le2^{-12}$, put
+$\xi=(17/16)x+2^{22}x^2$.
+Then $\xi\le1026x<1$, so Lemma~\ref{lem:respotentialmix}
+gives a residual logarithmic offspring bound
+\begin{equation}\label{eq:resratelocal}
+\alpha\left(\frac{17}{16}x_j+2^{32}x_j^2\right)
++64\alpha\varepsilon/r_{j+1}.
+\end{equation}
+Indeed,
+$2^{22}+2048\cdot1026^2<2^{32}$.
+The derivative of $P(x)=(17/16)x+2^{32}x^2$ on this interval
+is less than $H_0=2^{22}$.
+
+Write $\lambda_s=s(1-r_*^2)$ and
+$\lambda_\alpha=1-\alpha+\alpha\lambda_s$.
+The ideal comparison radii satisfy
+\[
+0\le R_j-r_*\le(1-r_*)\lambda_\alpha^j.
+\]
+The fixed-point inequalities proved earlier give
+$1-\lambda_s\ge\delta$.
+Consequently the sum of the excess of \eqref{eq:resratelocal}
+over $\alpha\Gamma_s$, on any suffix above the cutoff, is at
+most
+\[
+\frac{2s^2H_0(1-r_*)}{1-\lambda_s}
++24H_0\alpha^2D^2\varepsilon
++64\alpha D\varepsilon\sqrt{1+\alpha D}
+\le E_\delta.
+\]
+The cancellation
+$\alpha/(1-\lambda_\alpha)=1/(1-\lambda_s)$ is the reason
+the transient bound is uniform in $\alpha$.
+Thus the weighted suffix factor from level $\ell$ to $k\ge K$
+is at most $e^{E_\delta}e^{\alpha(\ell-k)\Gamma_s}$.
+
+Below the cutoff, the original normalized residual sampler has
+expected cost at most
+\[
+10e^{30}(J+2)^{5/2}e^{7000\delta(J+1)}\le M_*.
+\]
+This is the unweighted bound before its formal radius gate,
+using $r_K^{-1}\le\sqrt{1+\alpha K}$.
+The numerical inequality follows from $\delta\le2^{-16}$,
+$J=2^{28}$, and
+$7000\cdot2^{-16}(J+1)+30+\log10+(5/2)\log(J+2)<2^{26}$.
+
+Weighted charging now gives, uniformly in the normalized output
+mean at level $\ell$,
+\[
+C_\ell(i,x)\le
+8\phi(v_{\ell,i})e^{E_\delta}e^{\alpha\ell\Gamma_s}
+\left(M_*+2+\frac{2}{\Gamma_s}\right).
+\]
+To see that the geometric generation sum is uniform in
+$\alpha$, use
+\[
+\frac{\alpha}{1-e^{-\alpha\Gamma_s}}
+\le\alpha+\frac1{\Gamma_s}\le1+\frac1{\Gamma_s}.
+\]
+The proposal probability contributes its factor $2\alpha$.
+For levels below $K$, the same bound follows directly from $M_*$.
+
+At a raw root, the expected sum of child potentials is at most
+1024. Below the cutoff this follows from
+$\chi_g(r)\le10e^4<600$ and $\max\phi<9/8$;
+above it the weighted bound and $\xi<1$ give a smaller constant.
+Conditioning on the reverse geometric choice of the last active
+layer, using $\Gamma_s\ge51\delta/16$, and adding the root
+operation proves \eqref{eq:residualrateconstant} and
+the work bound.
+
+Finally, $3\delta\le u_*^2\le3\delta+(3/2)\delta^2$ gives
+\[
+\Gamma_s\le\frac{51}{16}\delta+
+ \left(\frac{51}{32}+2^{32}(25/8)^2\right)\delta^2
+\le\frac{51}{16}\delta+2^{36}\delta^2.
+\]
+Its lower bound follows from $u_*^2\ge3\delta$.
+The finite-bit implementation and exactness induction are those
+of Theorem~\ref{thm:residualfused}.
+\end{proof}

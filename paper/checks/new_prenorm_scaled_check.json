@@ -1,0 +1,2607 @@
+{
+  "precision_decimal_digits": 120,
+  "status": "deterministic consistency checks only",
+  "all_checks_passed": true,
+  "case_counts": {
+    "full_domain_floor": 1001,
+    "normalized_comparison": 216,
+    "conditional_head": 432,
+    "score_bound": 288,
+    "growth_product": 36
+  },
+  "total_cases": 1973,
+  "scores": [
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4359325819804686742745318",
+      "proved_score": "0.02754766951857948111577185"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2157539139762470378986965",
+      "proved_score": "0.006886917379644870278942964"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.4964365414153957794837327",
+      "proved_score": "0.03056744058984621131189347"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.2594248183258995279379234",
+      "proved_score": "0.007641860147461552827973367"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.5454497583574239977556645",
+      "proved_score": "0.0325043591147101107647952"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.2958358090410243009940416",
+      "proved_score": "0.008126089778677527691198801"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.5852956502373786620117448",
+      "proved_score": "0.03362191504243808648567167"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.3268615744056631827192157",
+      "proved_score": "0.008405478760609521621417916"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5136373176790559898477704",
+      "proved_score": "0.03357461107768839177479677"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.240080252372009872296298",
+      "proved_score": "0.008393652769422097943699193"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6499197884136888256182723",
+      "proved_score": "0.03860137594912340574749015"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3192793132357949849615748",
+      "proved_score": "0.009650343987280851436872538"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.7855385118191247084192769",
+      "proved_score": "0.04214081704157305324410697"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4020618792064345024323566",
+      "proved_score": "0.01053520426039326331102674"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.9198342747273992145956959",
+      "proved_score": "0.04431938367726874246843259"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.4870610739224437323416605",
+      "proved_score": "0.01107984591931718561710815"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5509297492861183768340048",
+      "proved_score": "0.02902990316777951165651056"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2503678132417531127908469",
+      "proved_score": "0.007257475791944877914127639"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7552637541777195879193749",
+      "proved_score": "0.03896593480669294452338169"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3539473041019176477508507",
+      "proved_score": "0.009741483701673236130845422"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.00785767482612543856644",
+      "proved_score": "0.05034017503946250308794506"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4856989523655339631801286",
+      "proved_score": "0.01258504375986562577198627"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.319716442158595867254765",
+      "proved_score": "0.06170814820479367497615356"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6526407302730255819498884",
+      "proved_score": "0.01542703705119841874403839"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4117800813634686467714666",
+      "proved_score": "0.0298246359151907997623275"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2366713317263540217367315",
+      "proved_score": "0.007456158978797699940581875"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5134035950900610942154694",
+      "proved_score": "0.03377307266277409680382891"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3133936044544539096141809",
+      "proved_score": "0.008443268165693524200957228"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.6094908397822496506205495",
+      "proved_score": "0.03644285258009936630024947"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.390351394659181257727184",
+      "proved_score": "0.009110713145024841575062368"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.7009618862811974461866144",
+      "proved_score": "0.03803929268499374534786944"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.467051084233230344497439",
+      "proved_score": "0.00950982317124843633696736"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4818125489429857680502044",
+      "proved_score": "0.04096709533402888676914457"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.257795571850560475679077",
+      "proved_score": "0.01024177383350722169228614"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6581849630356062785690241",
+      "proved_score": "0.05130972078803636457257677"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.366731246936124207592951",
+      "proved_score": "0.01282743019700909114314419"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.8683315112300433087650638",
+      "proved_score": "0.06065174763250426292389757"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5028110240183057074285437",
+      "proved_score": "0.01516293690812606573097439"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.116007661635605779239657",
+      "proved_score": "0.06775341434996361352486643"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6701424461507857277621684",
+      "proved_score": "0.01693835358749090338121661"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5077892619224599041232244",
+      "proved_score": "0.03065030169164440501586615"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2645580816955733619236852",
+      "proved_score": "0.007662575422911101253966537"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7258065696859132305585646",
+      "proved_score": "0.043174785637721461748347"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3867396279438923741867686",
+      "proved_score": "0.01079369640943036543708675"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.011717634670217826593057",
+      "proved_score": "0.06058238748497988596532303"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5502944812633019311750189",
+      "proved_score": "0.01514559687124497149133076"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.389890817435531978412598",
+      "proved_score": "0.08437607595436803712439164"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7709306605467872218352167",
+      "proved_score": "0.02109401898859200928109791"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4054525712988702422704598",
+      "proved_score": "0.03227402246943076909163297"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2479566207164381206902044",
+      "proved_score": "0.008068505617357692272908242"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5448639857958864832531172",
+      "proved_score": "0.03746212069940413322706274"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3488973997080198597016981",
+      "proved_score": "0.009365530174851033306765684"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.7001426906171215296486928",
+      "proved_score": "0.04121128314624055745242616"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4684227832471193651749622",
+      "proved_score": "0.01030282078656013936310654"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.8698019466325604501351271",
+      "proved_score": "0.04356378839091227101759752"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6055684745131847534168005",
+      "proved_score": "0.01089094709772806775439938"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4667835794489656938617121",
+      "proved_score": "0.04552194236852909152331765"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2657405862999817482254085",
+      "proved_score": "0.01138048559213227288082941"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6666797187652022797178647",
+      "proved_score": "0.06124858695090664209448193"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3891594483633832151927082",
+      "proved_score": "0.01531214673772666052362048"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9245970578725277765485547",
+      "proved_score": "0.07941313864750214973711101"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5530757051040721491540317",
+      "proved_score": "0.01985328466187553743427775"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.258478409819910880163754",
+      "proved_score": "0.09779143167281402508835777"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7715504828425627560357529",
+      "proved_score": "0.02444785791820350627208944"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4852256711742340525518817",
+      "proved_score": "0.03076828153469286830025337"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2703903889714939786759739",
+      "proved_score": "0.007692070383673217075063341"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.709831634380288396726897",
+      "proved_score": "0.04350643099094156118536801"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.4008524338122684289055262",
+      "proved_score": "0.010876607747735390296342"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.011840586863872157320453",
+      "proved_score": "0.06150904044869566131282211"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.578321368888739192538072",
+      "proved_score": "0.01537726011217391532820553"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.422010706873668893115202",
+      "proved_score": "0.08693510320674940459636599"
+    },
+    {
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.822058615936179067036613",
+      "proved_score": "0.0217337758016873511490915"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4454545419696906522032334",
+      "proved_score": "0.02769446812492047949669414"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2189587865319362248924928",
+      "proved_score": "0.006923617031230119874173534"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5187714910266494630218247",
+      "proved_score": "0.03076837286693322568571399"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.2689999236753265238868185",
+      "proved_score": "0.007692093216733306421428497"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.5806549483028053785355109",
+      "proved_score": "0.03274627191483707604638214"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.3125992351091072217813796",
+      "proved_score": "0.008186567978709269011595535"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.6337301219419411600308117",
+      "proved_score": "0.03388985747074544038732554"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.3514942866360352554178939",
+      "proved_score": "0.008472464367686360096831384"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5203630112910969387606658",
+      "proved_score": "0.03436694619068176211803044"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.241998467129731441983162",
+      "proved_score": "0.008591736547670440529507609"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6737127923707225843954247",
+      "proved_score": "0.03981954261943246914010399"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3276828788491808042145657",
+      "proved_score": "0.009954885654858117285025997"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.8383773490652014942509447",
+      "proved_score": "0.04374042718078579120865039"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4237625701872437233231276",
+      "proved_score": "0.0109351067951964478021626"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.012566458290017222387301",
+      "proved_score": "0.04619158465984263705417935"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.528755242505822033509344",
+      "proved_score": "0.01154789616496065926354484"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5521704312049565418086794",
+      "proved_score": "0.02956130855240793838032926"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.250695785351289583519943",
+      "proved_score": "0.007390327138101984595082316"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7650631110242944796519794",
+      "proved_score": "0.04028023908754909089933247"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3569317825339204304678184",
+      "proved_score": "0.01007005977188727272483312"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.037482044758008333764728",
+      "proved_score": "0.05327493182662170349508608"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4956512802605014656934552",
+      "proved_score": "0.01331873295665542587377152"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.387530696868058229672411",
+      "proved_score": "0.06736891114957692639107815"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6773350247694090005231647",
+      "proved_score": "0.01684222778739423159776954"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4181397272713737058135697",
+      "proved_score": "0.03006978161409042860955072"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2387801009293655241299299",
+      "proved_score": "0.007517445403522607152387681"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.531275656496011217003356",
+      "proved_score": "0.0341302875512058106146886"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3209872025642050036671973",
+      "proved_score": "0.00853257188780145265367215"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.6437839014281436138251258",
+      "proved_score": "0.03689283251630319633714872"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4076418025848435008686378",
+      "proved_score": "0.00922320812907579908428718"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.7552780600071362393300449",
+      "proved_score": "0.03855189106652818692089901"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.4972720030080739820476632",
+      "proved_score": "0.009637972766632046730224752"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4856166513522192574442453",
+      "proved_score": "0.04184900206506119956698893"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2588194433896670836222503",
+      "proved_score": "0.01046225051626529989174723"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6716937341841856877061592",
+      "proved_score": "0.05307511046875330282050302"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.371008133144438817423118",
+      "proved_score": "0.01326877761718832570512575"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9008552048187564950019503",
+      "proved_score": "0.06362954670616921185997625"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5146537535326181185714863",
+      "proved_score": "0.01590738667654230296499406"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.181799503886799519422869",
+      "proved_score": "0.07198312482656044017802729"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6973229144213574371860727",
+      "proved_score": "0.01799578120664011004450682"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5084541309780696518794002",
+      "proved_score": "0.03071352944395436179416181"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2647242923998708005081536",
+      "proved_score": "0.007678382360988590448540453"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.730841181953378767422199",
+      "proved_score": "0.0433520494469534319192175"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3881298035629997308119116",
+      "proved_score": "0.01083801236173835797980437"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.026597313353613116770484",
+      "proved_score": "0.06107507698142718683721012"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5546987097340877229429167",
+      "proved_score": "0.01526876924535679670930253"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.423509632042385850241348",
+      "proved_score": "0.08572261752990187035961638"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7814798519598678846075265",
+      "proved_score": "0.0214306543824754675899041"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4092818422308737471467419",
+      "proved_score": "0.0325626023984101085534166"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.249181432998737139024217",
+      "proved_score": "0.008140650599602527138354151"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5565516965722702008960368",
+      "proved_score": "0.03791555984317016251015065"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3533645798247260422344398",
+      "proved_score": "0.009478889960792540627537662"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.7260271678041154859722889",
+      "proved_score": "0.0418172629677054260460768"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4801000797923301709332528",
+      "proved_score": "0.0104543157419263565115192"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.9174282690559874520947585",
+      "proved_score": "0.04428144851113830570161278"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6301496218197472855429643",
+      "proved_score": "0.0110703621277845764254032"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4688120719498209987368709",
+      "proved_score": "0.04598199329860685634669455"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2662666025329827507329422",
+      "proved_score": "0.01149549832465171408667364"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6737954184682247129865333",
+      "proved_score": "0.06238314106324370461857526"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3911891837384865413252368",
+      "proved_score": "0.01559578526581092615464381"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9418103336147688291477382",
+      "proved_score": "0.08193419066805777353828914"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5584180375215815098480003",
+      "proved_score": "0.02048354766701444338457228"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.294168437298648839478526",
+      "proved_score": "0.1026194415760727291451535"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7835896294620996782586374",
+      "proved_score": "0.02565486039401818228628838"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4855688590610786615633722",
+      "proved_score": "0.03077112911735104685803829"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2704741544059477937936274",
+      "proved_score": "0.007692782279337761714509571"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7123787024041396448695358",
+      "proved_score": "0.04351448268476697582097779"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.4015099572219805114136959",
+      "proved_score": "0.01087862067119174395524445"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.019274567487493248525264",
+      "proved_score": "0.06153180002539089274304605"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5803169992179954783290435",
+      "proved_score": "0.01538295000634772318576151"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.438649316639831388330994",
+      "proved_score": "0.08699939764850551863239697"
+    },
+    {
+      "alpha": "0.5",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.8266734352893198793337276",
+      "proved_score": "0.02174984941212637965809924"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4501177704908725537933128",
+      "proved_score": "0.02777541805942265688278358"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.22050470571915539688689",
+      "proved_score": "0.006943854514855664220695894"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5305877598924989845118439",
+      "proved_score": "0.03087949431007661504772932"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.2739764011788346120435337",
+      "proved_score": "0.007719873577519153761932329"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.6003192305640958491111888",
+      "proved_score": "0.0328803267834965245159611"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.3218606705112305982513076",
+      "proved_score": "0.008220081695874131128990275"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.6618131165900915518674474",
+      "proved_score": "0.03403851813015392094095807"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.3656228412930196510063703",
+      "proved_score": "0.008509629532538480235239519"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5234500449155562464231329",
+      "proved_score": "0.0348278342690368250985309"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2428694691759417611312842",
+      "proved_score": "0.008706958567259206274632725"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6852480111885279613957713",
+      "proved_score": "0.04054144709903810367078188"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3316471579089256946804996",
+      "proved_score": "0.01013536177475952591769547"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.8655502298409484490426637",
+      "proved_score": "0.04470271196772313861692831"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.434552644648683307128531",
+      "proved_score": "0.01117567799193078465423208"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.063406286537549561463884",
+      "proved_score": "0.04732923927482590292317722"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.5509976105047745490332095",
+      "proved_score": "0.0118323098187064757307943"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5526978114291102701934187",
+      "proved_score": "0.02983293429851613230776069"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2508349267608482893114669",
+      "proved_score": "0.007458233574629033076940174"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7693610688474029242583052",
+      "proved_score": "0.04097567540824385205777666"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3582234733069161965256308",
+      "proved_score": "0.01024391885206096301444417"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.051160916084231792661073",
+      "proved_score": "0.05491600847999383560040777"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5001249438525183661005411",
+      "proved_score": "0.01372900211999845890010194"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.419687110531081492464098",
+      "proved_score": "0.07078318040061760448474504"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6885837925879948578158751",
+      "proved_score": "0.01769579510015440112118626"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4212087830545166916172633",
+      "proved_score": "0.0302023058407740092778052"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.239783345198219675718727",
+      "proved_score": "0.007550576460193502319451299"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5403121410611710049196142",
+      "proved_score": "0.03432444507609527604125828"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3247252612482935359298741",
+      "proved_score": "0.00858111126902381901031457"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.661980197794716391520386",
+      "proved_score": "0.03713840873861685295315382"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4165845326979315563134054",
+      "proved_score": "0.009284602184654213238288455"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.7852266234925965413230566",
+      "proved_score": "0.0388323680678382368062901"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.5135924762457971511411003",
+      "proved_score": "0.009708092016959559201572524"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4873612748441110288343159",
+      "proved_score": "0.04231781199641989975743126"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2592850724542604962072923",
+      "proved_score": "0.01057945299910497493935782"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6781483051348913560030724",
+      "proved_score": "0.05404138256883664368590787"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3730054091077662322743025",
+      "proved_score": "0.01351034564220916092147697"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9167842289326779534855396",
+      "proved_score": "0.06531477756047203626701354"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5202355605469150939131965",
+      "proved_score": "0.01632869439011800906675338"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.214794188503443414666685",
+      "proved_score": "0.07445074921392252627283664"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7102829991115226427043301",
+      "proved_score": "0.01861268730348063156820916"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5087370476334085666308126",
+      "proved_score": "0.03073595650301614413377165"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2647949177305205382134741",
+      "proved_score": "0.007683989125754036033442912"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7330571545990081858109609",
+      "proved_score": "0.04341518652933833894089869"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3887359038345751474088004",
+      "proved_score": "0.01085379663233458473522467"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.033501814499786583435217",
+      "proved_score": "0.06125199972079398566430942"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5567038473650982605472426",
+      "proved_score": "0.01531299993019849641607735"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.43952169390238207438031",
+      "proved_score": "0.08621388140130125280997351"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7863594588909002501999995",
+      "proved_score": "0.02155347035032531320249338"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4111187534067271316489034",
+      "proved_score": "0.0327163722763424547756751"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2497632079260394265860544",
+      "proved_score": "0.008179093069085613693918774"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5623340640978260761398251",
+      "proved_score": "0.03815892833124535641842707"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3555264041278154645692472",
+      "proved_score": "0.009539732082811339104606768"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.7391834380437281148082697",
+      "proved_score": "0.04214444292227879358523625"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4858494353355724414444422",
+      "proved_score": "0.01053611073056969839630906"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.9423920533784998511313853",
+      "proved_score": "0.04467049892533305456850287"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.6426277766752340225534713",
+      "proved_score": "0.01116762473133326364212572"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4697428075673139411528765",
+      "proved_score": "0.0462078068404093510701776"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2665067260546497843346608",
+      "proved_score": "0.0115519517101023377675444"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6771909779294723832555115",
+      "proved_score": "0.06295054482021708303152726"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3921445122136939434652052",
+      "proved_score": "0.01573763620505427075788181"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9501849926270522782445728",
+      "proved_score": "0.08323262894849525441040585"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5609557630579293400238255",
+      "proved_score": "0.02080815723712381360260146"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.311734398239853828781471",
+      "proved_score": "0.1052056653041498817477063"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7893095118659921586875442",
+      "proved_score": "0.02630141632603747043692657"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4857149606027048003043319",
+      "proved_score": "0.03077192722987785946554146"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2705097850286331620557564",
+      "proved_score": "0.007692981807469464866385364"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7135019109523480277055601",
+      "proved_score": "0.04351673979202552864539361"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.4017983365463999991635311",
+      "proved_score": "0.0108791849480063821613484"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.022735314484033288072258",
+      "proved_score": "0.06153818241570691143621911"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5812361442728130859495334",
+      "proved_score": "0.01538454560392672785905478"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.446609206527631662635289",
+      "proved_score": "0.08701744031642053803883363"
+    },
+    {
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.8288455410439999980486368",
+      "proved_score": "0.02175436007910513450970841"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4535447861246014161543297",
+      "proved_score": "0.02783973313075828909238538"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2216309949083372530520672",
+      "proved_score": "0.006959933282689572273096344"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5396954902025076348710066",
+      "proved_score": "0.03096794432883393371349948"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.2777680894979756116647614",
+      "proved_score": "0.007741986082208483428374871"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.6160496376993729641440695",
+      "proved_score": "0.03298716970038775836911297"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.3292156119186987534060468",
+      "proved_score": "0.008246792425096939592278241"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.6848444193774128350870785",
+      "proved_score": "0.03415709534526452725689948"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.3771282415781045921001772",
+      "proved_score": "0.00853927383631613181422487"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5256178634926719395674868",
+      "proved_score": "0.03520748934251079748761753"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2434775949071835763447453",
+      "proved_score": "0.008801872335627699371904384"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6936488386010331940215103",
+      "proved_score": "0.04114379426590075116992346"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3344893521089406758199046",
+      "proved_score": "0.01028594856647518779248087"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.8860239012038219070134363",
+      "proved_score": "0.04551415160357817353040333"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.44250594357141602416923",
+      "proved_score": "0.01137853790089454338260083"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.103247577518897044118562",
+      "proved_score": "0.04829547955658528492904449"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.5680806628706100013940454",
+      "proved_score": "0.01207386988914632123226112"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5530375288595063212570306",
+      "proved_score": "0.0300339037445043918994617"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2509244707797986315999145",
+      "proved_score": "0.007508475936126097974865424"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.772235409758828125004388",
+      "proved_score": "0.04150113728462680392814982"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3590815968731271362293183",
+      "proved_score": "0.01037528432115670098203745"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.060734865190519733938558",
+      "proved_score": "0.05620071223467958268147004"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5032111795225070102832747",
+      "proved_score": "0.01405017805866989567036751"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.442760966244861337092628",
+      "proved_score": "0.07360028187951972099568469"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.69647442730160420876497",
+      "proved_score": "0.01840007046987993024892117"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.423447502480990434449612",
+      "proved_score": "0.03030636389422271997556389"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2405093063415640712272719",
+      "proved_score": "0.007576590973555679993890972"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5471001921796007228919514",
+      "proved_score": "0.03447742054772219258624257"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3274885175927544445651688",
+      "proved_score": "0.008619355136930548146560642"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.6760599532075454534323192",
+      "proved_score": "0.03733239801941002117404815"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4233880175236544995367443",
+      "proved_score": "0.009333099504852505293512037"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.8089974186739775731990961",
+      "proved_score": "0.03905429380523233341302856"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.5263701160048776689760439",
+      "proved_score": "0.009763573451308083353257141"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4885866336762724661604502",
+      "proved_score": "0.04268136538974813957546204"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2596106442773597592171351",
+      "proved_score": "0.01067034134743703489386551"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6828197614235602568099835",
+      "proved_score": "0.05480475463541053082538453"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3744326037863017800765317",
+      "proved_score": "0.01370118865885263270634613"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.928520585238648479879259",
+      "proved_score": "0.06667583577510990630861486"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5242581649102723623730622",
+      "proved_score": "0.01666895894377747657715371"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.23945346924954292031425",
+      "proved_score": "0.07648575125598909230731745"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7196755434498794855854171",
+      "proved_score": "0.01912143781399727307682936"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.5089194454587396150331292",
+      "proved_score": "0.0307488478554898966722531"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2648404183031946423802292",
+      "proved_score": "0.007687211963872474168063275"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7345419431416202437595393",
+      "proved_score": "0.04345154079381404493274033"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3891400900148490568804627",
+      "proved_score": "0.01086288519845351123318508"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.038348844033794373690163",
+      "proved_score": "0.06135421881422494716973866"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5580971768124578844297466",
+      "proved_score": "0.01533855470355623679243467"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.45105195956486925794208",
+      "proved_score": "0.0864996217937499620042147"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7898167418942595434795704",
+      "proved_score": "0.02162490544843749050105367"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4124546336810596365617391",
+      "proved_score": "0.03283608472325290387905852"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.250183968481621763293158",
+      "proved_score": "0.00820902118081322596976463"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.5666277879571406660554726",
+      "proved_score": "0.03834925231982366571163176"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3571112833347854278318592",
+      "proved_score": "0.00958731307995591642790794"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.7491166183068303672007495",
+      "proved_score": "0.04240127073293247001650889"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.4901072334676107025453452",
+      "proved_score": "0.01060031768323311750412722"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "0.961594796653264903542148",
+      "proved_score": "0.04497667764159363884184777"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "1.25",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.652028204915406555759957",
+      "proved_score": "0.01124416941039840971046194"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.4703968197926342713917079",
+      "proved_score": "0.04637444691331962180748713"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2666749963727232359931465",
+      "proved_score": "0.01159361172832990545187178"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.6796476025715936432967662",
+      "proved_score": "0.06337384739863181076179026"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.3928304060609317372602286",
+      "proved_score": "0.01584346184965795269044756"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "0.9563388758237345915472766",
+      "proved_score": "0.08421853011073067740344653"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5627954468734048291870281",
+      "proved_score": "0.02105463252768266935086163"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.324759638381212373540717",
+      "proved_score": "0.1072181408421369716356387"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.7934657421237433050742971",
+      "proved_score": "0.02680453521053424290890968"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "coordinate",
+      "actual_score": "0.48580918400394408507388",
+      "proved_score": "0.0307723222628065121259323"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 2,
+      "head": "final_norm",
+      "actual_score": "0.2705327543671251123213131",
+      "proved_score": "0.007693080565701628031483075"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "coordinate",
+      "actual_score": "0.7142552434416687791965861",
+      "proved_score": "0.04351785703240570250922942"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 4,
+      "head": "final_norm",
+      "actual_score": "0.4019912238472438421410406",
+      "proved_score": "0.01087946425810142562730736"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "coordinate",
+      "actual_score": "1.025169193297488488501175",
+      "proved_score": "0.061541341987922859303423"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 8,
+      "head": "final_norm",
+      "actual_score": "0.5818788498033077289318432",
+      "proved_score": "0.01538533549698071482585575"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "coordinate",
+      "actual_score": "1.452356058061994617738329",
+      "proved_score": "0.08702637433058435456821283"
+    },
+    {
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "input_bits": 16,
+      "head": "final_norm",
+      "actual_score": "0.8303996132562682810778252",
+      "proved_score": "0.02175659358264608864205321"
+    }
+  ]
+}

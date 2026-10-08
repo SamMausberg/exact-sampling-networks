@@ -1,0 +1,659 @@
+{
+  "status": "all passed",
+  "kind": "supplementary invariant checks, not proof or benchmark",
+  "mpmath_decimal_precision": 450,
+  "cases": 108,
+  "period_boundary_cases_with_nontrue_quotient": 34,
+  "max_phase_error_over_delta": "1.00586593107011435393407338434659325089",
+  "proven_bound_phase_error_over_delta": 3,
+  "checks": [
+    {
+      "frequency": "one_third",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.33333333333333333333"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.33333333333333333333"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.33333333333333333333"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.16666666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.16666666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.16666666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.35416666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.35416666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.35416666666666666667"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "0.36625678805166633255"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.34130078004538066366"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.36510903267261974932"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.34650715426695540277"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.35216539888100297166"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.34229018269134489924"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.34263490691673037434"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.33907582356077906311"
+    },
+    {
+      "frequency": "one_third",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.35256190432931596917"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.20479598536398726375"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.12260498849424271731"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.32056984377057773759"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.01742623685823495847"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.025382766272020495092"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.26501428821502218203"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.43029505256706016612"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.35153106508808198037"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.0024428471399112718613"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "0.021377562406741060957"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.020128385012406572023"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.66136893409392743525"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.062807101021163523188"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.042060204102989103906"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.24493599679840203611"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.077005341305321960757"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.090055313610476768591"
+    },
+    {
+      "frequency": "negative",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.20727301745917477971"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.11875148019731989172"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.44977014044370949388"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.41984592850518701607"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.23750296039463978343"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.39954028088741898776"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.33969185701037403213"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.45647054059580970127"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.29911075539366657734"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.32150458660977939368"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "1.0058659310701143539"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.26600742798390196896"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.4404541291265445747"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.48816325898780572236"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.55224083567326391808"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.42929860685365203421"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.10465488789496987814"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.30821255553640142214"
+    },
+    {
+      "frequency": "sqrt_two",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.14388911670359224174"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.42701820758620948597"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.094827210716464939537"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.12612539932613329315"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.36451820758620948597"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.21982721071646493954"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.31362539932613329315"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.39576820758620948597"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.12607721071646493954"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.12612539932613329315"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "0.23841838268081397816"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.7152555344621924786"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.23841840431575731658"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.375"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.25"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.375"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.375"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.5"
+    },
+    {
+      "frequency": "two_pi",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.25"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.0"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.34482721071646493954"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.12612539932613329315"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.11451820758620948597"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.21982721071646493954"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.063625399326133293146"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.13014320758620948597"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.39170221071646493954"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.39175039932613329315"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "0.71525554088393897816"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.2384183762590674786"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.71525556251888231658"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.125"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.25"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.125"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.125"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.0"
+    },
+    {
+      "frequency": "negative_two_pi",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.25"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 1,
+      "precision": 2,
+      "phase_error_over_delta": "0.34980764081166259588"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 1,
+      "precision": 32,
+      "phase_error_over_delta": "0.33911227601117040972"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 1,
+      "precision": 120,
+      "phase_error_over_delta": "0.15671277371201846569"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 2,
+      "precision": 2,
+      "phase_error_over_delta": "0.19961528162332519175"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 2,
+      "precision": 32,
+      "phase_error_over_delta": "0.17822455202234081943"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 2,
+      "precision": 120,
+      "phase_error_over_delta": "0.31342554742403693139"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 5,
+      "precision": 2,
+      "phase_error_over_delta": "0.24396651921652624368"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 5,
+      "precision": 32,
+      "phase_error_over_delta": "0.2464486462517908259"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 5,
+      "precision": 120,
+      "phase_error_over_delta": "0.31149705969516016167"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 20,
+      "precision": 2,
+      "phase_error_over_delta": "0.27885868807155780393"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 20,
+      "precision": 32,
+      "phase_error_over_delta": "0.21237565115656691625"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 20,
+      "precision": 120,
+      "phase_error_over_delta": "0.33503486888873898463"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 81,
+      "precision": 2,
+      "phase_error_over_delta": "0.29679605152411800882"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 81,
+      "precision": 32,
+      "phase_error_over_delta": "0.21637096219675723642"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 81,
+      "precision": 120,
+      "phase_error_over_delta": "0.32575936024855952357"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 201,
+      "precision": 2,
+      "phase_error_over_delta": "0.30303744099423809429"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 201,
+      "precision": 32,
+      "phase_error_over_delta": "0.26041492837151933312"
+    },
+    {
+      "frequency": "large_rational",
+      "position_bits": 201,
+      "precision": 120,
+      "phase_error_over_delta": "0.29431511745747896739"
+    }
+  ]
+}

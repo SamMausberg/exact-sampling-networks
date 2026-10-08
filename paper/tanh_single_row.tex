@@ -1,0 +1,93 @@
+\subsection{The sharp cost of one tanh row}
+\label{sec:new-single-row-law}
+
+The distinction between a value and a sample already appears in one
+row. It is useful to state its complete query law before considering
+depth. Auxiliary bit work is at least constant even when no input
+coordinate is requested.
+
+\begin{theorem}[One-row law]
+\label{thm:new-single-row-law}
+Let $x\in\{-1,1\}^n$, let $|b_0|\le1$, and let $w$ be a dyadic
+row with $r=\sum_i|w_i|$. After an integer alias table has been built
+from the row, an exact sign of mean
+\[
+ f(x)=\tanh\!\left(b_0+\sum_iw_ix_i\right)
+\]
+can be generated using at most $2r(1+r)$ expected source-coordinate
+requests. Reading the entire input gives the alternative bound $n$.
+Including random bits, row choices, and transcendental refinement,
+the expected bit work is
+\[
+ O\!\left(B^4[1+\min\{n,r+r^2\}]\right),
+\]
+where $B$ includes the maximum encoding length of one coefficient,
+the bias encoding, addresses, and $\log(2+r)$.
+
+Conversely, when $n$ is a power of two and $r>0$ is dyadic, the
+zero-bias row $w_i=r/n$ has worst-input expected distinct-probe
+complexity $\Omega(\min\{n,r+r^2\})$, with an absolute implied
+constant.
+This lower bound permits arbitrary preprocessing independent of $x$.
+The displayed row must, as usual, fit the stipulated coefficient grid.
+For general widths, using the largest power of two at most $n$ changes
+only the absolute constant.
+\end{theorem}
+\paragraph{Proof idea.}
+Absolute-weight sampling turns the row into one unknown source mean, giving
+the upper bound. For the lower bound, use a uniform row and compare its
+sensitivity to the information obtained from distinct input probes.
+
+\begin{proof}
+If $r=0$, a known scalar coin suffices. Otherwise apply
+Corollary~\ref{cor:comptanhrow} with $R=1$ and $h_i=x_i$: a source
+request for coordinate $i$ is one input probe. This gives at most
+$2r(1+r)$ expected input requests and $O((1+r)^2B^4)$ expected local
+bit work, with coordinates selected through the integer alias table.
+The dense alternative computes the dyadic preactivation after $n$
+input probes and makes a known tanh coin by a certified uniform
+comparison. Choose the cheaper alternative
+using the known row norm. Both are exact and terminate almost surely.
+
+For the lower bound write $M=n^{-1}\sum_ix_i$. If $0<r\le1$,
+endpoint coupling (Section~\ref{sec:lower}) shows that some probe
+occurs with probability at least the total variation distance
+between the two endpoint output laws, namely $\tanh r\ge r/2$. Since
+$r+r^2\le2r$, this proves the claim in this range.
+
+Suppose $r\ge1$. Give the input signs independent common mean $t$,
+and put $H(t)=\mathbb E_t\tanh(rM)$. At $t=0$, let
+$Z=\sqrt n\,M$. Then
+\[
+ \mathbb E Z^2=1,\qquad \mathbb E Z^4\le3,\qquad
+ \Pr(|Z|\ge1/2)\ge3/16.
+\]
+The last inequality is Paley--Zygmund applied to $Z^2$ at threshold
+$1/4$. The finite-input score identity gives
+\[
+ H'(0)=\sqrt n\,\mathbb E\bigl[Z\tanh(rZ/\sqrt n)\bigr].
+\]
+For $u\ge0$, $\tanh u\ge\frac12\min\{u,1\}$: concavity gives
+the assertion on $[0,1]$ using $\tanh1>1/2$, and monotonicity gives
+it above one. Restricting the expectation to $|Z|\ge1/2$ therefore
+gives
+\[
+ H'(0)\ge\frac{3}{128}\min\{r,\sqrt n\}.
+\]
+The transcript information inequality gives
+\[
+ \mathbb E_0Q\ge H'(0)^2
+ \ge\frac9{16384}\min\{r^2,n\}
+ \ge\frac1{65536}\min\{r+r^2,n\}.
+\]
+An input attaining at least this average expected cost exists. The
+argument includes all preprocessing randomness in the independent
+auxiliary tape and imposes no bound on preprocessing time.
+\end{proof}
+
+For fixed positive $r$, this law gives bounded expected input work
+at arbitrarily large width. In contrast, the exact dyadic
+preactivation of a row with every coefficient nonzero depends on
+every input coordinate. Its deterministic evaluation must read all
+of them: changing an unqueried sign changes the preactivation.
+The network question is whether this saving survives composition.

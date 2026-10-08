@@ -1,0 +1,426 @@
+\subsection{The complexity of approximating an instance optimum}
+\label{sec:instance-hardness}
+
+The query optimum has a finite flow characterization, proved at
+the end of this appendix. Computing a close approximation within
+polynomial time is harder. The following reduction starts at the
+fixed row-norm bound eight, then extends to every fixed bound above
+one.  The optimum \(Q^*(W)\) is defined at the start of this
+appendix.
+
+\begin{proposition}[The norm-eight reduction]
+\label{prop:instance-hardness-eight}
+Suppose a deterministic algorithm, polynomial in the network
+description length, outputs a nonnegative rational number \(\Lambda(W)\).
+Suppose there are fixed constants \(K\ge1\) and \(c\ge0\) such that,
+for every width-\(n\) network with
+\[
+ D=\lceil\log_2n\rceil,\qquad b=20D,\qquad s\le8,
+\]
+it satisfies
+\[
+ \frac{1+Q^*(W)}{K(\log(n+2))^c}
+ \le\Lambda(W)\le
+ K(\log(n+2))^c(1+Q^*(W)).
+\]
+Then \(\mathrm P=\mathrm{NP}\).
+The same approximation guarantee with probability at least \(2/3\)
+from a polynomial-time randomized algorithm implies
+\(\mathrm{NP}\subseteq\mathrm{BPP}\).
+\end{proposition}
+
+\begin{lemma}[Exact Boolean gates in a fixed amplitude range]
+\label{lem:zero-positive-gates}
+Encode false by zero and true by any number in \([1/2,1)\).
+The functions
+\[
+ \operatorname{Or}(u_1,\ldots,u_j)
+ =\tanh\left(2\sum_{i=1}^j u_i\right),\qquad 1\le j\le3,
+\]
+preserve this encoding and compute the Boolean disjunction.
+Define
+\begin{align*}
+ B(u,v)={}&-\tanh(1/2+4u+4v)
+       +\tanh(1/2+4u)\\
+       &+\tanh(1/2+4v)-\tanh(1/2),\\
+ \operatorname{And}(u,v)={}&\tanh(2B(u,v)).
+\end{align*}
+For encoded inputs, \(\operatorname{And}\) preserves the encoding
+and computes conjunction.  The OR gate uses one layer and row norm
+at most six.  The AND gate uses two layers, each with row norms at
+most eight.  All biases are at most one in absolute value, and all
+parameters are dyadic half-integers.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Encode false by exact zero and true by an interval separated from
+zero. Cancellation makes the AND gate vanish exactly when an input is false,
+while elementary tanh bounds keep every true output inside the encoding
+interval.
+
+\begin{proof}
+For OR, the preactivation is zero when every input is zero.  If
+one input is at least \(1/2\), the preactivation is at least one,
+and \(\tanh1\ge1/2\).
+
+If \(u=0\), the first and third terms of \(B\) cancel, as do
+the second and fourth.  The case \(v=0\) is symmetric.  Thus a
+false input makes the AND output exactly zero.  If \(u,v\ge1/2\),
+monotonicity and \(\tanh x\le1\) give
+\[
+ B(u,v)\ge2\tanh(5/2)-1-\tanh(1/2)\ge\frac13.
+\]
+Here \(\tanh(1/2)\le1/2\), and
+\(\tanh(5/2)\ge11/12\) follows from \(e^5\ge23\).
+The exponential series gives, for example,
+\(e^5\ge1+5+25/2+125/6>23\).
+Also \(\tanh(2/3)\ge1/2\), since
+\(e^{4/3}\ge1+4/3+8/9>3\).  Therefore
+\(\operatorname{And}(u,v)\ge1/2\).  Every finite tanh output
+is strictly smaller than one.
+
+The first AND layer computes the four displayed tanh terms.
+Its largest row has weights \((4,4)\), and all four biases are
+\(1/2\).  The second layer has weights \((-2,2,2,-2)\)
+and zero bias.  The stated parameter bounds follow.
+\end{proof}
+
+\paragraph{Proof idea.}
+A formula circuit gates a balanced parity circuit. Unsatisfiable
+formulas produce a constant output, while one satisfying assignment leaves
+a parity signal of fixed amplitude. Any transcript missing a parity input
+has zero correlation with that signal, which creates a polynomial query gap.
+
+\begin{proof}[Proof of Proposition~\ref{prop:instance-hardness-eight}]
+Start from a formula \(\varphi\) in conjunctive normal form with
+at most three literals per clause, \(v\) variables, and \(k\)
+clauses.  Satisfiability for these formulas
+is NP-complete \cite{cook1971,karp1972}.  Let \(m=2^r\) be the least
+power of two with \(m\ge\max\{v,k,2\}\); the network will have width
+\(n=16m^3\).  Inputs consist of its
+\(v\) assignment signs \(x\), another \(m\) signs \(y\), and
+unused coordinates.  Formulas with an empty clause or with no
+clauses can be decided directly.  Delete repeated literals within
+each clause, and replace a clause containing complementary literals
+by a constant true clause.  Pad the list of clauses
+to length \(m\) with constant true clauses.
+
+\paragraph{The formula circuit.}
+At layer one, the two literal values for an assignment sign are
+\[
+ \tanh((1+x_i)/2),\qquad\tanh((1-x_i)/2).
+\]
+Exactly one is zero and the other equals \(\tanh1\ge1/2\).
+At layer two, apply the OR gate to each clause's literal values.
+A padded true clause is the constant \(\tanh1\), obtained from
+bias one and zero weights.  Apply a balanced binary tree of AND
+gates to these \(m=2^r\) clause outputs.  The final value
+\(V_\varphi(x)\), at depth \(2+2r\), is zero if the assignment
+does not satisfy the formula and belongs to \([1/2,1)\) otherwise.
+
+\paragraph{The parity circuit.}
+Use two outputs to encode a Boolean value: one belongs to
+\([1/2,1)\) and the other is zero.  The two literal values at
+layer one give such a pair for each \(y_i\).  Given encoded pairs
+\((u_+,u_-)\) and \((v_+,v_-)\), their product sign is encoded by
+\begin{align*}
+ w_+&=\operatorname{Or}
+       (\operatorname{And}(u_+,v_+),
+        \operatorname{And}(u_-,v_-)),\\
+ w_-&=\operatorname{Or}
+       (\operatorname{And}(u_+,v_-),
+        \operatorname{And}(u_-,v_+)).
+\end{align*}
+Only the pair matching the product sign is nonzero, and its value
+is at least \(1/2\).  This gate uses three layers.  A balanced
+binary tree produces \((P_+(y),P_-(y))\), encoding
+\(\chi(y)=\prod_{i=1}^m y_i\), at depth \(1+3r\).
+
+The formula circuit finishes no later than this, since
+\(2+2r\le1+3r\) for \(r\ge1\).  At each remaining layer,
+relay its value through \(u\mapsto\tanh(2u)\).  This relay
+preserves the encoding and uses row norm two.  Denote the resulting
+formula value at depth \(1+3r\) again by \(V_\varphi(x)\).
+
+\paragraph{The output.}
+Apply the AND gadget to
+\((V_\varphi,P_+)\) and \((V_\varphi,P_-)\) in parallel,
+obtaining \(G_+,G_-\) after two further layers.  The final neuron
+is
+\[
+ f_\varphi(x,y)=\tanh(2(G_+(x,y)-G_-(x,y))).
+\]
+The total depth is
+\(D=4+3r=\log_2(16m^3)=\log_2n\).
+If the assignment is unsatisfying, both gated values are exactly
+zero.  If it is satisfying, exactly one gated value is at least
+\(1/2\), and it has the sign selected by parity.  Therefore
+\begin{equation}\label{eq:SAT-parity-output}
+ \varphi(x)=0\ \Longrightarrow\ f_\varphi(x,y)=0,
+ \qquad
+ \varphi(x)=1\ \Longrightarrow\
+ \chi(y)f_\varphi(x,y)\ge\tanh1\ge\frac12.
+\end{equation}
+
+At layer one there are at most \(4m\) active neurons.  A first
+layer of parallel parity-combination gates has at most \(8m\)
+neurons: each pair uses four AND gates, each initially using four
+neurons.  All subsequent parity layers use fewer.  The formula
+circuit uses at most \(4m\) neurons in any layer, including
+padding and relays.  Thus at most \(12m\) neurons are active
+in a layer.  The two final AND gadgets use eight neurons in their
+first layer.  Since \(12m\le16m^3=n\), zero padding gives the
+required width at every layer.  All weights belong to
+\(\{0,\pm1/2,\pm2,\pm4\}\), and all biases belong to
+\(\{0,1/2,1\}\).  They lie on the prescribed \(2^{-20D}\)
+grid.  Lemma~\ref{lem:zero-positive-gates} verifies all row norms.
+The dense network description has polynomial size in \(v+k\),
+and its construction takes polynomial time.
+
+\paragraph{The cost gap.}
+If \(\varphi\) is unsatisfiable, \eqref{eq:SAT-parity-output}
+gives \(f_\varphi\equiv0\).  One independent fair bit samples
+the output, so \(Q^*(W_\varphi)=0\).
+
+If \(\varphi\) is satisfiable, fix one satisfying assignment
+\(x^*\).  Giving this assignment to the sampler for free can
+only help.  Its output sign \(Y\) satisfies, for every \(y\),
+\[
+ \Pr(Y=\chi(y)\mid x^*,y)
+ =\frac{1+\chi(y)f_\varphi(x^*,y)}2\ge\frac34.
+\]
+Now draw the \(m\) parity signs independently and uniformly.
+Conditional on any transcript that leaves at least one of them
+unqueried, their parity is uniform.  This remains true after
+including all preprocessing and online randomness in the
+transcript's independent tape.  Thus, if \(Q_y\) counts the
+distinct parity coordinates queried,
+\[
+ \Pr(Y=\chi(y))
+ \le\frac12+\frac12\Pr(Q_y=m).
+\]
+It follows that \(\Pr(Q_y=m)\ge1/2\) and
+\(\E Q_y\ge m/2\).  Averaging supplies a fixed \(y\) with
+this expected cost.  This argument applies to every exact sampler
+with unlimited preprocessing, so \(Q^*(W_\varphi)\ge m/2\).
+
+Choose fixed positive integers \(K',c'\) such that the rational
+quantity \(g(n)=K'(\lceil\log_2n\rceil+2)^{c'}\) bounds
+\(K(\log(n+2))^c\) from above.  In the unsatisfiable case,
+\(\Lambda(W_\varphi)\le g(n)\).  In the satisfiable case,
+\(\Lambda(W_\varphi)\ge(1+m/2)/g(n)\).  For all sufficiently
+large \(m\), \(g(16m^3)^2<1+m/2\); the two ranges are
+disjoint.  Comparing the output with \(g(n)\) decides
+satisfiability in polynomial time.  The finitely many smaller
+formula sizes can be handled by exhaustive search.  This proves
+\(\mathrm P=\mathrm{NP}\).  With a randomized approximation,
+the same reduction decides satisfiability with probability at
+least \(2/3\), giving \(\mathrm{NP}\subseteq\mathrm{BPP}\).
+\end{proof}
+
+\begin{theorem}[Conditional threshold for efficient instance optima]
+\label{thm:instance-hardness}
+Fix \(s>1\).  Suppose a deterministic polynomial-time algorithm
+computes a rational value \(\Lambda(W)\) satisfying
+\[
+ \frac{1+Q^*(W)}{K(\log(n+2))^c}
+ \le\Lambda(W)\le
+ K(\log(n+2))^c(1+Q^*(W))
+\]
+for fixed constants \(K\ge1,c\ge0\), on every width-\(n\),
+depth-\(\lceil\log_2n\rceil\) network with row norms at most
+\(s\) and parameter precision \(b=20\lceil\log_2n\rceil\).
+Then \(\mathrm P=\mathrm{NP}\).  A polynomial-time randomized
+approximation with probability at least \(2/3\) implies
+\(\mathrm{NP}\subseteq\mathrm{BPP}\).
+For every fixed \(s\le1\), the constant value one approximates
+\(1+Q^*(W)\) within a polylogarithmic factor on the same class.
+\end{theorem}
+
+\paragraph{Proof idea.}
+For an arbitrary fixed row bound above one, insert relay layers
+that restore the amplitude lost by smaller gates. Their number is a constant
+depending on the row bound. Padding preserves logarithmic depth and the
+polynomial gap used by the satisfiability reduction.
+
+\begin{proof}
+Fix an integer \(R\ge0\) with
+\(\delta=2^{-R}\le\min\{s-1,1\}\), and put
+\[
+ a=1+\delta,\qquad c=\delta/16,\qquad
+ K=3\cdot2^R(R+18),\qquad C=2K+3.
+\]
+All these quantities are fixed as the formula size increases.
+We will encode false by zero and true by any value in \([c,1)\).
+
+First consider the relay \(T(u)=\tanh(au)\).
+The inequality \(\tanh v\ge v-v^3/3\) for \(v\ge0\)
+follows by integrating
+\(\tanh'(v)=1-\tanh^2v\ge1-v^2\).
+For \(0\le u\le c\), it gives
+\[
+ T(u)\ge
+ \left(a-\frac{a^3c^2}{3}\right)u
+ \ge(1+\delta/2)u,
+\]
+because \(a^3c^2/3\le\delta^2/96\le\delta/2\).
+Monotonicity also implies \(T(u)\ge c\) whenever \(u\ge c\).
+Consequently, if
+\(d=c^2/2^{14}\), then \(K\) relay layers take every input
+in \([d,1)\) into \([c,1)\), and preserve zero exactly.
+Indeed, until the value reaches \(c\), each relay multiplies it
+by at least \(1+\delta/2\).  Moreover,
+\[
+ K\log(1+\delta/2)\ge K\delta/3=R+18
+ \ge(R+18)\log2=\log(c/d).
+\]
+The inequality \(\log(1+x)\ge x/(1+x)\) gives the first bound.
+
+Use first-layer coefficient \(\gamma=a/2\) and second-layer
+coefficient \(\kappa=a/4\) in the AND construction:
+\begin{align*}
+ B_a(u,v)={}&-\tanh(1/2+\gamma u+\gamma v)
+       +\tanh(1/2+\gamma u)\\
+       &+\tanh(1/2+\gamma v)-\tanh(1/2),\\
+ A_a(u,v)={}&\tanh(\kappa B_a(u,v)).
+\end{align*}
+The largest first-layer row norm is \(2\gamma=a\), and the
+second-layer row norm is \(4\kappa=a\).
+A zero input still causes exact cancellation.  If \(u,v\ge c\),
+the integral identity
+\[
+ B_a(u,v)=\int_0^{\gamma u}\int_0^{\gamma v}
+ 2\tanh(1/2+y+z)\sech^2(1/2+y+z)\,dz\,dy
+\]
+gives an explicit positive lower bound.  Every argument belongs
+to \([1/2,5/2]\).  On this interval,
+\(\tanh\ge1/3\), and
+\(\sech^2w\ge e^{-2w}\ge e^{-5}>1/256\).
+For the last inequality, the exponential series gives \(e<3\),
+so \(e^5<243<256\).  Therefore
+\[
+ B_a(u,v)\ge\frac{\gamma^2uv}{384}
+ \ge\frac{c^2}{1536}.
+\]
+Also \(0\le B_a(u,v)\le2\) and \(\kappa\le1/2\).
+Using \(\tanh z\ge z/2\) on \([0,1]\) gives
+\[
+ A_a(u,v)\ge\frac{\kappa B_a(u,v)}2
+ \ge\frac{c^2}{12288}\ge d.
+\]
+Append \(K\) relay layers.  The resulting AND gate has depth
+\(K+2\), preserves the new encoding, and has row norms at most
+\(a\).
+
+For OR with at most three inputs, use
+\(\tanh(\kappa\sum_i u_i)\) followed by \(K\) relays.
+Its initial row norm is at most \(3a/4\).  A true input implies
+an initial output at least
+\(\tanh(\kappa c)\ge\kappa c/2\ge c/8\ge d\).
+Thus this OR gate has depth \(K+1\), computes disjunction in
+the new encoding, and respects the norm bound.
+The original literal outputs are at least \(1/2\), hence at
+least \(c\), and their row norms are at most \(a\).
+
+Repeat the formula and parity construction with these gates.
+Each parity-combination level now has depth
+\((K+2)+(K+1)=C\), so the parity pair is ready at depth
+\(1+Cr\).  The formula value is ready at depth
+\((r+1)(K+2)\), which is no larger since the difference is
+\((K+1)(r-1)\ge0\).  Relay the formula value to synchronize
+the two circuits.  Gating the two parity outputs by the formula
+value uses \(K+2\) further layers.  Take the final output to be
+\[
+ f_\varphi(x,y)
+ =\tanh\left(\frac a2(G_+(x,y)-G_-(x,y))\right).
+\]
+Its row norm is \(a\).  On a satisfying assignment its
+correlation with parity is at least
+\(\tanh(ac/2)\ge c/4\); on an unsatisfying assignment it
+is exactly zero.
+
+Set
+\[
+ n=2^{K+4}m^C,\qquad
+ D=K+4+Cr=\log_2n,\qquad b=20D.
+\]
+The same active-width bound \(12m\) applies, since relay layers
+do not increase the number of signals.  Zero padding yields the
+required width \(n\).  All parameter denominators divide
+\(2^{R+2}\). Since \(R+2\le20(K+4)\le b\), they lie on
+the prescribed grid.
+All biases remain at most one.  For fixed \(s\), \(K\) and
+\(C\) are constants, so the reduction has polynomial size.
+
+The parity transcript argument now yields
+\(Q^*(W_\varphi)\ge cm/4\) in the satisfiable case and zero
+in the unsatisfiable case.  This polynomial gap again exceeds
+the square of any fixed polylogarithmic factor.  The approximation
+consequences follow exactly as in
+Proposition~\ref{prop:instance-hardness-eight}.
+
+When \(s\le1\), Theorem~\ref{thm:upper} gives
+\(Q^*(W)\le\log^{O(1)}n\).  Since \(Q^*(W)\ge0\), the
+constant value one satisfies a two-sided polylogarithmic
+approximation guarantee for \(1+Q^*(W)\).
+\end{proof}
+
+\begin{corollary}[Computing the multivariate score certificate]
+\label{cor:score-certificate-hardness}
+Let \(\mathsf I(W)\) be the first term in the supremum in
+\eqref{eq:instance-certificate}, with value zero on constant
+networks.  For every fixed \(s>1\), a deterministic polynomial-time
+approximation to \(1+\mathsf I(W)\) within a fixed
+polylogarithmic factor on the depth-\(\lceil\log_2n\rceil\),
+\(b=20\lceil\log_2n\rceil\), row-norm-\(s\) class would imply
+\(\mathrm P=\mathrm{NP}\).  The corresponding randomized
+approximation implies \(\mathrm{NP}\subseteq\mathrm{BPP}\).
+\end{corollary}
+
+\paragraph{Proof idea.}
+The balanced parity construction has the same nonzero amplitude
+for every parity pattern. Fixing a satisfying assignment therefore exposes
+an exact parity factor. A product distribution near the boundary makes its
+multivariate score certificate polynomially large.
+
+\begin{proof}
+In the reduction, the true amplitude of a parity pair is the same
+for every input pattern at a given level.  This follows by
+induction: at the leaves it equals \(\tanh1\); at each balanced
+combination, the correct branch applies the same AND gate to two
+copies of that amplitude and the same OR gate to the result and
+zero.  Relays preserve the equality.  The two final gated branches
+are also identical functions of the formula value and the parity
+amplitude.  Thus the network output factorizes exactly as
+\[
+ f_\varphi(x,y)=A_\varphi(x)\prod_{i=1}^m y_i,
+\]
+where \(A_\varphi(x)=0\) on an unsatisfying assignment and
+\(A_\varphi(x)\ge c/4\) on a satisfying assignment, with
+\(c\) as in Theorem~\ref{thm:instance-hardness}.
+
+If the formula is unsatisfiable then \(\mathsf I(W_\varphi)=0\).
+Otherwise, take product means for the assignment coordinates that
+approach a satisfying assignment \(x^*\).  Give every parity
+coordinate mean \(t=\sqrt{1-1/m}\), and use direction
+\(v_i=1/\sqrt m\) on parity coordinates and zero on the others.
+The direction is admissible in
+Lemma~\ref{lem:multivariate-transcript}.  In the limit the output
+mean is \(\alpha t^m\), where
+\(\alpha=A_\varphi(x^*)\ge c/4\), and its directional derivative
+is \(\alpha\sqrt m\,t^{m-1}\).  The denominator in the
+centered information bound is at most one.  Since the product
+extension and its derivatives are continuous,
+\[
+ \mathsf I(W_\varphi)\ge
+ \alpha^2m\left(1-\frac1m\right)^{m-1}
+ \ge\frac{\alpha^2m}{3}
+ \ge\frac{c^2m}{48}.
+\]
+The middle inequality follows from
+\((1+1/(m-1))^{m-1}\le e<3\).
+For the fixed norm \(s\), this is a polynomial gap in the
+network width.  The same comparison used for
+Theorem~\ref{thm:instance-hardness} decides satisfiability.
+\end{proof}
+

@@ -1,0 +1,59 @@
+\section{Guarantees of related attention methods}
+\label{app:related}
+
+This appendix states the guarantees of three attention methods
+summarized in Section~\ref{sec:prior-main}, in the notation of their
+papers. No proof in this paper uses them.
+
+\paragraph{KDEformer.}
+KDEformer gives a high-probability spectral approximation to an
+attention matrix product \cite{kdeformer2023}. In its notation,
+with unnormalized attention matrix $A$, diagonal row-sum matrix
+$D$, and value matrix $V$, its guarantee is
+\[
+ \|D^{-1}AV-\widetilde D^{-1}A\Pi^\top\Pi V\|_{\rm op}
+ \le \epsilon\|D^{-1}A\|_{\rm op}\|V\|_{\rm op}.
+\]
+For $N$ rows, its sample count is
+$m=O(\epsilon^{-2}\log N\,[\operatorname{srank}(D^{-1}A)
++\operatorname{srank}(V)])$, where
+$\operatorname{srank}(M)=\|M\|_F^2/\|M\|_{\rm op}^2$.
+Constructing $\Pi$ and $\widetilde D$ requires the KDE work;
+materializing the approximate product adds $O(Nmd)$ operations
+at width $d$. The theorem concerns all rows.
+
+\paragraph{HyperAttention.}
+HyperAttention proves a related operator-norm guarantee under
+conditions on the maximum column norm of normalized attention
+and on residual row masses after a heavy-entry mask is supplied
+\cite{hyperattention2023}. Under its bounds
+$N\max_j\|(D^{-1}A)_{*,j}\|_2^2\le N^{o(1)}$ and
+residual row-mass ratio at most $N^{o(1)}$, with
+$\epsilon>N^{-o(1)}$, the time is
+$O(dN^{1+o(1)}+d\,\operatorname{nnz}(\mathrm{mask}))$
+and the success probability is at least $0.98$.
+Finding the mask requires its own assumptions.
+The guarantee supplies no certified interval for every output
+probability on every random run.
+
+\paragraph{MagicPIG.}
+MagicPIG uses a prefill-built locality-sensitive hash index for
+decoding \cite{magicpig2024}. Its ideal attention-sampling theorem
+assumes draws from the true attention distribution and gives an
+unbiased sample average. The implemented LSH construction instead
+uses inclusion probabilities $u_i$ in the ratio
+\[
+ \widehat v=
+ \frac{\sum_{i\in S}e^{a_i}v_i/u_i}
+      {\sum_{i\in S}e^{a_i}/u_i}.
+\]
+For $L$ tables of $K$ hash bits, retrieving a key after at least
+two table collisions gives
+$u_i=1-(1-\zeta_i^K)^L-L\zeta_i^K(1-\zeta_i^K)^{L-1}$,
+where $\zeta_i$ is its one-bit collision probability.
+Such ratios are generally biased. For example, take
+weights $(1,2)$, values $(0,1)$, and one uniformly included
+index. The self-normalized estimate is the selected value, with
+mean $1/2$, while the true weighted mean is $2/3$.
+This distinction concerns exactness; empirical approximation
+quality requires separate measurements.

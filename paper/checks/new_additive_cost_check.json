@@ -1,0 +1,6 @@
+{
+  "all_checks_passed": true,
+  "total_cases": 4600,
+  "precision_decimal_digits": 120,
+  "status": "exact rational identities and deterministic numerical inequalities only"
+}

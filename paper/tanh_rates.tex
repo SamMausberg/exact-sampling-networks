@@ -1,0 +1,258 @@
+\subsection{Radius decay and the recursion size}\label{sec:cost}
+
+The radius lemmas below hold for any reference gain \(0\le g\le2\);
+the uniform algorithm uses \(g=\max\{1,S\}\).
+Let \(R_0=1\), \(R_{j+1}=\tanh(gR_j)\) be ideal reference radii
+used only in the analysis, and put \(q_j=3/(2j+3)\).
+
+\begin{lemma}[Radius decay]\label{lem:radius}
+For \(u>0\),
+\begin{equation}\label{eq:cothradius}
+\coth^2u\ge u^{-2}+\frac23.
+\end{equation}
+If \(g\le1\), \(R_j^2\le q_j\).
+If \(1\le g\le2\),
+\begin{equation}\label{eq:superradius}
+R_j^2\le\frac32(1-g^{-2})+q_j.
+\end{equation}
+Also \(R_j\le g^jR_j^{(1)}\) when \(g\ge1\), where
+\(R_j^{(1)}\) is the critical radius.
+\end{lemma}
+\paragraph{Proof idea.}
+Use the reciprocal square of the radius as a potential. A coefficientwise
+hyperbolic-function inequality gives a fixed increase at criticality and a
+geometric recurrence above it.
+
+\begin{proof}
+Multiplication by \(u^2\sinh^2u\) reduces
+\eqref{eq:cothradius} to
+\(u^2-\sinh^2u+(u^2/3)\sinh^2u\ge0\).
+Write \(\sinh^2u=\sum_{j\ge1}a_ju^{2j}\), where
+\(a_j=2^{2j-1}/(2j)!\).
+The coefficients of \(u^2,u^4\) vanish. For \(j\ge3\), the
+coefficient is \(a_{j-1}/3-a_j\ge0\), since
+\(a_j/a_{j-1}=4/[(2j)(2j-1)]\le1/3\).
+Absolute convergence justifies the calculation.
+
+At \(g=1\) the reciprocal square telescopes to
+\(R_j^{-2}\ge1+2j/3\). Monotonicity handles \(g<1\).
+For \(g\ge1\), put \(A=\frac32(1-g^{-2})\) and
+\(\Phi_g(v)=g^2v/(1+\frac23g^2v)\).
+We have \(R_{j+1}^2\le\Phi_g(R_j^2)\), and
+\[
+\Phi_g(A+q)-A=\frac{q}{g^2(1+\frac23q)}
+\le\frac{q}{1+\frac23q}.
+\]
+Since \(q_{j+1}=q_j/(1+\frac23q_j)\), induction proves
+\eqref{eq:superradius}.
+Concavity gives \(\tanh(cu)\le c\tanh u\) for \(c\ge1\);
+another induction proves the final assertion.
+\end{proof}
+
+\begin{lemma}[Uniform rounding stability]\label{lem:rounding}
+The stored radii lie in \((0,1]\) and
+\[
+0\le r_j-R_j\le3j\varepsilon.
+\]
+Replacing ideal radii by stored radii changes the logarithm of any
+offspring product by at most \(29/200\). Moreover,
+\[
+r_D\le\frac2{\sqrt{D+1}}\quad(g\le1),\qquad
+r_D\le\frac{2e^{(g-1)D}}{\sqrt{D+1}}\quad(1\le g\le2).
+\]
+\end{lemma}
+\paragraph{Proof idea.}
+Concavity makes the ideal radius trajectory contract perturbations from
+above. Thus the rounding errors add over layers, and their effects on
+squared radii and reciprocal radii remain summable.
+
+\begin{proof}
+Let \(f(u)=\tanh(gu)\).
+The ideal sequence decreases: \(R_1<1\), and \(f\) is increasing.
+For \(g>0\), concavity and \(f(0)=0\) imply
+\[
+f'(R_j)\le\frac{f(R_j)}{R_j}
+=\frac{R_{j+1}}{R_j}\le1.
+\]
+Since \(f'\) decreases on \([0,\infty)\), \(f\) is
+\(1\)-Lipschitz on \([R_j,\infty)\).
+The upward rounding ensures \(r_j\ge R_j\).
+Thus the error at each step increases by at most \(3\varepsilon\),
+including above unit norm. The case \(g=0\) is immediate.
+This observation removes any need for precision proportional to \(D\).
+
+The precision choice gives
+\(\varepsilon\le1/[100(D+1)^4]\).
+Also \(\tanh2+3\varepsilon<1\), so \(r_j\le1\).
+For example, \(e<3\) implies \(\tanh2<40/41\), whereas
+\(\varepsilon\le1/1600\).
+Put \(e_0=6D\varepsilon\). Then
+\(0\le r_j^2-R_j^2\le e_0\).
+On \([0,4]\), the derivative of \(\phi(v)=5v/3+v^2\) is at
+most \(29/3\). Since \(g^2\le4\), the total log perturbation is
+at most
+\[
+D\frac{29}{3}\,4e_0
+\le\frac{232D^2}{100(D+1)^4}\le\frac{29}{200},
+\]
+using \(D/(D+1)^2\le1/4\).
+The final-radius bounds follow from Lemma~\ref{lem:radius},
+\(3/(2D+3)\le3/[2(D+1)]\), and the rounding error.
+The coefficient \(2\) absorbs that error.
+\end{proof}
+
+\paragraph{Proof idea.}
+Bound each generation by the product of its local offspring factors. The
+initial output gate retains the final radius, and the resulting harmonic
+sums determine the power of depth.
+
+\begin{proof}[Proof of the call bound in Theorem~\ref{thm:upper}]
+Conditional expectation at each reached call bounds the expected
+number at layer \(k<D\) by \(r_D\prod_{\ell=k+1}^DB_\ell\).
+Therefore
+\begin{equation}\label{eq:generalcost}
+\E N_{\rm calls}\le1+r_D\sum_{k=0}^{D-1}
+\exp\!\left(\sum_{j=k}^{D-1}
+\left[\frac53(gr_j)^2+(gr_j)^4\right]\right).
+\end{equation}
+For \(g\le1\), the exponent is at most
+\(29/200+\sum_{j=k}^{D-1}(5q_j/3+q_j^2)\).
+Convexity of \(1/x\) and \(1/x^2\), integrated over intervals
+centered at their evaluation points, gives
+\begin{equation}\label{eq:qsums}
+\sum_{j=k}^{D-1}q_j\le\frac32\log\frac{D+1}{k+1},
+\qquad
+\sum_{j=k}^{D-1}q_j^2\le\frac9{4(k+1)}.
+\end{equation}
+Since \(29/200+9/4<3\),
+\[
+\prod_{\ell=k+1}^DB_\ell
+\le e^3\left(\frac{D+1}{k+1}\right)^{5/2}.
+\]
+Keeping the top factor and summing generations,
+\[
+\E N_{\rm calls}
+\le1+2e^3(D+1)^2\sum_{k=0}^{D-1}(k+1)^{-5/2}
+\le1+\frac{10}{3}e^3(D+1)^2
+\le80(D+1)^2.
+\]
+Here \(\sum_{j\ge1}j^{-5/2}\le5/3\), by an integral bound;
+\(e<11/4\) suffices for the last numerical constant.
+
+For \(1\le g\le2\), put \(\delta=g-1=(S-1)_+\).
+Equation \eqref{eq:superradius} yields
+\[
+(gR_j)^2\le q_j+\frac52(g^2-1)
+\le q_j+\frac{15}{2}\delta.
+\]
+Also \((gR_j)^2\le4\), \(q_j\le1\), so
+\((gR_j)^4\le q_j^2+(75/2)\delta\).
+Consequently
+\[
+\frac53(gR_j)^2+(gR_j)^4
+\le\frac53q_j+q_j^2+50\delta.
+\]
+The product bound gains at most \(e^{50\delta D}\), and the
+top factor gains at most \(e^{\delta D}\).
+The same sum proves \eqref{eq:maincall}.
+\end{proof}
+
+\begin{remark}[Subcritical work]
+For fixed \(0<S<1\), an optional variant uses reference gain \(g=S\).
+For this variant let
+\[
+C_S=\frac{5S^2}{3(1-S^2)}+\frac{S^4}{1-S^4}.
+\]
+Using \(R_j\le S^j\), the rounding bound, and
+\(r_D\le S^D+3\varepsilon/(1-S)\), \eqref{eq:generalcost} gives
+\[
+\E N_{\rm calls}\le
+1+e^{C_S+1}D\left(S^D+\frac{3\varepsilon}{1-S}\right).
+\]
+The expected number of nonroot calls tends to zero for each fixed
+subcritical norm. The root still performs scalar random computation.
+\end{remark}
+
+\begin{proposition}[A refined fixed-norm rate]\label{prop:fixedrate}
+Fix \(1<s\le2\), and let \(r_*\in(0,1)\) solve
+\(r_*=\tanh(sr_*)\).
+Set
+\[
+\lambda=s(1-r_*^2),\quad
+\Psi_s=\frac53(sr_*)^2+(sr_*)^4,\quad
+A_s=\frac{116s(1-r_*)}{3(1-\lambda)},
+\]
+and
+\[
+C_s=1+\frac{\exp(29/200+A_s)}{1-e^{-\Psi_s}}.
+\]
+Then \(0<\lambda<1\), and for every network with \(S\le s\),
+\[
+\E N_{\rm calls}\le C_s e^{D\Psi_s}.
+\]
+If \(\delta=s-1\in(0,1]\), then
+\begin{equation}\label{eq:psibound}
+\Psi_s\le5\delta+\frac{91}{4}\delta^2.
+\end{equation}
+Thus the upper exponent in Corollary~\ref{cor:threshold} can be
+replaced by \(\min\{2,\Psi_s/\log2\}\).
+\end{proposition}
+\paragraph{Proof idea.}
+Above criticality the ideal radius approaches a positive fixed point
+geometrically. The total excess over the limiting offspring rate is finite,
+giving a fixed prefactor and an exponential rate.
+
+\begin{proof}
+Strict concavity gives a unique positive fixed point and derivative
+\(\lambda<1\) there.
+The ideal radius sequence for norm \(s\) decreases to \(r_*\), and
+\[
+0\le R_j-r_*\le\lambda^j(1-r_*).
+\]
+The derivative of \(5\rho^2/3+\rho^4\) is at most \(116/3\)
+on \([0,2]\). Hence its excess above \(\Psi_s\), summed over
+all layers, is at most \(A_s\).
+Lemmas~\ref{lem:offspring} and \ref{lem:rounding}, followed by a
+geometric generation sum with \(r_D\le1\), prove the bound.
+For a network with \(S<s\), its reference gain satisfies
+\(g=\max\{1,S\}\le s\). Monotonicity therefore majorizes its
+ideal radii and offspring factors by those at norm \(s\).
+
+Letting \(j\to\infty\) in \eqref{eq:superradius} gives
+\((sr_*)^2\le\frac32(s^2-1)=3\delta+\frac32\delta^2\).
+Substitution yields
+\[
+\Psi_s\le
+5\delta+\frac{23}{2}\delta^2+9\delta^3+\frac94\delta^4
+\le5\delta+\frac{91}{4}\delta^2.
+\]
+Conversely, put \(u=sr_*\). The fixed-point equation and
+\eqref{eq:xcothx} give \(s\le1+u^2/3\), so
+\(u^2\ge3\delta\). Thus
+\(5\delta+9\delta^2\le\Psi_s\), proving
+\(\Psi_s=5\delta+O(\delta^2)\) directly from explicit inequalities.
+The prefactor \(C_s\) diverges as \(s\downarrow1\), so the
+transition window uses the uniform theorem.
+\end{proof}
+
+
+\begin{lemma}[The nearcritical fixed-point gap]\label{lem:nearcriticalgap}
+Let $s=1+\delta$, $0<\delta\le1/2$, and let $r_*=\tanh(sr_*)>0$.
+Put $u_*=sr_*$ and $\lambda=s(1-r_*^2)$. Then
+\[
+ 3\delta\le u_*^2\le3\delta+\tfrac32\delta^2,
+ \qquad 1-\lambda\ge\delta.
+\]
+\end{lemma}
+\paragraph{Proof idea.}
+Rewrite the fixed-point equation using $u\coth u$.
+Inequality~\eqref{eq:xcothx} bounds its distance from one, and differentiation converts that
+bound into the contraction gap.
+
+\begin{proof}
+Since $s=u_*\coth u_*$, inequality \eqref{eq:xcothx} gives the
+lower bound. The radius estimate at the fixed point gives
+$u_*^2\le\frac32(s^2-1)=3\delta+\frac32\delta^2$.
+Finally
+$1-\lambda=-\delta+u_*^2/s\ge\delta(3/s-1)\ge\delta$.
+\end{proof}

@@ -1,0 +1,8 @@
+{
+  "status": "all exact-rational checks passed; not a formal verification",
+  "operator_identity_cases": 117,
+  "coefficient_bound_cases": 3159,
+  "hypergeometric_fourth_moment_cases": 957,
+  "largest_coefficient_bound_ratio": "1/2",
+  "uses_floating_point": false
+}

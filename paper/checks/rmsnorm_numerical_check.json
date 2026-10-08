@@ -1,0 +1,16 @@
+{
+  "status": "all finite checks passed",
+  "decimal_precision": 120,
+  "scope": "deterministic finite formula checks; no proof or sampler benchmark",
+  "finite_population_derivative_cases": 54,
+  "minimum_derivative_over_proved_lower_bound": "5.3063969723697008374330783364476613468724005367543",
+  "minimum_score_lower_certificate_over_min_T_inverse_epsilon": "0.085322410050350463100084360824758373013441813619836",
+  "fixed_grid_width_four_score_cases": 54,
+  "minimum_fixed_grid_derivative_over_proved_lower_bound": "3.2432297322910255903202224704308846426301493956303",
+  "minimum_fixed_grid_score_certificate_over_min_T_inverse_epsilon": "0.10651809090365220977034548112887400800250216625574",
+  "geometric_majority_cases": 30,
+  "maximum_geometric_majority_truncation_error": "9.7306222872270483379802464221209743591864064096846e-91",
+  "maximum_terms_in_geometric_majority_check": 13367,
+  "floor_factory_algebra_cases": 135,
+  "maximum_floor_factory_algebra_residual": "9.681479787123295682045076583215879618925547980122e-122"
+}

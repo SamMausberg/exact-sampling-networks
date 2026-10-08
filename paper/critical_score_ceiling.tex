@@ -1,0 +1,153 @@
+\subsection{The reach of second-order score bounds}
+\label{sec:critical-score-ceiling}
+
+The curvature lower bound has order $\sqrt D$. Allowing a different
+input bias in every group and retaining the full Hessian does not
+increase its exponent. The point is a common entrywise derivative
+majorant. A bound on the Hessian norm separately at each point would
+not suffice, because different finite differences average derivatives
+at different points.
+
+\begin{proposition}[A common Hessian majorant]
+\label{prop:critical-hessian-majorant}
+Let $D\ge1$ and let $f$ be one output of a zero-bias, depth-$D$ tanh network whose
+absolute row sums are at most one. Put $r_0=1$ and
+$r_\ell=\tanh r_{\ell-1}$. There is an entrywise nonnegative
+matrix $C$, determined by the weights, such that
+\[
+ |\partial_{ij}f(x)|\le C_{ij}
+ \quad(x\in[-1,1]^n),\qquad
+ \sum_{i,j}C_{ij}\le2\sum_{\ell=1}^D r_\ell
+                    \le2\sqrt{6D}.
+\]
+Partition the input coordinates into groups. Give coordinates in group
+$a$ independent signs of common mean $t_a$, and write
+$H(t)=\mathbb E_t f(X)$. For
+$\Sigma(t)=\operatorname{diag}(\sqrt{1-t_a^2})$, one has
+\[
+ \|\Sigma(t)D^2H(t)\Sigma(t)\|_*
+ \le2\sum_{\ell=1}^D r_\ell\le2\sqrt{6D},
+ \qquad t\in(-1,1)^k,
+\]
+where $\|\cdot\|_*$ is the nuclear norm, the sum of singular values.
+For every sign input $x$, with $x^{(i)}$ denoting a flip of coordinate $i$,
+the sum of the one-coordinate coupling witnesses obeys
+\[
+ \frac12\sum_i|f(x)-f(x^{(i)})|\le1.
+\]
+The corresponding first-score product witness satisfies
+$\|\Sigma(t)\nabla H(t)\|_2^2/(1-H(t)^2)<3$.
+\end{proposition}
+
+\paragraph{Proof idea.}
+Propagate an absolute gradient bound and a nonnegative Hessian bound
+through each row. The row norm prevents their total masses from
+acquiring a width factor. Mixed finite differences preserve the
+entrywise bound, even though they evaluate different coordinate
+squares. Grouping coordinates only regroups its mass.
+
+\begin{proof}
+Let $P_0=I$ and $P_\ell=|W_\ell|\cdots|W_1|$, where the
+absolute value is entrywise. Every row of $P_\ell$ is nonnegative
+and sums to at most one. The absolute gradient of the preactivation
+of neuron $(\ell,a)$ is bounded by the row vector
+$v_{\ell,a}=P_\ell[a,:]$.
+Set $C_{0,a}=0$ and define
+\[
+ C_{\ell,a}
+ =\sum_j|w_{\ell,aj}|C_{\ell-1,j}
+       +2r_\ell v_{\ell,a}^{\mathsf T}v_{\ell,a}.
+\]
+Since $|\tanh'|\le1$ and
+$|\tanh''u|\le2|\tanh u|\le2r_\ell$, the scalar chain
+rule shows inductively that $C_{\ell,a}$ bounds the absolute
+Hessian of that neuron at every point of the cube. Its entry sum is
+at most the largest preceding entry sum plus $2r_\ell$, because
+\[
+ \sum_{i,j}v_i v_j=\left(\sum_i v_i\right)^2\le1.
+\]
+Taking $C=C_{D,a}$ proves the first assertion. The bound
+$\sum_{\ell=1}^Dr_\ell\le\sqrt{6D}$ is the one in the proof of
+Proposition~\ref{prop:new-critical-derivatives}.
+
+For individual input means $z_i$, let
+$\Phi(z)=\mathbb E_z f(X)$. This is the multilinear extension
+of the values of $f$ on the sign cube. Its diagonal second derivatives
+vanish. For $i\ne j$, its mixed derivative is the average, over the
+other coordinates, of the corresponding second finite difference
+of $f$, divided by four. The fundamental theorem of calculus writes
+that finite difference as the integral of $\partial_{ij}f$ over
+$[-1,1]^2$. Therefore
+$|\partial_{ij}\Phi(z)|\le C_{ij}$.
+If $g(i)$ denotes the group of coordinate $i$, substitution
+$z_i=t_{g(i)}$ gives
+\[
+ |\partial_{ab}H(t)|
+ \le\sum_{i:g(i)=a}\sum_{j:g(j)=b}C_{ij}.
+\]
+Summing over $a,b$ does not add mass. Multiplication by the diagonal
+entries of $\Sigma(t)$ cannot increase that bound, since those entries
+belong to $[0,1]$. Finally the nuclear norm is at most the sum of the
+absolute matrix entries: expand a matrix in the rank-one coordinate
+matrices, each of nuclear norm one, and use the triangle inequality.
+
+The same argument gives the common absolute gradient bound
+$|\partial_i f|\le P_D[a,i]$, whose entries sum to at most one.
+Integrating over a flipped coordinate proves the coupling assertion.
+Finite differences and grouping also give
+$\|\nabla H(t)\|_1\le1$. Thus
+$\|\Sigma\nabla H\|_2^2\le1$, while
+$|H(t)|\le r_D\le\tanh1$ for $D\ge1$. The first-score witness
+is at most $\cosh^2(1)<3$.
+\end{proof}
+
+\begin{proposition}[Matrix-valued second-order transcript bound]
+\label{prop:critical-matrix-score}
+In the grouped product experiment above, every exact sampler satisfies
+\[
+ \mathbb E_tQ\ge
+ \frac12\|\Sigma(t)D^2H(t)\Sigma(t)\|_*,
+\]
+where $Q$ counts distinct input probes. Consequently this particular
+family of lower-bound witnesses is always at most
+$\sum_{\ell=1}^D r_\ell\le\sqrt{6D}$.
+This conclusion places no upper bound on the optimal sampling cost.
+\end{proposition}
+
+\paragraph{Proof idea.}
+Keep one score coordinate for every group. The Hessian of the stopped
+transcript likelihood is a rank-one score matrix minus a nonnegative
+diagonal term. After whitening, both terms have expected nuclear norm
+$\mathbb E_tQ$. The preceding proposition bounds the target Hessian
+that this inequality can detect.
+
+\begin{proof}
+Reduce to a finite decision tree as in the proof of
+Lemma~\ref{lem:transcript}, keeping one score coordinate for every
+group. At a new probe of a coordinate in group $a$, put the score
+increment $e_aX_i/(1+t_aX_i)$. Let $Z$ be their sum. Let $A$ be
+diagonal, with $A_{aa}$ the sum of $(1+t_aX_i)^{-2}$ over probes in
+group $a$. Finite-tree likelihood differentiation gives
+\[
+ D^2H(t)=\mathbb E_t\bigl[Y(ZZ^{\mathsf T}-A)\bigr].
+\]
+The martingale identities of that proof, applied in each group, give
+\[
+ \mathbb E_t\|\Sigma Z\|_2^2=\mathbb E_tQ,
+ \qquad
+ \mathbb E_t\operatorname{tr}(\Sigma A\Sigma)=\mathbb E_tQ.
+\]
+Since $|Y|=1$, the triangle inequality and convexity of the nuclear
+norm imply
+\[
+ \|\Sigma D^2H\Sigma\|_*
+ \le\mathbb E_t\bigl[
+       \|(\Sigma Z)(\Sigma Z)^{\mathsf T}\|_*
+          +\|\Sigma A\Sigma\|_*\bigr]
+ =2\mathbb E_tQ.
+\]
+The first matrix has nuclear norm $\|\Sigma Z\|_2^2$; the
+second is nonnegative diagonal and has nuclear norm equal to its
+trace. The witness ceiling follows from
+Proposition~\ref{prop:critical-hessian-majorant}.
+\end{proof}

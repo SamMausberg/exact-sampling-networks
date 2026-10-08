@@ -1,0 +1,18 @@
+{
+  "status": "all deterministic checks passed",
+  "precision_decimal_digits": 120,
+  "random_seed_for_fixed_case_selection": 20261008,
+  "counts": {
+    "ov_score_identities": 87380,
+    "hamming_score_identities": 5040,
+    "network_map_identities": 640,
+    "token_gap_checks": 54,
+    "bucket_exponent_checks": 128,
+    "prenorm_checks": 20
+  },
+  "total_checks": 93262,
+  "largest_recorded_softmax_identity_error": "9.68147978712329568204507658321587961892554798012197716371940735336104087024421491215670558569253649227014385626888616885e-122",
+  "boundary_no_token_probability": "0.195416395526370208828393674395742937491343594244684116483646967303569737021603347226822348323274980040328932066187982756",
+  "boundary_yes_token_probability": "0.5",
+  "scope": "finite formula checks; not proofs or sampler benchmarks"
+}

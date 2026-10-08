@@ -1,0 +1,123 @@
+\subsection{A finite known query list}
+\label{sec:finite-query-list}
+
+\begin{theorem}[A finite known query list can move evaluation to prefill]
+\label{thm:finite-query-list}
+Fix a cache and a list of $M$ permitted queries, known before
+preprocessing. Query $q$ has a categorical output law
+$p_{q,1},\ldots,p_{q,V}$. Suppose a deterministic certified algorithm,
+given $q$ and an integer $t\ge1$, returns dyadic intervals of width
+at most $2^{-t}$ containing all $V$ probabilities, with endpoints
+of length $O(B+t)$, in at most
+\[
+ H(B+t)^d
+\]
+bit operations. Here $H\ge V$, $B\ge2$, and the fixed integer $d\ge2$
+are known bounds; $B$ includes addresses and parameter lengths.
+No exact real probabilities need be stored.
+
+There is a preprocessor using
+\[
+ O\!\left(MH[B+\log(VH+2)]^d\right)
+\]
+bit operations and
+$O(MV[B+\log(VH+2)])$ additional bits of storage, such that, when the
+online query is supplied by its list identifier, one exact output
+sample takes
+\[
+ O\!\left([B+\log(VH+2)]^d\right)
+\]
+expected bit operations. It halts almost surely, and the bound is
+uniform over the query list. The cache and the certified evaluation
+procedure remain available on a rare fallback branch. If $H$ is
+polynomial in $T,n,D,V$ and the model encoding size, and $B$ is
+polylogarithmic in those quantities, this online bound is
+polylogarithmic in those quantities, regardless of the attention
+temperature. Identifying a query supplied as an arbitrary vector is
+a separate cost and is not covered by the list-identifier interface.
+\end{theorem}
+\paragraph{Proof idea.}
+Prefill stores dyadic masses lying below the desired probabilities.  Their missing mass is positive but small.  Most samples finish from the stored table, while the residual branch recomputes enough certified digits to sample its exact conditional law.
+
+\begin{proof}
+The case $V=1$ is immediate. Choose a dyadic $\delta$ with
+$1/(8H)<\delta\le1/(4H)$. For each query, compute dyadic lower
+bounds $\ell_k\le p_k$ with
+$0\le p_k-\ell_k\le\delta/V$. Such bounds follow by evaluating at
+precision $t_0=\lceil\log_2(V/\delta)\rceil+2$ and rounding
+downward to a common dyadic grid, clamping negative lower bounds to
+zero. Put
+\[
+ a_k=(1-\delta)\ell_k,\qquad r=1-\sum_{k=1}^V a_k.
+\]
+All these numbers are stored dyadics of length
+$O(B+\log(VH+2))$. They satisfy $0\le a_k\le p_k$ and
+\[
+ \delta\le r\le1-(1-\delta)^2\le2\delta.
+\]
+The left inequality uses $\sum\ell_k\le1$; the right uses
+$\sum\ell_k\ge1-\delta$.
+
+Store the prefix sums of $a_1,\ldots,a_V,r$ on their common dyadic
+grid. Draw from these $V+1$ known masses using uniform grid bits
+and binary search of the prefix sums. This costs a polynomial in
+$B+\log(VH+2)$, covered by its $d$th power. On outcome $k\le V$,
+return token $k$. On the residual outcome, use fresh randomness to
+sample the categorical law
+\[
+ b_k=\frac{p_k-a_k}{r}.
+\]
+It is a probability distribution because its entries are nonnegative
+and sum to one. The final probability of token $k$ is exactly
+$a_k+rb_k=p_k$.
+
+We give the precision and stopping bound for the residual sampler.
+Let $U$ be a fresh uniform number on $[0,1]$, exposed through its
+binary digits, and use the cumulative masses of $b$. At stage
+$j\ge0$, evaluate all $p_k$ with width at most $2^{-t_j}$, where
+\[
+ t_j=\left\lceil\log_2(16V^2/\delta)\right\rceil+j.
+\]
+Each resulting residual cumulative interval has width at most
+$V2^{-t_j}/r\le2^{-j}/(16V)$. Expose enough bits of $U$ that its
+dyadic interval has width at most $2^{-j}/(16V)$. If this interval
+is certified to lie between two adjacent cumulative boundaries,
+return the corresponding token; otherwise refine.
+Division by the known positive dyadic $r$ can be implemented by
+cross-multiplication in every comparison, using finite integers.
+
+Failure to decide at stage $j$ places $U$ within distance at most
+$2^{-j}/(8V)$ of one of the $V-1$ true boundaries. A union bound
+therefore gives probability at most $2^{-j}/4$. The probability of
+never deciding is zero. The same estimate gives conditional expected
+fallback work
+\[
+ O\!\left(
+ H\sum_{j\ge0}2^{-j}[B+\log(V/\delta+2)+j]^d
+ \right)
+ =O\!\left(H[B+\log(VH+2)]^d\right).
+\]
+The sum also covers the fresh uniform bits and the $V$ cumulative
+interval additions, since $H\ge V$ and $d\ge2$. Boundary equalities
+have probability zero and do not require an equality oracle.
+
+The residual branch has probability $r\le2\delta\le1/(2H)$.
+Multiplying its conditional expected work by this known probability
+gives the stated online bound. The initial dyadic draw contributes
+the same order or less. Preprocessing performs one precision-$t_0$
+evaluation and stores $V+1$ prefix masses for each of the $M$ known
+queries, giving the displayed preprocessing and storage bounds.
+Every arithmetic operation uses finite integers or certified dyadic
+intervals.
+\end{proof}
+
+For decoding, this theorem distinguishes a finite advertised set of
+next queries from an unrestricted fresh query. A finite vocabulary
+can sometimes determine such a list once the previous state is fixed;
+constructing that list and all its output laws is then part of
+prefill. The lower bound of Section~\ref{sec:indexedlower} concerns
+arbitrary fresh queries and does not apply to such a list. The tables
+are specific to one cache, and a sampled token that changes the cache
+requires new tables. For fixed-rank key maps,
+Theorem~\ref{thm:momentdecoder} provides a decoder construction that
+pays for those updates.

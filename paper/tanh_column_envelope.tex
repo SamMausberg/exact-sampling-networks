@@ -1,0 +1,673 @@
+\subsection{A critical sampler from a column envelope}
+\label{sec:column-envelope}
+
+The first-layer rank can grow with the width in the result below.  A
+different condition replaces the rank bound.  Define the column envelope
+of the first weight matrix by
+\[
+ C_{\mathrm{col}}=\sum_{j=1}^n\max_i|w_{1,ij}|.
+\]
+This quantity is computed directly from the weights.  It is one for a
+Hadamard sign matrix divided by its width, although that matrix has full
+rank.  It can also be as large as $n$.  The theorem therefore leaves the
+unrestricted critical problem open.
+
+The empirical telescope uses the multilevel debiasing principles of
+Rhee and Glynn~\cite{rheeglynn2015} and the antithetic vector-mean
+construction of Blanchet and Glynn~\cite{blanchetglynn2015}.
+We give explicit bounded correction branches, sampled derivatives,
+and a finite-bit implementation for the present network.
+
+\begin{theorem}[Column-envelope sampling]
+\label{thm:column-envelope-critical}
+Put $K_{\mathrm{col}}=\max\{1,C_{\mathrm{col}}\}$.
+Consider zero-bias tanh networks with row sums at most one.  At
+$D=\lceil\log_2 n\rceil$ and $b=O(\log n)$, weight-only preprocessing
+and storage $O(Dn^2\log^6 n)$ suffice for an exact sampler with
+\[
+ \mathbb E Q=O(K_{\mathrm{col}}^2\sqrt{D+1}),\qquad
+ \mathbb E W=O(K_{\mathrm{col}}^7\sqrt{D+1}\,B^{40}),
+ \quad B=16+b+\lceil\log_2(nD+2)\rceil.
+\]
+Here $Q$ counts input probes and $W$ counts all online bit operations.
+The constants in the online bounds are absolute.  The preprocessing
+bound uses the stated precision convention $b=O(\log n)$; the
+additional preprocessing in this proof is explicitly $O(Dn^2B^4)$.
+The worst-case probe order on $C_{\mathrm{col}}\le C_0$ for every
+fixed $C_0\ge1$ is
+$\Theta(\sqrt D)$ under the width and grid conditions of the critical
+mean-chain lower bound.
+\end{theorem}
+
+\paragraph{Proof idea.}
+One context probe supplies an implicit bounded vector whose expectation
+is the entire first preactivation, up to a known scale.  A corrected
+empirical-mean factory needs $O(K_{\mathrm{col}}^2D)$ such vectors
+on its open amplitude branch.  Its correction terms involve fourth derivatives.
+We sample their chain-rule expansions along at most four paths through
+the network.  A small amount of slack in each first-derivative factor
+keeps their product bounded by an absolute constant.  Fourth-order
+antithetic remainders then admit an exact importance sampler.  Every
+subsequent neuron coin uses the already probed empirical observations;
+no dense evaluation is performed.
+
+The proof occupies the rest of this subsection. Its first part builds
+the source vector, the amplitude gate, and the common derivative
+majorants. The second gives the coin for one chain-rule diagram, the
+third the empirical correction and its antithetic identity, and the
+fourth the exact tilting that samples the fourth-order remainders. The
+last part assembles the telescope and counts sources and bit work.
+
+\subsubsection{A source vector and common derivative bounds}
+
+For a nonzero first-layer column put $d_j=\max_i|w_{1,ij}|$, and let
+$c_j$ be the least power of two at least $d_j$.  Set $c_j=0$ on a zero
+column and $C=\sum_jc_j$.  Then
+\[
+ C_{\mathrm{col}}\le C\le2C_{\mathrm{col}}.
+\]
+The zero matrix has fair output and is handled separately.  Otherwise
+choose $J$ with probability $c_J/C$, query $x_J$, and retain the pair
+$(J,x_J)$.  It represents the vector
+\begin{equation}
+ Y_i=w_{1,iJ}x_J/c_J,\qquad |Y_i|\le1,
+ \qquad \mathbb E Y=W_1x/C.
+ \label{eq:column-vector-source}
+\end{equation}
+Only requested coordinates are formed.  Each is a known dyadic number.
+Indeed $2^{-b}\le c_J\le1$ is a power of two, so its denominator divides
+the original grid denominator $2^b$.  Averaging $m$ such observations
+therefore introduces only $O(\log m)$ additional bits.
+
+Let $F(y)$ be the scalar output obtained by first applying
+$\tanh(Cy)$ coordinatewise and then applying layers $2,\ldots,D$ of
+the given network.  Thus $F(\mathbb E Y)$ is the desired output mean.
+Put $r_1=1$.  For $\ell\ge2$, choose dyadic radii with
+\[
+ \tanh r_{\ell-1}\le r_\ell
+          \le\tanh r_{\ell-1}+\epsilon_0,
+ \qquad 0<\epsilon_0\le(16D^2)^{-1}.
+\]
+Certified scalar evaluation and upward rounding construct these with
+$O(\log(D+2))$ bits.  The one-Lipschitz property of tanh gives
+\[
+ r_\ell\le R_{\ell-1}+D\epsilon_0,
+ \qquad R_j=\tanh^{\circ j}(1),
+ \qquad r_\ell^2\le2/\ell,\qquad r_\ell\le1.
+\]
+For the square bound, expand
+$(\sqrt{3/(2\ell+1)}+1/(16D))^2$ and use $\ell\le D$; its
+three terms sum to less than $2/\ell$.  The upper bound one follows
+inductively from $\tanh1+1/16<1$.  Also
+$r_D\ge R_{D-1}\ge(2D-1)^{-1/2}$, using the scalar radius lower
+bound.  We work with $D\ge32$; the finitely many smaller depths use
+the existing universal critical sampler, whose cost is absorbed by the
+absolute constants.  Let $q$ be the least power of two at
+least $2r_D$.  Then
+\begin{equation}
+ 0<q\le1,\qquad q\le6D^{-1/2},\qquad q^{-1}\le\sqrt D,
+ \qquad |f|\le\tfrac12,\quad f=F/q.
+ \label{eq:column-top-gate}
+\end{equation}
+
+A \emph{common derivative majorant} is a nonnegative symmetric tensor
+$C^{(k)}$ such that
+$|\partial_{i_1}\cdots\partial_{i_k}f(y)|\le C^{(k)}_{i_1\ldots i_k}$
+for every $y\in[-1,1]^n$.  Its mass is $M_k=\sum C^{(k)}$.
+The tensor is independent of the point $y$.  This is stronger than a
+pointwise bound on the sum of derivative magnitudes.
+
+The positive chain-rule recursion, with scalar bounds
+\begin{equation}
+ c_{\ell,1}=1,\quad c_{\ell,2}=2r_\ell,
+ \quad c_{\ell,3}=2,\quad c_{\ell,4}=16r_\ell,
+ \label{eq:column-scalar-majorants}
+\end{equation}
+constructs common majorants through order four.  To check their masses,
+divide order $k$ by $C^k$ and let $A_\ell,B_\ell,E_\ell,H_\ell$
+denote the resulting masses at orders one through four.  The usual
+chain rule gives
+\begin{align*}
+ A_\ell&\le1,&
+ B_\ell&\le B_{\ell-1}+2r_\ell,\\
+ E_\ell&\le E_{\ell-1}+6r_\ell B_{\ell-1}+2,&
+ H_\ell&\le H_{\ell-1}+8r_\ell E_{\ell-1}
+       +6r_\ell B_{\ell-1}^2+12B_{\ell-1}+16r_\ell.
+\end{align*}
+Consequently
+\[
+ B_D\le4\sqrt2\sqrt D<6\sqrt D,\quad E_D\le50D,
+ \quad H_D\le928D^{3/2}.
+\]
+For the last inequality, the increment is at most
+$656\sqrt2\sqrt\ell<928\sqrt\ell$.
+Writing $\kappa=\max\{1,C\}$, sufficient rational upper bounds for
+$f=F/q$ are
+\begin{equation}
+ M_2\le6\kappa^2D,
+ \qquad M_3\le50\kappa^4D^2,
+ \qquad M_4\le928\kappa^4D^2.
+ \label{eq:column-derivative-masses}
+\end{equation}
+
+The full tensors need not be stored.  At each neuron and each order
+$k\le4$, store the scalar mass obtained by putting one in every input
+direction.  A chain-rule term is indexed by a partition of $k$ labeled
+directions.  Its weight is $c_{\ell,|\pi|}$ times the product of the
+corresponding lower-order row masses.  Prefix arrays select both a
+partition and each predecessor.  This samples an ordered chain-rule
+diagram with the correct normalized majorant weight.  At most $k$
+paths cross any layer, and at most $k-1$ vertices have derivative
+order greater than one.  Its leaves supply the ordered tensor indices. The root factor $1/q$
+scales the tensor and its mass together, so it does not change the
+diagram distribution. Throughout, $M_k$ denotes the actual mass of
+the constructed tensor; the displayed inequalities are upper bounds
+used only in the work estimates.
+All stored quantities are dyadic, with $O(D[b+\log(D+n+2)])$ bits.
+The four mass passes and their selectors use $O(Dn^2)$ scalar
+operations and storage entries.
+
+\subsubsection{A bounded coin for a chain-rule diagram}
+
+The normalized-neuron sampler used below has the following interface.
+Its first layer uses the arbitrary-radius majority factory of
+Theorem~\ref{thm:quadraticradiusbits}, with radius $C$ and its outer
+gate $\tanh C$.  The resulting mean is $\tanh(Cy_i)$, which already
+equals $h_{1,i}/r_1$ because $r_1=1$.
+At a later row put $\lambda=\sum_j|w_{\ell,ij}|$ and
+$\rho=\lambda r_{\ell-1}$.  If $\lambda=0$, return a fair sign.
+Otherwise select signed normalized predecessor coins with probabilities
+$|w_{\ell,ij}|/\lambda$.  Their mean $z$ satisfies
+$\rho z=\sum_jw_{\ell,ij}h_{\ell-1,j}$.
+The scalar majority factory has mean
+$\tanh(\rho z)/\tanh\rho$; a final known gate
+$\tanh\rho/r_\ell\le1$ gives mean $h_{\ell,i}/r_\ell$.
+The inequality follows from $\rho\le r_{\ell-1}$ and the upward
+radius bound.  A further gate of probability $r_\ell$ gives an
+actual-activation sign of mean $h_{\ell,i}$ when required.
+
+\begin{lemma}[A sampled derivative term]
+\label{lem:column-diagram-coin}
+Fix $k\le4$, a sampled order-$k$ diagram, and an input point supplied
+by coordinate-coin access.  Let $\alpha$ be the product of its edge
+signs and its scalar derivative factors divided by the
+majorants in~\eqref{eq:column-scalar-majorants}.  There is an exact
+$Z\in\{-1,0,1\}$ with
+\[
+ \mathbb E Z=\alpha/48.
+\]
+It makes a polynomial number of coordinate-source calls in expectation.
+The polynomial is uniform over the supplied point and over all diagrams.
+\end{lemma}
+
+\paragraph{Proof idea.}
+The sharp bound $\tanh'\le1$ has an endpoint that prevents a direct
+positive factory.  Divide each such factor by $1+1/(4D)$ instead.
+Their total loss stays below three.  Every higher derivative is a
+fixed polynomial in a normalized activation, and there are at most
+three such vertices in a fourth-order diagram.
+
+\begin{proof}
+At a vertex in layer $\ell$, put $h=\tanh s$, $u=h/r_\ell$.
+Independent normalized-neuron coins have mean $u$.  The polynomials
+for derivative orders two, three, and four, after division by their
+majorants, are respectively
+\[
+ -u+r_\ell^2u^3,\qquad
+ -1+4r_\ell^2u^2-3r_\ell^4u^4,\qquad
+ u-\tfrac52r_\ell^2u^3+\tfrac32r_\ell^4u^5.
+\]
+Their absolute coefficient sums are at most $2,8,5$.  Sampling a
+signed monomial from these coefficients, and returning a fair sign
+on unused mass, gives a sign with the corresponding mean divided by
+$K_2=2,K_3=8,K_4=5$.
+
+For a first-derivative vertex put $\epsilon=1/(4D)$ and $M=4D+1$.
+Take $M$ independent signs of mean $h$, and let $K$ be the number of
+plus signs.  Return a bit with conditional probability
+\begin{equation}
+ \frac{4K(M-K)}{M(M-1)(1+\epsilon)}.
+ \label{eq:column-first-derivative-factory}
+\end{equation}
+This belongs to $[0,1]$, because
+$4K(M-K)\le M^2$ and $M/(M-1)=1+\epsilon$.
+Its expectation is $(1-h^2)/(1+\epsilon)$.
+
+Use fresh neuron coins in all these constructions.  There are at most
+$4D$ first-derivative vertices, so their lost factor is below
+$(1+1/(4D))^{4D}<3$.  The identity
+$\sum(\nu-1)=k-1\le3$ bounds the product of the higher-derivative
+losses by $16$: the largest possibility is one order-three and one
+order-two vertex.  Multiply all sampled signs and bits and the known
+edge signs.  Finally retain that product with probability
+\[
+ (1+\epsilon)^{N_1}\prod_{\nu\ge2}K_\nu/48,
+\]
+returning zero otherwise.  This is a known rational probability at
+most one.  Conditional independence proves the required mean.
+The work bound is proved quantitatively below.
+\end{proof}
+
+Conditional on a majorant diagram with leaf indices $J_1,\ldots,J_k$,
+the resulting bounded estimate of a directional derivative is
+\begin{equation}
+ 48M_k Z\prod_{a=1}^k v_{a,J_a}.
+ \label{eq:column-directional-estimator}
+\end{equation}
+Its expectation is $D^kf(y)[v_1,\ldots,v_k]$.  Diagram sampling
+requires only the scalar masses and prefix arrays already stored.
+
+\subsubsection{An empirical correction with sparse coordinate access}
+
+For $m\ge2$ vector observations let $z$ be their mean, $V_m$ their
+unbiased sample covariance, and define
+\[
+ G_m=f(z)-\frac{V_m:D^2f(z)}{2m},\qquad P_m=\mathbb E G_m.
+\]
+The colon denotes contraction of the two indices.  The strong law
+and bounded convergence give $\mathbb E f(z)\to f(\mathbb E Y)$.
+Every covariance entry has magnitude at most two, so the correction
+has magnitude at most $M_2/m$ and $P_m\to f(\mathbb E Y)$.
+If $a,b$ are a uniform unordered
+pair of observations and $u=Y_a-Y_b$, then
+$\mathbb E[uu^\top]/2=V_m$.  Thus the base coefficient has the bounded
+unbiased estimator
+\[
+ \widehat G_m=\tfrac12 S-\frac{48M_2}{4m}
+                         Z\,u_{J_1}u_{J_2},
+ \qquad \mathbb E S=2f(z).
+\]
+The sign $S$ is supplied by the normalized critical sampler followed
+by its gate $2r_D/q\le1$.  At an empirical point $z$, each coordinate
+source call simply selects one retained observation uniformly and
+samples its known dyadic coordinate.  The second term uses
+Lemma~\ref{lem:column-diagram-coin}.  If $m\ge384M_2$, then
+$|\widehat G_m|\le5/8$.
+
+We next give an exact correction for a fixed population of $2m$
+observations.  Let its mean be $z$.  A uniform half $A$ and its
+complement $B$ have means $z+\delta,z-\delta$ and covariance matrices
+$V_A,V_B$.  Write $H=D^2f(z)$ and $T=D^3f(z)$.  Define
+\begin{align*}
+ R_4&=\tfrac12[f(z+\delta)+f(z-\delta)]-f(z)
+                          -\tfrac12H[\delta,\delta],\\
+ R_H&=\tfrac12V_A:[D^2f(z+\delta)-H-T[\delta]]
+       +\tfrac12V_B:[D^2f(z-\delta)-H+T[\delta]].
+\end{align*}
+The exact identity is
+\begin{equation}
+ G_{2m}-\mathbb E_A G_m(A)
+ =c_3+\mathbb E_A\left[\frac{R_H}{2m}-R_4\right],
+ \quad
+ c_3=\frac{D^3f(z):\sum_{a=1}^{2m}(Y_a-z)^{\otimes3}}
+                  {4m(m-1)(2m-1)}.
+ \label{eq:column-antithetic-identity}
+\end{equation}
+Here $T[\delta]$ leaves two indices uncontracted.
+
+\paragraph{Proof of the identity.}
+The within-population covariance decomposition and complement symmetry
+give
+\[
+ (m-1)(V_A+V_B)=(2m-1)V_{2m}-2m\delta\delta^\top,
+ \quad \mathbb E\delta\delta^\top=V_{2m}/(2m),
+ \quad \mathbb E\delta^{\otimes3}=0.
+\]
+For centered observations $v_a=Y_a-z$, subset inclusion probabilities
+$1/2$ and $(m-1)/(2(2m-1))$ also give
+\[
+ \mathbb E[V_A\otimes\delta]
+ =\frac{\sum_av_a^{\otimes3}}{2(m-1)(2m-1)}.
+\]
+Indeed the distinct-index terms sum to minus the equal-index third
+moment, while the third moment of $\delta$ vanishes.  Substituting
+these expressions in the paired Taylor expansions proves
+\eqref{eq:column-antithetic-identity}.
+
+The cubic term is estimated by a uniform observation $a$, the
+direction $u=Y_a-z$, and an order-three diagram.  Its estimator is
+\[
+ \frac{48M_3 Z\,u_{J_1}u_{J_2}u_{J_3}}
+                         {2(m-1)(2m-1)}.
+\]
+Its magnitude is at most $48\cdot6M_3/m^2$.
+
+For the fourth-order terms use integral remainders.  With a fair sign
+$\sigma$, an unordered pair $u=Y_a-Y_b$ from the half of mean
+$z+\sigma\delta$, and independent beta variables, they are
+\begin{align}
+ R_4&=\frac1{24}\mathbb E_{\sigma,t\sim\operatorname{Beta}(1,4)}
+    D^4f(z+\sigma t\delta)[\delta,\delta,\delta,\delta],
+ \label{eq:column-quartic-integral}\\
+ \mathbb E_A\frac{R_H}{2m}
+ &=\frac1{8m}\mathbb E_{A,\sigma,u,t\sim\operatorname{Beta}(1,2)}
+    D^4f(z+\sigma t\delta)[u,u,\delta,\delta].
+ \label{eq:column-hessian-integral}
+\end{align}
+The first formula is the fourth-order Taylor remainder with density
+$4(1-t)^3$; the second is the second-order remainder of the Hessian
+with density $2(1-t)$.  These formulas avoid subtracting nearly equal
+random function estimates.
+
+\subsubsection{Exact tilting of a half-sample}
+
+Choose a uniform pairing of the $2m$ observations and select one
+member of each pair by independent fair signs $\varepsilon_j$.
+For any fixed coordinate $i$,
+\[
+ \delta_i=\sum_{j=1}^m\varepsilon_jd_j,
+ \quad d_j=(Y_{a_j,i}-Y_{b_j,i})/(2m),\quad |d_j|\le1/m.
+\]
+For a fixed pairing put $v=\sum d_j^2$, $u=\sum d_j^4$.  Its exact
+second and fourth moments are
+\begin{equation}
+ \nu_2=v\le1/m,\qquad
+ \nu_4=3v^2-2u\le3/m^2.
+ \label{eq:column-pairing-moments}
+\end{equation}
+To sample signs with density proportional to
+$(\sum\varepsilon_jd_j)^k$, $k=2,4$, expose them sequentially.
+At partial sum $s$ the remaining moment polynomials are
+\[
+ P_2(s)=s^2+v,\qquad
+ P_4(s)=s^4+6s^2v+3v^2-2u.
+\]
+The next plus probability is $P_k(s+d)/(2P_k(s))$, using the
+remaining moments after this increment in the numerator.  The two
+probabilities add to one.  A zero denominator is a null path under
+the tilted law.  This is a finite rational Doob transform.
+
+Accept a fresh pairing with probability $m\nu_2$ for a quadratic
+tilt, or $m^2\nu_4/3$ for a quartic tilt.  On acceptance use its
+tilted signs.  On rejection return zero.  There is no retry loop.
+Consequently the accepted half-sample has unnormalized density
+$m\delta_i^2$ or $m^2\delta_i^4/3$ relative to a uniform half.
+
+Here is the complete Hessian-remainder branch.  Its mass is
+$48M_4/(2m^2)$.  Sample an order-four diagram and then choose
+$i=J_3$ or $J_4$ equally.  Perform the quadratic tilt in coordinate
+$i$.  Put $v_\delta=(\delta_{J_3}^2+\delta_{J_4}^2)/2$.
+On an accepted split, generate $\sigma,u,t$ as in
+\eqref{eq:column-hessian-integral}, and the diagram coin $Z$ at
+$z+\sigma t\delta$.  Return a bounded sign estimator with conditional
+mean
+\[
+ Z\,\frac{u_{J_1}u_{J_2}}4
+      \frac{\delta_{J_3}\delta_{J_4}}{v_\delta}.
+\]
+Both rational factors belong to $[-1,1]$; accepted splits have
+$v_\delta>0$.  Multiplying the branch mass, the accepted density
+$mv_\delta$, and the diagram mean $\alpha/48$ gives exactly the
+integrand coefficient $M_4/(8m)$ in
+\eqref{eq:column-hessian-integral}.
+
+The quartic branch has mass $48M_4/(8m^2)$.  Sample an order-four
+diagram, choose one of its four leaves uniformly, and perform the
+quartic tilt in that coordinate.  Put
+$w_\delta=\frac14\sum_{a=1}^4\delta_{J_a}^4$.
+On acceptance generate $\sigma,t$ from
+\eqref{eq:column-quartic-integral} and return conditional mean
+\[
+ -Z\,\frac{\prod_{a=1}^4\delta_{J_a}}{w_\delta}.
+\]
+The ratio has magnitude at most one by the arithmetic-geometric mean
+inequality.  The branch mass and accepted density
+$m^2w_\delta/3$ give precisely the negative term in
+\eqref{eq:column-quartic-integral}.  Only four coordinate sequences
+are ever needed to form these moments and ratios.
+
+The beta variables require no real-number oracle.  Use one P\'olya
+urn, initially $(1,4)$ or $(1,2)$, for the whole integral term.  A
+coordinate coin of mean
+$z_i+\sigma t\delta_i=(1-t)z_i+t(z_i+\sigma\delta_i)$ first draws
+from that urn, then selects a uniform observation from the full
+population or the chosen half.  It finally samples the known dyadic
+coordinate $Y_i$.  Conditional on the beta parameter, all urn draws
+are independent.  The same urn is shared by every neuron and every
+factor in that one diagram.  A fresh urn per factor would change the
+integral and is not used. To verify this representation at finite
+stopping times, a specified urn word with $s$ successes and $f$
+failures has probability
+\[
+ \frac{(a)_s(b)_f}{(a+b)_{s+f}}
+ =\frac{1}{\mathrm B(a,b)}\int_0^1
+       t^{s+a-1}(1-t)^{f+b-1}\,dt.
+\]
+Here $(a)_s$ is a rising factorial. The first equality follows by
+multiplying the predictive probabilities; the second follows by
+integrating by parts. Hence every finite semantic transcript of source
+outputs and high-level choices has exactly the beta-mixture probability,
+even when requests are adaptive. The
+finite moment bounds below imply almost sure termination, so the
+same identity applies to the returned value.
+
+\subsubsection{Exactness, source count, and finite-bit work}
+
+Put $A=6M_3+M_4$ and $K_*=48$.  Let $m_0$ be the least power of two with
+\begin{equation}
+ m_0\ge2,\qquad m_0\ge8K_*M_2,
+ \qquad m_0^2\ge16K_*A.
+ \label{eq:column-starting-degree}
+\end{equation}
+Every bounded rational estimator below is rounded to a sign of that
+conditional mean using a fresh known coin.  Give the base mass $3/4$,
+and return a known sign of mean
+$\widehat G_{m_0}/(3/4)$.  At each level $m=2^am_0$, give the
+cubic, Hessian, and quartic branches their masses just specified.
+Their sum is at most $K_*A/m^2$.  Return a fair sign on all remaining
+mass, including rejected tilts.  The total non-base mass is at most
+$4K_*A/(3m_0^2)\le1/12$.  This countable choice is exact with finite
+rational arithmetic: its actual non-base mass is
+$4(288M_3+30M_4)/(3m_0^2)$.  Conditional on that choice, take level
+$a$ with probability $(3/4)4^{-a}$, using a geometric draw, and
+choose the three branches in the proportions
+$288M_3:24M_4:6M_4$.  Zero masses are omitted.
+Every selected branch is bounded and its
+mean is its required coefficient.  Therefore
+\[
+ P_{m_0}+\sum_{a\ge0}(P_{2^{a+1}m_0}-P_{2^am_0})
+       =f(\mathbb E Y)
+\]
+proves exactness.  Absolute convergence follows from the branch-mass
+sum.  If a majorant mass is zero, its branch is omitted.
+
+The base probes $m_0$ observations and a correction probes $2m$.
+All later neuron-source requests select from those retained
+observations.  Hence
+\begin{equation}
+ \mathbb E N\le\tfrac34m_0+
+       \sum_{m=2^am_0}\frac{K_*A}{m^2}(2m)
+       =\tfrac34m_0+\frac{4K_*A}{m_0}\le m_0.
+ \label{eq:column-source-count}
+\end{equation}
+For explicit constants, the bounds
+\eqref{eq:column-derivative-masses} give
+$8\cdot48M_2\le2304\kappa^2D$ and
+$16\cdot48(6M_3+M_4)\le943104\kappa^4D^2$.
+A power of two at least $2304\kappa^2D$ therefore satisfies the
+three starting conditions, so the least valid power obeys
+$m_0<4608\kappa^2D$.  Opening the gate $q$ and otherwise returning
+a fair sign proves
+$\mathbb E Q<27648\kappa^2\sqrt D$ for $D\ge32$.
+
+We finish the bit count, including the unbounded urn counters.
+Use full majorities in every normalized neuron call.  Every monomial
+and every first-derivative factor executes all of its selected source
+calls, even if an earlier factor already makes the product zero.  At a layer $\ell\ge2$, its full arity $A_\ell$
+has, uniformly over rows,
+\[
+ \mathbb E A_\ell\le1+3\rho^2,
+ \qquad \mathbb E A_\ell^2\le1+18\rho^2,
+ \qquad \rho\le r_{\ell-1}.
+\]
+For completeness, the pgf in the majority representation has
+$\mathbb E K=\rho^2$ and
+$\mathbb E K^2=\rho^2+\tfrac43\rho^4$ before the factor
+$(\rho/\tanh\rho)/C_K$.  Since $C_K\ge1$ and
+$\rho\coth\rho\le4/3$ for $\rho\le1$, these inequalities
+follow by using $\sum_k\pi_k=1$ for the constant term:
+\[
+ \mathbb E_\pi(2K+1)\le1+\tfrac83\rho^2,\qquad
+ \mathbb E_\pi(2K+1)^2
+ =1+\mathbb E_\pi(4K^2+4K)
+ \le1+\tfrac43(8\rho^2+\tfrac{16}3\rho^4)
+ \le1+18\rho^2.
+\]
+The gate only reduces the arity.
+Thus the mean and second moment are bounded by
+$1+6/(\ell-1)$ and $1+36/(\ell-1)$.
+
+Let $A_1$ be the resulting first-layer source arity, including the
+zero arity when the outer gate closes.  The general-radius theorem
+gives
+\begin{equation}
+ \mathbb E A_1\le2\max\{C,C^2\}\le2\kappa^2,\qquad
+ \mathbb E[\text{local scalar work}]=O(\kappa^2B^4).
+ \label{eq:column-growing-first-moment}
+\end{equation}
+For its second moment use the majority-index law
+$\pi_k=(C/\tanh C)d_k/C_k$.  The proposal has
+$\mathbb E_dK=C^2$ and
+$\mathbb E_dK^2=C^2+\frac43C^4$.  Since
+$\sum_k\pi_k=1$ and $C_k\ge1$,
+\begin{align}
+ \mathbb E A_1^2
+ &\le \mathbb E_\pi(2K+1)^2 \nonumber\\
+ &\le1+C\coth C\left(8C^2+\frac{16}3C^4\right)
+ \le28\kappa^5.
+ \label{eq:column-growing-second-moment}
+\end{align}
+The last step uses $C\coth C\le1+C\le2\kappa$.
+The semantic first-layer count $S_1=1+A_1$ therefore satisfies
+\[
+ \mathbb E S_1\le3\kappa^2,\qquad
+ \mathbb E S_1^2\le58\kappa^5.
+\]
+These bounds include the accepted full majority's source calls.
+The scalar proposal and acceptance arithmetic is paid separately
+by~\eqref{eq:column-growing-first-moment}.
+
+For completeness, we give explicit bounds for the recurrence used
+in the finite-bit argument.  Let $a_\ell,b_\ell$ bound the first two
+moments of the total semantic vertices and source calls below a
+normalized-neuron call in layer $\ell$.  The upper-layer arity
+estimates give
+\[
+ a_\ell\le1+\mu_\ell a_{\ell-1},\qquad
+ b_\ell\le\mu_\ell b_{\ell-1}
+       +1+2\mu_\ell a_{\ell-1}+\nu_\ell a_{\ell-1}^2,
+\]
+where $\mu_\ell=1+6/(\ell-1)$ and
+$\nu_\ell=1+36/(\ell-1)$.  The latter bounds the second factorial
+arity moment as well.  Conditional on arity and predecessor
+indices, fresh subcalls give this recurrence even when different
+predecessor neurons have different costs.
+
+Write $p_\ell=\prod_{j=1}^{\ell-1}(1+6/j)
+=\binom{\ell+5}{6}\le(\ell+5)^6$.
+Division of the first recurrence by $p_\ell$ yields
+$a_\ell/p_\ell\le3\kappa^2+\ell-1$ and hence
+\[
+ a_\ell\le\kappa^2(\ell+5)^7.
+\]
+For $\ell\ge2$, the nonrecursive part of the second recurrence is
+at most $52\kappa^4(\ell+4)^{14}$, since
+$\mu_\ell\le7$ and $\nu_\ell\le37$.
+Divide by $p_\ell$, bound each reciprocal by one, and sum.  This gives
+\begin{equation}
+ b_\ell\le p_\ell
+  [58\kappa^5+52\kappa^4\ell(\ell+5)^{14}]
+ \le110\kappa^5(\ell+5)^{21}.
+ \label{eq:column-growing-tree}
+\end{equation}
+
+Each selected empirical coefficient uses at most $24D^2$
+normalized or actual neuron roots, including the base function
+coin when present.  If their complete recursive counts are $T_j$,
+the pointwise inequality
+$(\sum_{j=1}^{J}T_j)^2\le J\sum_{j=1}^{J}T_j^2$
+does not require their independence.  With the linear diagram
+bookkeeping included, a semantic count $N$ for a selected
+coefficient has
+\begin{equation}
+ \mathbb E N^2\le
+  2\cdot10^5\,\kappa^5(D+5)^{25}.
+ \label{eq:column-growing-diagram}
+\end{equation}
+All arities, row choices, and monomial degrees use only known
+weights and radii.  Full padding prevents source outcomes from
+controlling these counts.  In particular the bound is uniform
+over the empirical observations, the accepted split, and the
+latent beta parameter.
+
+We spell out the arithmetic charge to keep that last conditioning
+statement separate from the implementation of the urn.  At the
+$j$th reached primitive visit, the actual observable history
+determines every rational parameter.  Fresh random bits implement
+its next known coin.  The general-radius scalar theorem, the
+unit-radius scalar bound at later layers, and exact rational
+comparison give conditional expected local work
+\[
+ O\!\left(\kappa^2
+  [B^2+\log(m+2)+\log(j+2)]^4\right).
+\]
+This statement concerns the observable filtration. It makes no
+conditional precision-tail claim given the latent beta variable.
+Summing the nonnegative predictable charges and using
+$N\log^4(N+2)=O(N+N^2)$ with
+\eqref{eq:column-growing-diagram} bounds the neuron and urn work.
+The pairing, the finite Doob transform, and the four coordinate
+sequences take $O(m[B^2+\log(m+2)]^4)$ further work.  Consequently
+one selected coefficient costs at most
+\begin{equation}
+ O\!\left(
+  \kappa^2[m+\kappa^5(D+5)^{25}]
+       [B^2+\log(m+2)]^4\right)
+ \label{eq:column-growing-coefficient}
+\end{equation}
+in expectation.  The constants in these bounds do not depend on
+$C$ or on the point supplied to the sampler.
+
+The correction levels have geometric ratio $1/4$ and
+$m=2^am_0$.  Since $\log m_0=O(B)$, summing
+\eqref{eq:column-growing-coefficient} over those levels gives
+$O(\kappa^7(D+5)^{25}B^8)$ conditional work.  Here $\kappa^2$ is
+the local scalar work of one visit, from
+\eqref{eq:column-growing-first-moment}, and $\kappa^5$ enters
+through $\mathbb E S_1^2$ in \eqref{eq:column-growing-diagram}.
+The factor $B^8$ is the fourth power of the operand length $O(B^2)$.
+The amplitude gate $q\le6D^{-1/2}$ and $32\le D\le B$ then give
+$O(\kappa^7\sqrt D(D+5)^{24}B^8)=O(\kappa^7\sqrt D\,B^{32})$
+online bits, including the initial branch selection.  This implies
+the bound with $B^{40}$ stated in the theorem.
+
+Finally, growing $C$ causes no preprocessing increase beyond the
+original budget.  Each $c_j$ is a power of two between $2^{-b}$
+and one; hence $C\le n$ has $O(b+\log n)$ bits.  The positive
+order-four mass circuits remain of size $O(Dn^2)$ with operands
+of $O(D[b+\log(nD+2)])=O(B^2)$ bits.  Schoolbook arithmetic uses
+$O(Dn^2B^4)$ additional work and no larger order of storage.
+At the stated precision this is $O(Dn^2\log^4n)$, within the
+original $O(Dn^2\log^6n)$ budget.  The arbitrary-radius factory
+creates its product proposal on demand and requires no table whose
+size grows polynomially in $C$.  Substituting
+$\kappa\le2K_{\mathrm{col}}$ gives the stated online bounds.
+The mean-chain family has $C_{\mathrm{col}}=1$, so its critical
+lower bound proves sharpness on each fixed bounded-envelope subclass.
+This completes the proof of
+Theorem~\ref{thm:column-envelope-critical}.
+
+\paragraph{Scope and selection of the sampler.}
+The column envelope is independent of algebraic rank.
+Preprocessing may compare $K_{\mathrm{col}}^4$ with $D+1$ and
+choose between this construction and the existing zero-bias sampler.
+The resulting expected probe bound is
+\[
+ O\!\left(\min\{D+1,K_{\mathrm{col}}^2\sqrt{D+1}\}\right).
+\]
+Its bit work remains within the displayed conservative bound because
+$D\le B$ in the stated regime.  The new source bound improves the
+$O(D)$ envelope when $C_{\mathrm{col}}=o(D^{1/4})$.
+Its bit bound is polylogarithmic whenever $C_{\mathrm{col}}$ is
+polylogarithmic in $n$.  The exponent $40$ is an implementation
+bound and makes no practical prediction.

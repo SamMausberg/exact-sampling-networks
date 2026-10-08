@@ -1,0 +1,375 @@
+\subsection{Sharp bounds for a scalar mean chain}\label{sec:wholechain}
+
+A whole-chain factory improves on independent layer composition
+when the network depends on the input through one scalar mean.
+This section proves matching query bounds for that family.
+
+Let \(F_{s,0}(z)=z\), \(F_{s,d+1}(z)=\tanh(sF_{s,d}(z))\),
+where \(s>0\) is dyadic. The analytic identities below hold for
+every positive real \(s\); the dyadic assumption supplies an
+executable parameter description.
+A source request returns an independent sign of
+unknown mean \(z\in[-1,1]\).
+Let \(U_D(s)\) be the infimum, over exact factories for a sign of
+mean \(F_{s,D}(z)\), of the worst-mean expected source count.
+Auxiliary randomness and arithmetic are excluded from this
+particular query measure.
+
+\begin{theorem}[Uniform scalar complexity]\label{thm:uniformchain}
+Set \(\lambda=s^D\) and \(A=\sum_{j=1}^D s^{2j}\).
+Then, with universal constants,
+\begin{equation}\label{eq:uniformchain}
+\frac1{25}\lambda\sqrt{1+A}
+\le U_D(s)\le2\lambda\sqrt{1+A}.
+\end{equation}
+Thus the dependence on the gain and depth is determined jointly,
+including when \(s\) approaches one with \(D\).
+\end{theorem}
+
+\begin{theorem}[The scalar phase diagram]\label{thm:chainphase}
+For \(D\ge1\),
+\begin{align}
+(1-s)s^D\le U_D(s)&\le\frac{s^D}{1-s^2},
+&&0<s<1,\label{eq:chainsub}\\
+\frac{\sqrt D}{8}\le U_D(1)&\le2\sqrt D,\label{eq:chaincritical}\\
+s^{2D}\le U_D(s)&\le
+\frac{2s}{\sqrt{s^2-1}}s^{2D},
+&&s>1.\label{eq:chainsuper}
+\end{align}
+The upper bounds are realized by an exact majority mixture for
+the entire composition.
+\end{theorem}
+
+\subsubsection{Positivity for the entire composition}
+
+A smooth function \(f\) on \((0,\infty)\) is
+\emph{completely monotone} if \((-1)^kf^{(k)}\ge0\) for all \(k\).
+A nonnegative smooth function is a \emph{Bernstein function} if
+its derivative is completely monotone.
+Two elementary closure facts will suffice. Products of completely
+monotone functions are completely monotone, by Leibniz's rule.
+If \(C\) is completely monotone and \(g\) is Bernstein, then
+\(C\circ g\) is completely monotone. Indeed, a term in the
+Faà di Bruno formula has the form
+\[
+C^{(k)}(g)\prod_{j\ge1}(g^{(j)})^{m_j},
+\quad \sum_jm_j=k,\quad\sum_jjm_j=q,
+\]
+and its sign is \((-1)^{k+\sum_j(j-1)m_j}=(-1)^q\).
+The coefficients in that formula are nonnegative.
+Differentiating a composition then shows that Bernstein functions
+are closed under composition.
+
+Put
+\[
+C(w)=\sech^2\sqrt w,\qquad
+T(w)=\frac{\tanh\sqrt w}{\sqrt w},\qquad
+g(w)=\tanh^2\sqrt w.
+\]
+The cosh product shows that \(C\) is completely monotone:
+each finite product of factors \((1+\alpha w)^{-2}\) has this
+property, and local uniform convergence permits differentiation.
+Its logarithmic derivative gives
+\[
+T(w)=\sum_{j\ge0}\frac8{\pi^2(2j+1)^2+4w},
+\]
+which is completely monotone as well.
+Since \(g'=TC\), \(g\) is Bernstein.
+Positive scaling preserves these properties.
+Writing \(g_s(w)=g(s^2w)\), \(C_s(w)=C(s^2w)\), we obtain
+\begin{equation}\label{eq:chainH}
+H_{D,s}(w):=F_{s,D}'(\sqrt w)
+=s^D\prod_{j=0}^{D-1}C_s(g_s^{\circ j}(w)),
+\end{equation}
+a completely monotone function.
+
+This derivative has the analytic domain needed for its Taylor
+series. If \(\sqrt w=x+iy\) with \(\Re w>0\), then \(x>|y|\), and
+\[
+\Re\tanh^2(x+iy)
+=\frac{\sinh^2(2x)-\sin^2(2y)}
+       {(\cosh(2x)+\cos(2y))^2}>0.
+\]
+Thus \(g_s\) maps the right half-plane into itself, and
+\(H_{D,s}\) is holomorphic there.
+Its removable value at zero is \(s^D\).
+Consequently
+\[
+H_{D,s}(1-v)=\sum_{k\ge0}d_kv^k,\qquad d_k\ge0,\qquad
+\sum_kd_k=s^D.
+\]
+The coefficient signs follow from complete monotonicity at \(w=1\);
+the sum follows by monotone convergence as \(v\uparrow1\).
+
+Let \(R=F_{s,D}(1)>0\).
+The same derivative integration as in Lemma~\ref{lem:majority} proves
+\begin{equation}\label{eq:chainmixture}
+\frac{F_{s,D}(z)}R=\sum_{k\ge0}\pi_kM_k(z),
+\qquad \pi_k=\frac{d_k}{R C_k},\qquad \sum_k\pi_k=1.
+\end{equation}
+Open a gate of probability \(R\). On a closed gate return a fair
+sign; on an open gate draw \(K\sim\pi\) and return its majority.
+This sign has mean \(F_{s,D}(z)\).
+
+\subsubsection{The cost of the global mixture}
+
+Define \(A_D(s)=\sum_{j=1}^D s^{2j}\).
+We count every vote of the full majority; stopping early can only
+lower the cost. Integration by parts gives the exact full-majority mean
+\begin{equation}\label{eq:chainarity}
+Q_{D,s}=s^D+
+\int_0^1\frac{s^D-F_{s,D}'(z)}{z^2}\,dz.
+\end{equation}
+The gate probability \(R\) cancels the normalization in
+\eqref{eq:chainmixture}.
+For \(z\ge0\), \(F_{s,j}(z)\le s^jz\), and
+\[
+\frac{F_{s,D}'(z)}{s^D}
+=\prod_{j=1}^D(1-F_{s,j}(z)^2).
+\]
+Using \(1-\prod_j(1-u_j)\le\sum_ju_j\) for \(0\le u_j\le1\),
+\[
+0\le s^D-F_{s,D}'(z)
+\le s^D\min\{1,A_D(s)z^2\}.
+\]
+Hence
+\begin{equation}\label{eq:chainQ}
+Q_{D,s}\le s^D(1+A_D(s)),\qquad
+Q_{D,s}\le2s^D\sqrt{A_D(s)}\quad\text{if }A_D(s)\ge1.
+\end{equation}
+The first bound holds for every \(A_D(s)\).
+It implies the upper bound in \eqref{eq:uniformchain}: if \(A\le1\),
+\(1+A\le2\sqrt{1+A}\), and the second bound handles \(A\ge1\).
+For \(s<1\), \(1+A_D(s)\le(1-s^2)^{-1}\).
+At \(s=1\), \(A_D(1)=D\).
+For \(s>1\),
+\(A_D(s)\le s^2s^{2D}/(s^2-1)\).
+These inequalities prove all upper bounds in
+Theorem~\ref{thm:chainphase}.
+
+\subsubsection{Lower bounds without a stopping-time regularity assumption}
+
+Consider any almost surely terminating scalar factory whose
+worst-mean expected source count is \(M<\infty\).
+Truncate it after \(T\) source requests and return a fair sign if
+it has not terminated. Its mean \(f_T\) is a polynomial and
+\[
+\sup_{z\in[-1,1]}|f_T(z)-f(z)|\le M/T.
+\]
+The finite transcript proof of Lemma~\ref{lem:transcript} gives
+\[
+|f_T'(z)|\le\sqrt{\frac{M}{1-z^2}},\qquad
+|f_T''(z)|\le\frac{2M}{1-z^2}.
+\]
+Integrate the first bound on a short interval and pass to the
+uniform limit. For the second, use
+\[
+f_T(z+h)-2f_T(z)+f_T(z-h)
+=\int_{-h}^h(h-|u|)f_T''(z+u)\,du.
+\]
+Pass to the limit in \(T\), divide by \(h^2\), and then let
+\(h\to0\). For twice differentiable \(f\),
+\begin{equation}\label{eq:unknownlower}
+M\ge(1-z^2)f'(z)^2,\qquad
+M\ge\frac{1-z^2}{2}|f''(z)|.
+\end{equation}
+These are bounds on the global worst-mean cost \(M\).
+No differentiation through an unbounded runtime is needed.
+
+\paragraph{Proof idea.}
+The reciprocal-square recurrence compares the chain's range with its
+derivative at zero. An input interval on which the derivative stays large
+then forces any exact factory to use enough source samples.
+
+\begin{proof}[Lower bound in Theorem~\ref{thm:uniformchain}]
+The reciprocal-square inequalities
+\[
+u^{-2}+\frac23\le\coth^2u\le u^{-2}+1,
+\]
+from \eqref{eq:cothradius} and \(\sinh u\ge u\), give the range
+comparison
+\begin{equation}\label{eq:chainrange}
+\frac{\lambda}{\sqrt{1+A}}\le R=F_{s,D}(1)
+\le\frac{\lambda}{\sqrt{1+\frac23A}}.
+\end{equation}
+Indeed, apply the inequalities to each step of the radius recurrence
+and multiply the final reciprocal inequality by \(s^{2D}\).
+The accumulated geometric sum is exactly \(A\).
+
+Endpoint coupling (Section~\ref{sec:lower}) gives \(M\ge R\).
+If \(A<24\), this is at least
+\(\lambda\sqrt{1+A}/25\).
+If \(A\ge24\), equation \eqref{eq:chainrange} gives
+\(T=2R/\lambda\le2/\sqrt{17}<1/2\). The target has derivative
+\(\lambda\) at zero and range \([-R,R]\), so the bending
+bound \eqref{eq:bending}, with the cost bound
+\eqref{eq:unknownlower}, gives
+\[
+M\ge\frac{3\lambda^2}{16R}
+\ge\frac3{16}\sqrt{\frac23}\lambda\sqrt{1+A}
+\ge\frac1{25}\lambda\sqrt{1+A}.
+\]
+\end{proof}
+
+For \(f=F_{s,D}\), \(f'(0)=s^D\), proving the supercritical lower
+bound. For \(s=1\), \eqref{eq:tanhlower} gives
+\(F_{1,j}(z)^2\ge(z^{-2}+j)^{-1}\).
+Take \(z_0=1/(2\sqrt D)\). Then
+\[
+F_{1,D}'(z_0)
+=\prod_{j=1}^D(1-F_{1,j}(z_0)^2)
+\le(1-1/(5D))^D\le e^{-1/5}\le5/6.
+\]
+Since \(F_{1,D}'(0)=1\), the mean value theorem gives some
+\(z_*\in(0,z_0)\) with
+\(|F_{1,D}''(z_*)|\ge\sqrt D/3\).
+Here \(1-z_*^2\ge3/4\), so \eqref{eq:unknownlower} yields
+\(M\ge\sqrt D/8\).
+
+For \(0<s<1\), endpoint coupling with all-plus and all-minus
+source signs shows that some source request occurs with probability
+at least \(R=F_{s,D}(1)\), the difference of the two target
+Bernoulli probabilities. For \(u\ge0\), the bound
+\(\tanh u\ge u/(1+u)\) follows from \(e^{2u}\ge1+2u\).
+Writing \(R_j=F_{s,j}(1)\),
+\[
+\frac{s^{j+1}}{R_{j+1}}
+\le\frac{s^j}{R_j}+s^{j+1}.
+\]
+Thus \(s^D/R\le1+\sum_{j=1}^D s^j\le(1-s)^{-1}\).
+This proves the remaining lower bound.
+
+\subsubsection{Finite inputs and arbitrary depth}
+
+For a vector of \(m\) signs, independently choosing a uniform
+coordinate on each request supplies the unknown-mean source with
+\(z=m^{-1}\sum_jx_j\). Repeated coordinate choices remain independent
+conditional on the fixed input, because the indices are independent.
+A second option opens the same gate \(R\), then reads all \(m\)
+signs and evaluates the scalar function if the gate opens.
+It uses \(mR\) expected probes.
+
+\begin{theorem}[Uniform finite-input complexity]\label{thm:finitejoint}
+Let \(m\ge2\) be even, \(D\ge1\), \(s>0\) dyadic,
+\(\lambda=s^D\), \(A=\sum_{j=1}^D s^{2j}\), and
+\[
+\Xi_{s,D,m}=\lambda\min\left\{\sqrt{1+A},
+                      \frac{m}{\sqrt{1+A}}\right\}.
+\]
+For the mean-chain target on \(m\) input signs, the optimal
+worst-input expected number \(Q^*_{s,D,m}\) of distinct probes obeys
+\begin{equation}\label{eq:finitejoint}
+\frac1{128}\Xi_{s,D,m}\le Q^*_{s,D,m}\le2\Xi_{s,D,m}.
+\end{equation}
+The constants are independent of \(s,D,m\).
+\end{theorem}
+\paragraph{Proof idea.}
+Choose between a global majority factory and a rare complete input read. For
+the lower bound, apply the transcript score to the empirical mean and use
+its fourth moment to retain the dependence on the finite input size.
+
+\begin{proof}
+Choose the global factory when \(1+A\le m\), and the gated scan
+otherwise. Equations \eqref{eq:chainQ} and \eqref{eq:chainrange}
+give the upper bound in both cases.
+This choice uses an exact rational comparison before seeing the input.
+
+For the lower bound, endpoint coupling gives \(Q^*\ge R\).
+If \(A<100\), then
+\[
+R\ge\frac{\lambda}{\sqrt{1+A}}
+\ge\frac{\Xi_{s,D,m}}{101}.
+\]
+Suppose now that \(A,m\ge100\).
+Equation \eqref{eq:derivativelower} gives
+\(h=H'(0)\ge\lambda/\sqrt{1+3A/m}\).
+Using \eqref{eq:chainrange}, the interval \(T=2R/h\) has
+\[
+T^2\le\frac{4(1+3A/m)}{1+\frac23A}
+\le6/A+18/m\le0.24<1/4.
+\]
+The bending bound \eqref{eq:bending} and the second transcript
+bound yield
+\[
+Q^*\ge\frac{3h^2}{16R}
+\ge\frac{3\lambda\sqrt{1+\frac23A}}{16(1+3A/m)}
+\ge\frac{3}{64}\sqrt{\frac23}\,\Xi_{s,D,m}.
+\]
+For the last inequality,
+\(\sqrt{1+2A/3}\ge\sqrt{2/3}\sqrt{1+A}\) and
+\(1+3A/m\le4\max\{1,(1+A)/m\}\).
+
+It remains to consider \(m<100\).
+At a balanced input, flipping one coordinate changes the plus
+probability by \(F_{s,D}(2/m)/2\). Lemma~\ref{lem:attentioncoupling},
+summed over the \(m\) coordinates, gives
+\[
+Q^*\ge\frac m2F_{s,D}(2/m)
+\ge\frac{\lambda}{\sqrt{1+4A/m^2}}.
+\]
+If \(A\le m^2\), this is at least \(\lambda/\sqrt5\), while
+\(\Xi_{s,D,m}\le\lambda\sqrt m<10\lambda\).
+If \(A>m^2\), it is at least
+\(m\lambda/\sqrt{5A}\ge\Xi_{s,D,m}/\sqrt5\).
+Each displayed constant is larger than \(1/128\).
+\end{proof}
+
+\begin{theorem}[Finite critical mean chain]\label{thm:finitecritical}
+For even \(m\ge2\), \(D\ge1\), and
+\(f(x)=F_{1,D}(m^{-1}\sum_jx_j)\), the optimal worst-input
+expected number of distinct probes lies between
+\[
+\frac1{100}\min\{\sqrt D,m/\sqrt D\}
+\quad\text{and}\quad
+2\min\{\sqrt D,m/\sqrt D\}.
+\]
+For every fixed \(s>1\), the corresponding order is
+\(\Theta_s(\min\{s^{2D},m\})\).
+\end{theorem}
+\paragraph{Proof idea.}
+Combine the two available upper bounds. For the lower bound, run the
+case split of the preceding proof at \(s=1\) and track the constants
+against \(\sqrt D\), including the regime where the number of inputs
+is smaller than the depth.
+
+\begin{proof}
+The critical upper bound follows by choosing between
+\(Q_{D,1}\le2\sqrt D\) and \(mR_D\le2m/\sqrt D\).
+The supercritical claim follows from
+\eqref{eq:lowersuper}, \eqref{eq:chainQ}, and \(mR\le m\).
+
+For the critical lower bound set
+\(\psi=\min\{\sqrt D,m/\sqrt D\}\), and use the proof of
+Theorem~\ref{thm:finitejoint} at \(s=1\), where \(\lambda=1\) and
+\(A=D\). If \(D<100\), endpoint coupling and
+\eqref{eq:chainrange} give
+\(\sup_x\E[Q\mid x]\ge R_D\ge(1+D)^{-1/2}\ge1/10\),
+while \(\psi\le\sqrt D<10\). If \(D,m\ge100\), its bending case gives
+\[
+\sup_x\E[Q\mid x]\ge\frac{3\sqrt{1+2D/3}}{16(1+3D/m)}
+\ge\frac{3}{64\sqrt{3/2}}\,\psi>\frac{\psi}{100},
+\]
+since \(\sqrt{1+2D/3}\ge\sqrt{2/3}\sqrt D\) and
+\(\sqrt D/(1+3D/m)\ge\psi/4\).
+If \(m<100\), its balanced-input bound reads
+\begin{equation}\label{eq:balancedinfluence}
+\E[Q\mid x_{\rm balanced}]
+\ge\frac m2F_{1,D}(2/m)
+\ge(1+4D/m^2)^{-1/2}.
+\end{equation}
+If \(D\le m^2\), this is at least \(1/\sqrt5\), while
+\(\psi\le\sqrt m<10\).
+If \(D>m^2\), it is at least
+\(m/\sqrt{5D}=\psi/\sqrt5\).
+All cases imply the stated constant.
+\end{proof}
+
+For arbitrary critical networks one may also enter the root factory
+with probability \(R\le r_D\), then read the whole context and
+evaluate its conditional scalar probability. This gives at most
+\(2n/\sqrt{D+1}\) expected input probes.
+Together with Theorem~\ref{thm:finitecritical}, it proves full-class
+query order \(\Theta(n/\sqrt D)\) for \(D\ge n\), whenever the
+uniform first row is on the parameter grid.
+This statement concerns queries; evaluating on the rare open branch
+may still be arithmetically expensive.

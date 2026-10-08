@@ -1,0 +1,31 @@
+\section{Attention and preprocessing}\label{app:attention}
+% Complete attention proof package. All inputs are relative to this directory.
+
+This appendix proves the attention results of
+Sections~\ref{sec:attention-main} and~\ref{sec:index-main} and the
+decoder of Section~\ref{sec:full-decoder-main}.
+Sections~\ref{sec:attentionprimitive}--\ref{sec:quadratichead} treat a
+fresh context: the exponential race behind
+Theorem~\ref{thm:main-attention}, its positional lower bound, and the
+bounded-logit heads.
+Sections~\ref{sec:newrankone}--\ref{sec:finite-query-list} treat a cache
+built at prefill. They give the rank-one index, exact decisions from
+certified intervals, the fixed-rank index of
+Theorem~\ref{thm:main-fixed-rank}, the implicit rank-one query with its
+query law, and a known query list. Section~\ref{sec:momentdecoder}
+proves the decoder of Theorem~\ref{thm:main-decoder}, and
+Section~\ref{sec:indexedlower} proves the lower bound of
+Theorem~\ref{thm:main-index-hard}.
+
+\input{attention_primitives.tex}
+\input{attention_head.tex}
+\input{attention_rank_one.tex}
+\input{attention_finite_bits.tex}
+% The static all-temperature arrangement index is retained in source only.
+\input{attention_dynamic_index.tex}
+% The general cover/factory branch is retained in source only.
+\input{attention_implicit.tex}
+\input{attention_query_law.tex}
+\input{attention_finite_queries.tex}
+\input{attention_moment_decoder.tex}
+\input{attention_indexed_lower.tex}

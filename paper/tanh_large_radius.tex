@@ -1,0 +1,484 @@
+\subsection{A finite-bit scalar tanh backend}
+\label{sec:scalarbackend}
+
+The scalar construction also admits a quadratic cost bound at arbitrary
+radius. The following product sampler supplies the finite arithmetic
+implementation needed by attention and normalization.
+
+\begin{lemma}[Majority representation and raw arity]
+\label{lem:comptanharity}
+Let $u>0$, $q=\tanh u$, and
+\[
+ \sech^2(u\sqrt{1-v})=\sum_{k\ge0}d_kv^k,
+ \qquad C_k=(2k+1)\binom{2k}{k}4^{-k}.
+\]
+The coefficients $d_k$ are nonnegative and sum to one. The numbers
+$\pi_k=(u/q)d_k/C_k$ form a probability distribution, and
+\[
+ \frac{\tanh(uz)}q=\sum_{k\ge0}\pi_k M_k(z),\qquad -1\le z\le1,
+\]
+where $M_k$ is the mean of majority on $2k+1$ independent signs of mean
+$z$. A gate of probability $q$, followed by this majority, and a fair
+sign on the closed branch, returns a sign of mean $\tanh(uz)$. Its
+expected full-majority source count is
+\[
+ Q_u=u+\int_0^1\frac{u\tanh^2(uz)}{z^2}\,dz
+ \le2\max\{u,u^2\}.
+\]
+\end{lemma}
+\paragraph{Proof idea.}
+The expansion and its cost integral are those of
+Lemmas~\ref{lem:majority} and~\ref{lem:arity}, whose proofs hold at
+every radius. Splitting the cost integral gives a quadratic bound at
+large radius.
+
+\begin{proof}
+The coefficient and mixture claims are Lemma~\ref{lem:majority} with
+$\rho=u$; its proof uses no bound on the radius.
+Lemma~\ref{lem:productaritylaw} below gives a second proof of the
+coefficient claims. The gate and the fair sign give mean
+$q\cdot\tanh(uz)/q=\tanh(uz)$. The derivation of
+\eqref{eq:arityintegral} also holds at every radius. It gives the
+expected full-majority count on the open gate, and multiplication by
+the gate probability $q$ gives the stated formula for $Q_u$.
+If $u\le1$, the inequality $|\tanh(uz)|\le uz$ bounds it by
+$u+u^3\le2u$. If $u\ge1$, split the integral at $1/u$:
+\[
+ Q_u\le u+\int_0^{1/u}u^3\,dz+
+                  \int_{1/u}^1 u z^{-2}\,dz=2u^2.
+\]
+\end{proof}
+
+\subsubsection{Sampling the arity through the cosh product}
+\label{sec:productarity}
+
+The classical product for $\cosh$ gives a direct sampler for the
+majority index. It also gives a quadratic scalar bit bound at
+arbitrary row norm. The product is recorded in DLMF
+Eq.~4.36.2, and its relation to independent gamma sums is part of
+the P\'olya--Gamma construction of Polson, Scott, and
+Windle~\cite{dlmf,polson2013}. The discrete construction below is
+a Poissonization of that product.
+
+\begin{lemma}[A product law for the arity proposal]
+\label{lem:productaritylaw}
+Let $u>0$, and write
+\[
+ \sech^2(u\sqrt{1-v})=\sum_{k\ge0}d_kv^k,
+ \qquad
+ a_j=\frac{4u^2}{\pi^2(2j-1)^2},
+ \qquad p_j=\frac1{1+a_j}.
+\]
+Let $G_{j,1},G_{j,2}$ be independent geometric random variables
+with $\Pr(G_{j,r}=k)=p_j(1-p_j)^k$, $k\ge0$.
+Then
+\[
+ K=\sum_{j\ge1}(G_{j,1}+G_{j,2})
+ \quad\hbox{satisfies}\quad
+ \Pr(K=k)=d_k,\qquad \E K=u^2.
+\]
+The sum is finite almost surely.
+\end{lemma}
+\paragraph{Proof idea.}
+Each factor of the classical cosine product is a geometric probability
+generating function. Their total mean is finite, so the infinite sum is
+almost surely finite and has the required coefficient law.
+
+\begin{proof}
+The hyperbolic cosine product gives
+\[
+ \sech^2(u\sqrt{1-v})
+ =\prod_{j\ge1}\{1+a_j(1-v)\}^{-2}.
+\]
+Each factor is the probability generating function of
+$G_{j,1}+G_{j,2}$. Also
+$2\sum_j a_j=u^2$, either by comparing quadratic coefficients
+in the hyperbolic cosine product or by the sum of the reciprocal
+odd squares. Monotone convergence gives $\E K=u^2<\infty$,
+so $K<\infty$ almost surely. For $0\le v\le1$, dominated
+convergence identifies the generating function of the sum with
+the displayed product. Uniqueness of probability generating
+functions proves the law.
+\end{proof}
+
+Here is a finite algorithm for this infinite product. Put
+$H=\max\{1,u\}$ and $J=\lceil H\rceil$. First sample both
+geometric variables at every index $1\le j\le J$. For $j>J$,
+put
+\[
+ \mu_j=2\log(1+a_j),\qquad
+ \nu_j=\frac{2u^2}{j(j-1)},\qquad
+ \Lambda=\sum_{j>J}\nu_j=\frac{2u^2}{J}.
+\]
+Generate $N\sim\operatorname{Poisson}(\Lambda)$ as the sum of
+$J$ independent Poisson variables of parameter $2u^2/J^2\le2$.
+For each of its $N$ points, independently choose
+\begin{equation}\label{eq:producttailindex}
+ j=1+\lfloor J/U\rfloor,
+ \qquad U\sim\operatorname{Uniform}(0,1),
+\end{equation}
+and retain the point with probability $\mu_j/\nu_j$.
+Remove duplicate retained indices. At each remaining index,
+sample $G_{j,1}+G_{j,2}$ conditioned to be positive.
+All other tail indices contribute zero.
+
+\begin{lemma}[Exact tail sampling]
+\label{lem:producttail}
+The finite algorithm just described has the law in
+Lemma~\ref{lem:productaritylaw}. It proposes at most $2H$ tail
+points in expectation and visits at most $2H$ prefix indices.
+For every retained index, its conditional positive value can
+be sampled as follows. With probability $1/(1+p_j)$ return
+$1+G_1+G_2$; otherwise return $1+G_2$, using fresh independent
+$\operatorname{Geom}(p_j)$ variables.
+\end{lemma}
+\paragraph{Proof idea.}
+A summable Poisson envelope selects the tail indices that can contribute.
+Thinning gives the correct activation probability for each index, and a
+two-case geometric mixture generates its positive value.
+
+\begin{proof}
+Since $j>J\ge u$,
+$a_j<1/\pi^2<1/8$. In particular,
+\[
+ \mu_j\le2a_j\le\nu_j.
+\]
+The second inequality follows from
+$4j(j-1)\le\pi^2(2j-1)^2$.
+The mark in \eqref{eq:producttailindex} has probability
+$J/[j(j-1)]=\nu_j/\Lambda$ at $j$, with $j\ge J+1$.
+Poisson marking and independent thinning therefore leave
+independent counts $Z_j\sim\operatorname{Poisson}(\mu_j)$.
+The probability of an active index is
+\[
+ \Pr(Z_j>0)=1-e^{-\mu_j}=1-p_j^2,
+\]
+which equals the probability that the sum of its two geometric
+variables is positive. The activation events are independent.
+Conditional on positivity, the event $G_{j,1}>0$ has probability
+$(1-p_j)/(1-p_j^2)=1/(1+p_j)$.
+The memoryless identity for a geometric variable now proves
+the stated conditional sampler. Its fresh randomness also gives
+the correct joint law across indices. Finally,
+$\Lambda\le2H$ and $J\le2H$.
+\end{proof}
+
+\begin{lemma}[Finite-bit implementation of the product proposal]
+\label{lem:productaritybits}
+Suppose $u>0$ is rational. Let $\bits_u\ge8$ bound its binary
+input length and the bits needed to address a source request.
+The preceding proposal $K$ can be sampled exactly with
+\[
+ O(H\bits_u^4)
+\]
+expected bit operations. This count includes all random bits,
+arithmetic, duplicate removal, and precision refinement.
+The constant is absolute and independent of $u$.
+\end{lemma}
+\paragraph{Proof idea.}
+Implement every count and comparison with certified scalar intervals.
+Geometric and Poisson moment bounds control both the number of generated
+objects and the precision needed to decide their comparisons.
+
+\begin{proof}
+We give the numerical primitives and the moment bounds that
+make this assertion uniform. All elementary functions in the
+construction have certified rational intervals. For a precision
+parameter $V$, use $8V$ fractional working bits.
+The Machin formula
+$\pi=16\arctan(1/5)-4\arctan(1/239)$ gives $\pi$ from
+$O(V)$ alternating-series terms. Binary range reduction followed
+by
+\[
+ \log y=2\sum_{r\ge0}\frac{t^{2r+1}}{2r+1},
+ \qquad t=(y-1)/(y+1),
+\]
+evaluates logarithms: one may reduce to $1/4\le y\le4$, so
+$|t|\le3/5$. Taking $8V$ terms leaves an error less than
+$2^{-10V}$; the accumulated rounding error is
+$O(V^2 2^{-8V})$. Exponentials on a bounded interval are evaluated
+as in Section~\ref{sec:fixedprecision}, with range reduction and
+repeated squaring. These algorithms take $O(V)$ arithmetic
+operations on $O(V)$-bit numbers and hence $O(V^3)$ bit work
+with schoolbook multiplication and division.
+
+For completeness, the unbounded discrete inversions can be
+performed with these primitives. To sample
+$G\sim\operatorname{Geom}(p_j)$, put
+\[
+ d=-\log(1-p_j)=\log(1+a_j)-\log a_j,
+ \qquad G=\lfloor(-\log U)/d\rfloor.
+\]
+Expose the leading zero bits of $U$. If their number is $T$,
+write $U=2^{-T}V_0$ with $1/2\le V_0<1$.
+Thus $-\log U=T\log2-\log V_0$.
+Here $T$ has a geometric tail,
+\[
+ d\ge(1+a_j)^{-1}\ge(1+u^2)^{-1},
+ \qquad
+ d\le 8(\bits_u+\log_2(j+2)+1).
+\]
+The first bound uses $a_j<u^2$ and
+$\log(1+x)\ge x/(1+x)$.
+At refinement stage $m$, the choice
+\[
+ V=\left\lceil64\{\bits_u+\log_2(j+2)+T+m+1\}\right\rceil
+\]
+absorbs the division by $d$, all argument magnitudes, and the
+series and arithmetic errors above. At that stage reveal enough
+further bits of $V_0$ to know it to $8V$ fractional bits; this
+also charges all random bits used in the inversion. In particular it gives an
+interval for $(-\log U)/d$ of width at most
+$2^{-m-8}/(1+d)$. Intersect the interval with $[0,\infty)$,
+and stop when all its values have the same integer part.
+
+Only positive integers can obstruct this stopping rule.
+Since $(-\log U)/d$ is exponential with rate $d$, for
+$0<\epsilon\le1/2$ and $d\epsilon\le1$ the probability of
+lying within $\epsilon$ of a positive integer is at most
+\[
+ \sum_{k\ge1}\!
+ \left(e^{-d(k-\epsilon)}-e^{-d(k+\epsilon)}\right)
+ =\frac{2\sinh(d\epsilon)}{e^d-1}
+ \le 6\epsilon.
+\]
+Consequently the refinement stage has a geometric tail,
+uniformly in $j$ and $u$. The expected bit cost of one such
+geometric draw is
+$O((\bits_u+\log_2(j+2))^3)$.
+This argument does not require independence between its
+leading-zero count and its final refinement stage: the moments
+of their sum are bounded by the moments of each separately.
+
+For \eqref{eq:producttailindex}, expose $T$ leading zero bits
+of its fresh uniform variable. Conditional on $T$,
+$J/U$ lies in $[J2^T,J2^{T+1}]$, and its density is at most
+$2/(J2^T)$. The interval contains at most $2J2^T$ integer
+boundaries. A union bound therefore bounds the probability of
+being within $\epsilon$ of a boundary by $8\epsilon$.
+Reading
+$\lceil\log_2(J+1)\rceil+2T+m+8$ bits of $U$ gives an
+interval for $J/U$ of width at most $2^{-m-4}$ by rational
+division. The floor thus stops with a geometric refinement
+tail conditional on $T$. Its expected bit cost is
+$O(\bits_u^2)$, and its output obeys
+\begin{equation}\label{eq:productlogtail}
+ \log_2(j+2)\le\log_2(4J)+T+1.
+\end{equation}
+
+The thinning probability is numerically stable in the form
+\[
+ \frac{\mu_j}{\nu_j}
+ =\frac{4j(j-1)}{\pi^2(2j-1)^2}
+   \frac{\log(1+a_j)}{a_j}.
+\]
+At a tail index $a_j<1/8$, so the last factor is the series
+$\sum_{r\ge0}(-a_j)^r/(r+1)$, with uniformly geometric
+convergence. An interval of width $2^{-m}$ costs
+$O((\bits_u+\log_2(j+2)+m)^3)$ bit operations.
+A fresh lazy uniform comparison gives a geometrically decaying
+precision tail. The conditional-positive case coin
+$1/(1+p_j)$ has the same bound. Its subsequent geometric
+variables have the bound already proved. All these statements
+are conditional on the chosen index, so their averages can
+use \eqref{eq:productlogtail} directly.
+
+One may generate each Poisson variable of parameter
+$0\le\lambda\le2$ without an unbounded-mean primitive.
+Propose $k$ with probability $2^{-k-1}$ and accept it with
+probability
+\[
+ \frac{e^{-\lambda}\lambda^k/k!}{16\cdot2^{-k-1}}.
+\]
+This is at most one because the numerator-to-proposal ratio is
+at most $2e^\lambda\le2e^2<16$.
+The mean number of trials is exactly 16.
+At refinement stage $m$, the preceding exponential algorithm
+and $k$ sequential multiplications and divisions give the
+acceptance interval with $O((\bits_u+k+m)^3)$ bit work.
+The proposal $k$ and the lazy comparison both have geometric
+tails. The expected cost of this Poisson primitive is therefore
+$O(\bits_u^3)$.
+
+There are $J\le2H$ prefix indices and Poisson draws, each of
+expected cost $O(\bits_u^3)$. The total proposal count $N$ is
+Poisson with mean $\Lambda\le2H$, and its independent marks
+satisfy \eqref{eq:productlogtail}.
+Sorting the retained indices removes duplicates. For example,
+pad all proposed indices to their maximum bit length and use
+mergesort. Conditional on $N=n$, that maximum has moments
+\[
+ O_r\bigl((\bits_u+\log_2(n+2))^r\bigr),
+\]
+because the maximum of $n$ geometric leading-zero counts has
+tail at most $n2^{-t}$.
+The sorting cost is at most a constant times
+$n\log_2(n+2)$ times the sum of this maximum length and
+$\log_2(n+2)$, including address manipulation.
+For a Poisson variable,
+$\E[Nf(N)]=\Lambda\E[f(N+1)]$ for every nonnegative $f$.
+Markov's inequality at thresholds
+$(1+\Lambda)2^t$ bounds every fixed logarithmic moment of
+$N+1$ by a constant times
+$(1+\log_2(2+\Lambda))^r$.
+Since $\log_2(H+2)=O(\bits_u)$, the expected sorting cost is
+$O(H\bits_u^2)$. The same moment bounds charge the scalar
+work at every proposed or retained mark by
+$O(H\bits_u^3)$ in expectation. Adding the sampled counts to
+form $K$ also fits $O(H\bits_u^4)$: its counter length is
+bounded by $O(1+\log_2(K+1))$, and $\E K=u^2$ gives all
+fixed logarithmic moments by the same Markov argument.
+For this last charge, Cauchy--Schwarz handles the dependence
+between the count and the counter length: the number of
+summands is at most $J+N$, with
+$\E(J+N)^2=O(H^2)$, while
+$\E\log_2^2(K+2)=O(\bits_u^2)$.
+These bounds prove the lemma.
+\end{proof}
+
+\begin{theorem}[Quadratic bit cost for an arbitrary radius]
+\label{thm:quadraticradiusbits}
+Let $u>0$ be rational, let $\bits_u\ge8$ have the meaning in
+Lemma~\ref{lem:productaritybits}, and put $H=\max\{1,u\}$.
+The positive-majority factory for an exact sign of mean
+$\tanh(uz)$ has expected scalar bit cost
+\[
+ O(H^2\bits_u^4).
+\]
+This count excludes the computations producing its source
+signs, and includes all source-selection bookkeeping and
+majority processing. Its expected number of source requests,
+including its outer gate, is at most $2\max\{u,u^2\}$.
+\end{theorem}
+\paragraph{Proof idea.}
+Sample the product-law proposal and accept according to the reciprocal
+majority normalizer. A finite fair-coin experiment realizes that acceptance
+probability, while its expected repetitions cancel the proposal
+normalization.
+
+\begin{proof}
+Write $q=\tanh u$ and
+$C_k=(2k+1)\binom{2k}{k}/4^k$. The majority-index law is
+\[
+ \pi_k=\frac{u}{q}\frac{d_k}{C_k}.
+\]
+Generate $K$ with law $d$ and accept it with probability
+$1/C_K$. Its acceptance coin is the following finite sequence:
+for $r=1,\ldots,K$, flip a coin of probability $2r/(2r+1)$;
+reject at its first failure and accept if all succeed.
+Indeed
+\[
+ \frac1{C_k}=\prod_{r=1}^k\frac{2r}{2r+1}.
+\]
+Also $C_k\ge\sqrt{k+1}$, by induction using
+$((2k+1)/(2k))^2\ge(k+1)/k$.
+The expected number of tests conditional on $K=k$ is thus
+\[
+ \sum_{r=0}^{k-1}\frac1{C_r}\le2\sqrt{k}.
+\]
+Each rational test can be performed by drawing a uniform
+integer with denominator $2r+1$, using binary rejection.
+Its expected bit cost is $O((1+\log_2(k+2))^2)$, including
+the counter and comparison. Consequently the expected scalar
+cost of this acceptance loop, conditional on $K=k$, is
+$O(\sqrt{k}(\bits_u+\log_2(k+2))^2)$.
+
+For each fixed integer $r\ge1$, $\E K=u^2$ and Markov's
+inequality give
+\[
+ \E_d(\bits_u+\log_2(K+2))^r=O_r(\bits_u^r).
+\]
+Cauchy--Schwarz therefore bounds the average acceptance-loop
+cost by $O(u\bits_u^2)$. A proposal trial, including generation
+of $K$, costs $O(H\bits_u^4)$ in expectation.
+The identity
+\[
+ \sum_{k\ge0}\frac{d_k}{C_k}
+ =\int_0^1\sech^2(uz)\,dz=\frac qu
+\]
+follows either from the majority normalization or from
+$\int_0^1(1-z^2)^k\,dz=1/C_k$ and monotone convergence.
+Thus the accepted index has law $\pi$, and the mean number
+of independent trials is $u/q\le1+u\le2H$.
+The predictable trial-cost lemma gives total expected arity
+cost $O(H^2\bits_u^4)$ even though a trial's cost may depend
+on whether it succeeds.
+
+The accepted majority loop has the same order of bit work.
+Indeed, using $C_k\ge\sqrt{k+1}$, its expected cost is at most
+a constant times
+\[
+ \frac uq\,
+ \E_d\!\left[
+ \sqrt{K+1}(\bits_u+\log_2(K+2))^2\right]
+ =O(H^2\bits_u^2).
+\]
+The source-selection tables have $O(\bits_u)$-bit entries,
+so their work is included by increasing the logarithmic power
+to four. The expected number of source requests is the
+bound $Q_u\le2\max\{u,u^2\}$ in Lemma~\ref{lem:comptanharity}.
+Finally, the gate $q=\tanh u$ can be evaluated with certified
+exponentials. To accuracy $2^{-m}$, values
+$u\ge m+2$ are handled by
+$0\le1-\tanh u\le2e^{-2u}$; otherwise the argument is
+$O(m)$. Range reduction and repeated squaring then cost
+$O((\bits_u+m)^3)$ bits. Its fresh uniform comparison has
+a geometric refinement tail. This fits the claimed bound.
+\end{proof}
+
+
+\begin{corollary}[Biased linear tanh row]
+\label{cor:comptanhrow}
+Suppose independent source signs have means $h_j/R$, where $|h_j|\le R$,
+$|b|\le1$, and $\sum_j|w_j|R=\rho$. There is an exact sign sampler of
+mean $\tanh(b+\sum_jw_jh_j)$ with at most $2\rho(1+\rho)$ expected source
+requests and $O((1+\rho)^2B^4)$ expected local bit work.
+\end{corollary}
+\paragraph{Proof idea.}
+Fold the known bias into the source distribution and apply the
+arbitrary-radius scalar factory. Only the part of each source request
+assigned to the row requires a child sample.
+
+\begin{proof}
+For $u=|b|+\rho>0$, make a sign of mean
+$(b+\sum_jw_jh_j)/u$ by selecting the known bias sign with mass $|b|/u$
+and a signed source coordinate with the remaining row masses. Each
+request for this mixed sign uses a source with probability $\rho/u$.
+Apply the preceding majority construction at radius $u$. Its expected
+source count is at most
+\[
+ \frac\rho u Q_u\le2\rho\max\{1,u\}\le2\rho(1+\rho).
+\]
+The last inequality uses $|b|\le1$. The product proposal theorem bounds
+its local bit cost by $O(\max\{1,u\}^2B^4)$, including the known gate
+and row selection. For $u=0$, a fair sign suffices. A zero-weight row
+can instead sample its known tanh bias directly. Conditional charging
+is valid because the decision to request a mixed sign precedes its
+fresh bias-versus-source choice.
+\end{proof}
+
+
+\begin{corollary}[A bounded-radius tanh factory]\label{lem:unittanhfour}
+Given independent signs of unknown mean $z\in[-1,1]$ and known
+finite parameters $|a|\le1$, $0\le r\le4$, a sign of mean
+$\tanh(a+rz)$ can be sampled exactly with at most $40$ expected
+source requests and $O(B^4)$ auxiliary bit operations. Here $B$
+includes the encodings of $a,r$ and the source interface; each
+source call uses fresh randomness. The same assertion holds for
+a weighted mixture of predecessor signs of total absolute weight
+at most four. If $a=0$ and $r\le1$, at most two expected
+source requests suffice.
+\end{corollary}
+\paragraph{Proof idea.}
+Apply the preceding arbitrary-radius row bound on a fixed bounded interval.
+Its source cost and all scalar precision costs are then bounded by absolute
+constants apart from the encoding factor.
+
+\begin{proof}
+Apply Corollary~\ref{cor:comptanhrow}, whose source bound is
+$2r(1+r)\le40$. A zero row uses only its known bias coin.
+Absolute-weight sampling and sign complementation implement the
+weighted source. The bounded parameters leave the fourth-power
+bit factor unchanged. In the unbiased unit-radius case,
+Lemma~\ref{lem:comptanharity} gives the sharper bound $Q_r\le2$.
+\end{proof}

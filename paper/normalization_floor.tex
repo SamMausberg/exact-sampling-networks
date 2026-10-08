@@ -1,0 +1,310 @@
+\subsection{Normalization with a denominator floor}
+\label{sec:rmsnorm}
+
+We use the explicit convention
+\begin{equation}
+ \mathcal N_{\epsilon}(a)_i
+ =\frac{a_i}{\sqrt{\epsilon+n^{-1}\sum_{j=1}^n a_j^2}},
+ \qquad |a_j|\le R.
+ \label{eq:rmsdefinition}
+\end{equation}
+The original RMSNorm definition has $\epsilon=0$ in this formula
+\cite[Eq.~(4)]{zhang2019rmsnorm}. The authors' released implementation
+instead adds its numerical stabilizer outside the square root
+\cite{zhang2019rmscode}. Llama's reference implementation uses the
+inside-root convention in \eqref{eq:rmsdefinition}\cite{llamarmscode}.
+These are different functions. Every theorem below refers to
+\eqref{eq:rmsdefinition}. A gain of absolute value at most $G$ simply
+multiplies the output radius by $G$.
+
+\begin{theorem}[A normalization factory with a denominator floor]
+\label{thm:rmsfloor}
+Suppose that $R>0$, $\epsilon\ge0$, and $\lambda>0$ are known rational
+numbers, and that
+\[
+ v=\epsilon+\frac1n\sum_{j=1}^n a_j^2\ge\lambda.
+\]
+Replace $\lambda$ by $\max\{\lambda,\epsilon\}$, and put
+\[
+ \kappa=\max\{1,R^2/\lambda\},
+ \qquad R_{\rm out}=\frac{2R}{\sqrt\lambda}.
+\]
+Assume that a request at coordinate $j$ returns an independent sign of
+mean $a_j/R$. There is an exact sign sampler of mean
+$\mathcal N_\epsilon(a)_i/R_{\rm out}$ whose expected number of such
+requests is at most
+\begin{equation}
+ 1+228\kappa^2.
+ \label{eq:rmschildbound}
+\end{equation}
+If $B_N$ includes the binary lengths of the rational parameters and
+$\lceil\log_2(n+2)\rceil$, its expected auxiliary bit work is
+$O(\kappa^2B_N^4)$. The constant in this bound is absolute. No numerical
+evaluation of the vector $a$ is required.
+\end{theorem}
+
+\paragraph{Proof idea.}
+Two independent signs give a disagreement coin whose bias records the
+average squared coordinate. A linear factory moves this bias away from its
+endpoint, and a negative-binomial generating function supplies the reciprocal
+square root. Multiplying by a fresh numerator sign completes the normalized
+coordinate.
+
+\begin{proof}
+An independent product of two signs with mean $a_j/R$ has mean
+$(a_j/R)^2$. It does not give a coin of that probability. The latter
+function vanishes when the source bias is zero, an interior point of
+the sign-coin parameter interval. A finite Bernoulli factory for that
+square coin would therefore be impossible. We instead use the
+disagreement coin
+\[
+ q=\frac12\left(1-\frac1n\sum_j(a_j/R)^2\right).
+\]
+It costs two source requests at one uniform coordinate. This exact
+coin is available even when all coordinates vanish.
+
+Set
+\begin{equation}
+ U=\epsilon+R^2,\qquad
+ d=\frac{\lambda}{2U},\qquad
+ C=\frac{2R^2}{U-\lambda/2},\qquad
+ \zeta=\frac{\lambda}{2U-\lambda}.
+ \label{eq:rmsparameters}
+\end{equation}
+The promise implies $0<\lambda\le U$. In particular $0<d\le1/2$,
+$C\le4$, and
+\begin{equation}
+ r=Cq\le1-\zeta,
+ \qquad \frac C\zeta=\frac{4R^2}{\lambda}.
+ \label{eq:rmsamplifier}
+\end{equation}
+If $C\le1$, obtain an $r$-coin by thinning the $q$-coin. If $C>1$,
+use the linear Bernoulli factory with supplied slack
+$\min\{\zeta,1/2\}$.
+
+We use the following published input-count result: for $Cp\le1-e$,
+Huber's linear factory is exact and uses at most $9.5C/e$ source
+coins in expectation \cite[Theorem~1]{huber2016linear}. Its
+finite-bit implementation in the parameter range used here is
+recorded below. Thus an $r$-coin costs at most $76\kappa$ $q$-coins
+in expectation. This bound also covers thinning.
+
+Let
+\[
+ c_k=\binom{2k}{k}4^{-k},\qquad
+ \Pr(K=k)=\sqrt d\,c_k(1-d)^k,\quad k\ge0.
+\]
+Independently draw a known coin of probability $1/\sqrt2$. If it
+fails, return $A=0$. Otherwise return $A=1$ exactly when $K$
+independent $r$-coins are all one. For $K=0$, the empty conjunction
+is one. The binomial generating function gives
+\begin{align}
+ \Pr(A=1)
+ &=\frac1{\sqrt2}
+   \sqrt{\frac d{1-(1-d)r}}
+   =\frac{\sqrt\lambda}{2\sqrt v},
+ \label{eq:rmsattenuation}\\
+ \mathbb E K
+ &=\frac{1-d}{2d}
+   =\frac U\lambda-\frac12
+   \le\frac32\kappa.
+ \label{eq:rmsarity}
+\end{align}
+The algebra in the first line uses
+$(1-d)C=2R^2/U$ and
+$1-(1-d)Cq=v/U$.
+
+On $A=1$, return a fresh sign of mean $a_i/R$. On $A=0$, return
+a fair sign. Its mean is
+\[
+ \frac{a_i}{R}\frac{\sqrt\lambda}{2\sqrt v}
+ =\frac{\mathcal N_\epsilon(a)_i}{R_{\rm out}}.
+\]
+The fair branch completes the output law to a sign on every run.
+
+The number of $r$-coins is at most $K$. Each $q$-coin uses two
+child signs. The uniform conditional input bound for the amplifier
+therefore gives
+\[
+ 1+2(76\kappa)(3\kappa/2)=1+228\kappa^2.
+\]
+This argument charges a fresh factory invocation before its own
+randomness is exposed. It does not require the cost of that
+invocation to be independent of its output. All component
+procedures terminate almost surely, and $K$ is finite almost
+surely. This proves exactness, termination, and
+\eqref{eq:rmschildbound}.
+
+The arithmetic bound is proved below.
+\end{proof}
+
+For recursive composition, the possibly irrational radius
+$R_{\rm out}$ can be replaced by a rational one without changing
+the child bound. Choose a power of two $\overline R$ with
+$R_{\rm out}\le\overline R<2R_{\rm out}$. Its exponent is
+found by comparisons of the rational quantities
+$\overline R^2\lambda$ and $4R^2$. With probability
+$R_{\rm out}/\overline R$, invoke the normalization sampler;
+otherwise return a fair sign. The resulting mean is
+$\mathcal N_\epsilon(a)_i/\overline R$. This known algebraic
+coin has a certified square-root implementation using
+$O(B_N^4)$ expected bit work and introduces no child requests.
+All later attention and row samplers may therefore use rational
+radius bounds.
+
+\subsubsection{Finite-bit implementation}
+
+\begin{lemma}[Half-order negative-binomial sampling]
+\label{lem:rmshalfnb}
+For rational $0<d\le1/2$, the law
+$\Pr(K=k)=\sqrt d\,c_k(1-d)^k$ can be sampled exactly with
+$O(d^{-1}(B+\log_2(d^{-1}+2))^4)$ expected bit work, where $B$
+bounds the input length of $d$.
+\end{lemma}
+\paragraph{Proof idea.}
+A geometric proposal acquires the required central-binomial factor
+through a product of rational acceptance coins. Most unsuccessful products
+stop early. Their square-root mean length compensates for the square-root
+acceptance probability.
+
+\begin{proof}
+Propose $G\ge0$ with law $d(1-d)^k$. Accept it with probability
+\[
+ c_G=\prod_{j=1}^G\frac{2j-1}{2j},
+\]
+stopping this product of rational coins at its first failure.
+The mean acceptance probability is $\sqrt d$. Thus the accepted
+law is the claimed law. The elementary bound
+$c_j\le1/\sqrt{j+1}$ follows by induction from
+$c_{j+1}/c_j=(2j+1)/(2j+2)$. Conditional on $G=k$, the expected
+number of product tests is at most
+\[
+ \sum_{j=0}^{k-1}c_j\le2\sqrt k.
+\]
+An unconditional trial uses at most $2/\sqrt d$ tests in
+expectation. Dividing by its success probability bounds the
+total expected number of tests by $2/d$.
+
+Geometric inversion generates $G$ from
+\[
+ G=\left\lfloor\frac{-\log V}{-\log(1-d)}\right\rfloor,
+ \qquad V\sim\operatorname{Unif}(0,1).
+\]
+The proof of Lemma~\ref{lem:productaritybits} performs this
+inversion with certified logarithms. There the rate is
+$-\log(1-p_j)$; here it is $-\log(1-d)\in[d,\log2]$. The
+leading-zero count of $V$ has a geometric tail, and the bound $6e$ there
+on the chance of lying within $e$ of a positive integer needs only
+$e\le1/2$ and a rate times $e$ at most one. Another
+$\lceil\log_2(d^{-1}+2)\rceil$ working bits absorb the division by
+the rate. Consequently extra refinement has a geometric tail, and a
+certified $m$-bit logarithm costs a cubic number of bit operations
+in its input and output lengths. Rational product coins use the
+usual uniform-bit comparison.
+
+Both the proposal law and the accepted law have geometric
+tails on scale $d^{-1}$. Their logarithmic moments, together
+with the same bound for the stopped product tests, show that
+the expected cost per test is absorbed by the fourth power in
+the stated bound. This reasoning counts uniform bits,
+counters, rational arithmetic, and precision refinement.
+\end{proof}
+
+\begin{lemma}[Finite-bit linear factories with arbitrary known multiplier]
+\label{lem:general-linear-bits}
+\label{lem:rmslinearbits}
+Let $C>1$ and $0<e\le1/2$ be known rationals, and suppose $Cp\le1-e$.
+Huber's linear factory has an implementation with
+$O(Ce^{-1}B^4)$ expected auxiliary bit work, where $B\ge16$ includes
+the parameter lengths, source-address length, and
+$\log_2(1/(C-1)+2)$. Source invocations are counted separately.
+\end{lemma}
+\paragraph{Proof idea.}
+Huber's counter has a harmonic function equal to the desired output
+bias. Its global source bound controls the early stages, while the rapidly
+decreasing probability of reaching a late stage pays for that stage's larger
+counters and finer arithmetic.
+
+\begin{proof}
+Use Huber's stage algorithm \cite[Theorem~1]{huber2016linear}.
+At stage $j$, let $e_j=2^{-j}e$,
+$C_j=C\prod_{r<j}(1+e_r/2)<2C$, and $k_j=(23/5)/e_j$.
+Initially the integer counter is $i=1$. While $0<i<k_j$, draw a source bit $X$ and
+an independent positive geometric variable $G$ of parameter
+$(C_j-1)/C_j$, and replace $i$ by $i-1+(1-X)G$. At $i=0$, return
+one. At an upper exit, continue with probability $(1+e_j/2)^{-i}$;
+on continuation replace $C_j$ by $C_j(1+e_j/2)$ and $e_j$ by $e_j/2$.
+If continuation fails, return zero. The source bound for this
+algorithm is at most $9.5C/e$.
+
+Its exactness also follows from the counter identity. At a within-stage
+step the conditional expectation of $(C_jp)^i$ is unchanged, because
+$\mathbb E(C_jp)^G=(C_j-1)p/(1-p)$. At an upper exit the continuation
+probability times $(C_{j+1}p)^i$ equals $(C_jp)^i$. The slack promise
+is preserved. The finite stopping bounds below imply almost-sure
+termination, at which the harmonic function is the returned bit;
+bounded convergence therefore gives bias $Cp$.
+At an upper exit the probability of continuing is at
+most $\exp(-46/25)<1/6$, so the probability of reaching stage $j$ is
+at most $6^{-j}$. The stopped-drift calculation, including the geometric
+overshoot, bounds the expected update count from any entry state by
+\[
+ \frac{(C_j-1)\lceil k_j\rceil+C_j}{e_j}
+ \le14C e_j^{-2}.
+\]
+If the entry counter already exceeds the threshold, no updates are
+needed before the exit test. A positive geometric variable is sampled
+by rational-parameter inversion, so its numerical magnitude is not
+charged as a unary loop. All arithmetic and certified logarithm comparisons use dyadic
+fixed-point intervals with outward rounding and guarded summation.
+The required numerical estimates hold uniformly over the stages. A geometric draw has parameter at least $(C-1)/(2C)$, so
+its logarithm has moments $O((B+j)^r)$ for each fixed $r$. At an
+upper exit, memorylessness bounds the overshoot by a fresh geometric
+excess. Conditioning on continuation multiplies its mass by a
+decreasing exponential, which improves this tail. This remains true
+at subsequent stage entries.
+
+At requested precision $m$, the product defining $C_j$ is recomputed
+with $O(B+j+m)$ working bits and $j$ guarded multiplications.
+Subtracting one needs only $O(B)$ additional guard bits, since
+$C_j-1\ge C-1$. Geometric inversion uses the logarithm procedure
+in Lemma~\ref{lem:rmshalfnb}. For a continuation coin, if
+$i e_j>3(m+1)$ its probability is below $2^{-m}$; otherwise its
+exponent has $O(B+j+m)$ relevant bits. Binary range reduction and
+certified logarithm and exponential series cost a cubic number of
+operations in those lengths. Fresh uniform comparison bits give a
+geometric refinement tail. These bounds give stage work
+$O(Ce_j^{-2}(B+j)^4)$. To sharpen the total, let $N_j$ count updates
+at stage $j$. Each update requests exactly one source coin, so Huber's
+global source bound gives $\sum_j\mathbb E N_j\le9.5C/e$. At the
+start of an update its counter is below $k_j$, hence has length
+$O(B+j)$. Its fresh geometric draw and subsequent comparison have
+conditional expected auxiliary work $O((B+j)^4)$ uniformly over the
+past. Predictable charging bounds the update work by
+$O(\sum_j(B+j)^4\mathbb E N_j)$.
+
+Choose $J=\lceil\log(1/e)/\log(3/2)\rceil=O(B)$. The stages
+$j\le J$ have total work $O(Ce^{-1}B^4)$ by the global source bound.
+For the remaining stages, the reach and stopped-drift estimates give
+\[
+ \sum_{j>J}(B+j)^4\mathbb E N_j
+ \le14Ce^{-2}\sum_{j>J}(2/3)^j(B+j)^4
+ =O(Ce^{-1}B^4).
+\]
+Exit tests have one invocation per reached stage. The conditional
+overshoot log-moment estimate and reach probability $6^{-j}$ give a
+further $O(B^4)$ term, which is absorbed by the claimed bound.
+The construction and its exactness are those of Huber's factory; the
+calculation supplies the bit bound at arbitrary known multiplier.
+\end{proof}
+
+For the floor parameters, $C/\zeta=4R^2/\lambda\le4\kappa$.
+With supplied slack $e=\min\{\zeta,1/2\}$ and $C\le4$, one has
+$C/e=O(\kappa)$. Lemma~\ref{lem:general-linear-bits} therefore costs
+$O(\kappa B_N^4)$ auxiliary work per amplified coin. There are at
+most $3\kappa/2$ such coins in expectation. Predictable charging
+bounds their local work by $O(\kappa^2B_N^4)$; source invocations
+remain counted separately. Lemma~\ref{lem:rmshalfnb} costs
+$O(\kappa B_N^4)$ for the negative-binomial draw. Known gates,
+coordinate choices, and the output sign contribute $O(B_N^4)$.
+This proves the bit bound in Theorem~\ref{thm:rmsfloor}.

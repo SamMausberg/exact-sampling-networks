@@ -1,0 +1,178 @@
+{
+  "precision_decimal_digits": 120,
+  "status": "deterministic consistency checks only",
+  "formalization": "Lean file is uncompiled",
+  "case_counts": {
+    "growth_inequalities": 2016,
+    "mean_amplification": 2090,
+    "score_lower_bounds": 20,
+    "origin_mass": 348,
+    "composition_products": 60,
+    "bit_charge_recurrence": 1392,
+    "relative_parameters": 64
+  },
+  "total_cases": 5990,
+  "score_cases": [
+    {
+      "family": "query",
+      "input_bits": 2,
+      "amplification_steps": 16,
+      "score_derivative": "0.36632625802775607447027184901373544",
+      "score_query_lower": "0.13419492732061812179569843705388467",
+      "proved_query_lower": "0.0000152587890625"
+    },
+    {
+      "family": "context",
+      "input_bits": 2,
+      "amplification_steps": 16,
+      "score_derivative": "0.42603756029959548548031658414606344",
+      "score_query_lower": "0.18150800278603145933185646599443369",
+      "proved_query_lower": "0.0000152587890625"
+    },
+    {
+      "family": "query",
+      "input_bits": 3,
+      "amplification_steps": 16,
+      "score_derivative": "0.50962880367920790142146110708441114",
+      "score_query_lower": "0.25972151753950062904044581838231177",
+      "proved_query_lower": "0.00002288818359375"
+    },
+    {
+      "family": "context",
+      "input_bits": 3,
+      "amplification_steps": 16,
+      "score_derivative": "0.58938805602266476739753737572167517",
+      "score_query_lower": "0.34737828058217582239276715780906392",
+      "proved_query_lower": "0.00002288818359375"
+    },
+    {
+      "family": "query",
+      "input_bits": 4,
+      "amplification_steps": 16,
+      "score_derivative": "0.51560311591461537259479564828877395",
+      "score_query_lower": "0.26584657314086029611004581787898941",
+      "proved_query_lower": "0.000030517578125"
+    },
+    {
+      "family": "context",
+      "input_bits": 4,
+      "amplification_steps": 16,
+      "score_derivative": "0.59732663064295316785353805992900048",
+      "score_query_lower": "0.35679910367526299841694522188115568",
+      "proved_query_lower": "0.000030517578125"
+    },
+    {
+      "family": "query",
+      "input_bits": 8,
+      "amplification_steps": 16,
+      "score_derivative": "0.70785962843578445032032485841644038",
+      "score_query_lower": "0.501065253569246821973767357376616",
+      "proved_query_lower": "0.00006103515625"
+    },
+    {
+      "family": "context",
+      "input_bits": 8,
+      "amplification_steps": 16,
+      "score_derivative": "0.81561590369800338983694803133510693",
+      "score_query_lower": "0.66522930236511073968505551490678152",
+      "proved_query_lower": "0.00006103515625"
+    },
+    {
+      "family": "query",
+      "input_bits": 16,
+      "amplification_steps": 32,
+      "score_derivative": "1.0490964542946363155269001285237912",
+      "score_query_lower": "1.1006033704135779437646026913201742",
+      "proved_query_lower": "0.0001220703125"
+    },
+    {
+      "family": "context",
+      "input_bits": 16,
+      "amplification_steps": 32,
+      "score_derivative": "1.2369192397181246729321678012293793",
+      "score_query_lower": "1.5299692055848635694164648365078271",
+      "proved_query_lower": "0.0001220703125"
+    },
+    {
+      "family": "query",
+      "input_bits": 32,
+      "amplification_steps": 32,
+      "score_derivative": "1.4561151611676716088672603415070607",
+      "score_query_lower": "2.1202713625823542645098734080250729",
+      "proved_query_lower": "0.000244140625"
+    },
+    {
+      "family": "context",
+      "input_bits": 32,
+      "amplification_steps": 32,
+      "score_derivative": "1.7133110796590745395894840516930619",
+      "score_query_lower": "2.9354348556825436625653535240541537",
+      "proved_query_lower": "0.000244140625"
+    },
+    {
+      "family": "query",
+      "input_bits": 64,
+      "amplification_steps": 32,
+      "score_derivative": "2.0133272331072248591740305338303009",
+      "score_query_lower": "4.0534865475711937470708282906930357",
+      "proved_query_lower": "0.00048828125"
+    },
+    {
+      "family": "context",
+      "input_bits": 64,
+      "amplification_steps": 32,
+      "score_derivative": "2.363586550406282125358916068947842",
+      "score_query_lower": "5.5865413812614684341725610516741421",
+      "proved_query_lower": "0.00048828125"
+    },
+    {
+      "family": "query",
+      "input_bits": 128,
+      "amplification_steps": 32,
+      "score_derivative": "2.7774719296881903999968120781256629",
+      "score_query_lower": "7.7143503202058400770704604996121395",
+      "proved_query_lower": "0.0009765625"
+    },
+    {
+      "family": "context",
+      "input_bits": 128,
+      "amplification_steps": 32,
+      "score_derivative": "3.2525510019393457288691530844011639",
+      "score_query_lower": "10.579088020216641783319247323727207",
+      "proved_query_lower": "0.0009765625"
+    },
+    {
+      "family": "query",
+      "input_bits": 256,
+      "amplification_steps": 32,
+      "score_derivative": "3.8257502174066833161470306635195073",
+      "score_query_lower": "14.636364725987284659164955649363164",
+      "proved_query_lower": "0.001953125"
+    },
+    {
+      "family": "context",
+      "input_bits": 256,
+      "amplification_steps": 32,
+      "score_derivative": "4.4678889569642116991511353469372695",
+      "score_query_lower": "19.962031731762751540696408583664429",
+      "proved_query_lower": "0.001953125"
+    },
+    {
+      "family": "query",
+      "input_bits": 512,
+      "amplification_steps": 64,
+      "score_derivative": "5.9161139086463888583319921377241743",
+      "score_query_lower": "35.000403780079252693926099290849014",
+      "proved_query_lower": "0.00390625"
+    },
+    {
+      "family": "context",
+      "input_bits": 512,
+      "amplification_steps": 64,
+      "score_derivative": "7.0320857665720479669562560590002467",
+      "score_query_lower": "49.450230228425187488131892030792568",
+      "proved_query_lower": "0.00390625"
+    }
+  ],
+  "all_checks_passed": true
+}

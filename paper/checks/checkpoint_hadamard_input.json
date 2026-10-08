@@ -1,0 +1,16 @@
+{
+  "scope": "Illustrative structural tanh network, not measurements from a trained checkpoint.",
+  "residual_width": 32,
+  "depth": 5,
+  "parameter_bits": 100,
+  "critical_tanh": {
+    "certificate_status": "Supplied exact structural identities for the Sylvester Hadamard family; this worksheet does not inspect a matrix.",
+    "zero_bias": true,
+    "row_norm_max": "1",
+    "first_layer_rank": 32,
+    "column_envelope": "1",
+    "first_layer_rank_is_uniform_constant": false,
+    "column_envelope_is_uniform_constant": true,
+    "descriptor": "W_1=H_32/32 for the Sylvester Hadamard matrix, W_l=I_32 for l>=2, and every bias is zero. H_32 H_32^T=32 I_32 gives first-layer rank 32. Every first-layer entry has absolute value 1/32, so each row has l1 norm 1 and C_col=1. In the family of orders n=2^k, the rank grows as n while C_col stays 1."
+  }
+}

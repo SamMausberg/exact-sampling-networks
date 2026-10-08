@@ -1,0 +1,80 @@
+\begin{corollary}[Residual bit bound at arbitrary norm]
+\label{cor:largeresidualsharpbits}
+Let $s\ge1$, with $C_s$, $b_s$, and $\bits_s$ as in
+Proposition~\ref{prop:largerow}.
+The raw residual sampler has expected online bit work
+\begin{equation}\label{eq:largeresidualsharpbits}
+ O(\bits_s^4 b_s^D).
+\end{equation}
+Its preprocessing remains rational row sums and prefix tables,
+at cost $O(Dn^2\bits_s^2)$.
+In particular, $\alpha s^2D=O(\log\log n)$ and
+$\bits_s=\log^{O(1)}n$ suffice for polylogarithmic expected
+online bit work. This permits $s$ itself to exceed every fixed
+power of $\log n$. To fit the original
+$O(Dn^2\log^6n)$ preprocessing allowance, it is sufficient
+that $\bits_s=O(\log^3n)$.
+\end{corollary}
+\paragraph{Proof idea.}
+Use the sharp large-radius scalar routine at each active residual update.
+The same compressed-skip accounting now charges its quadratic radius cost
+together with all scalar precision work.
+
+\begin{proof}
+An active row has $u=|b_0|+\sigma\le1+s$ and therefore
+costs $O((1+s)^2\bits_s^4)$ by
+Theorem~\ref{thm:quadraticradiusbits}.
+Its expected number of child requests remains at most $C_s$.
+The expected number of leaves is at most $b_s^D$, and the
+expected active-row count is at most
+$\alpha\sum_{j<D}b_s^j$.
+Compressed geometric skips have the same logarithmic bit cost
+per visited branch. The stopping-cost lemma gives
+\[
+ O\!\left(\bits_s^4\left[
+ 1+b_s^D+(1+s)^2\alpha\sum_{j<D}b_s^j\right]\right).
+\]
+For $s\ge1$,
+\[
+ \frac{(1+s)^2}{C_s-1}\le\frac43,
+ \qquad
+ (1+s)^2\alpha\sum_{j<D}b_s^j
+ \le\frac43(b_s^D-1),
+\]
+including $\alpha=0$ by continuity or direct inspection.
+This proves \eqref{eq:largeresidualsharpbits}.
+Finally $C_s-1\le4s^2$ and
+$b_s^D\le\exp(4\alpha s^2D)$.
+\end{proof}
+
+\begin{corollary}[One residual layer]
+\label{cor:largeresidualonelayerbits}
+For any signed, biased row of width $n$, row norm at most
+$s\ge1$, and $|b_0|\le1$, one residual output admits an
+exact sampler using
+\[
+ O\!\left(\bits_s^4
+ [1+\alpha\min\{s^2,n\}]\right)
+\]
+expected online bit operations after the same preprocessing.
+For the legal uniform zero-bias rows of
+Proposition~\ref{prop:residuallargeslower}, with $s\ge2$ and
+even width, its input-query dependence is optimal up to an
+absolute factor.
+\end{corollary}
+\paragraph{Proof idea.}
+There is only one active nonlinear row. Mix its exact sample with the
+directly accessible skip coordinate, and compare this algorithm with reading
+the entire row.
+
+\begin{proof}
+Choose the identity input on the skip branch. On the nonlinear
+branch, put $H=\max\{1,\sigma+|b_0|\}$ and use the
+quadratic-radius sampler if $H^2\le n$; otherwise probe and
+sum the entire rational row and sample
+its tanh output with a certified comparison. The latter costs
+$O(n\bits_s^4)$ in expectation. Since $H\le2s$, the chosen
+cost is bounded by $O(\bits_s^4\min\{s^2,n\})$.
+The query lower bound is
+\eqref{eq:residuallargeslower}.
+\end{proof}

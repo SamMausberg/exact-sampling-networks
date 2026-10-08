@@ -1,0 +1,90 @@
+\section{A complete autoregressive decoder}
+\label{sec:full-decoder-main}
+
+This section states the decoder bound announced in the introduction
+and the ideas of its proof. The index of Section~\ref{sec:index-main}
+assumes finite records. The decoder also constructs each new key and
+value with the neural model and charges that work.
+
+Fix a dyadic embedding table with entries of magnitude at most $s$
+and a causal network of the pre-norm form~\eqref{eq:main-prenorm}.
+Use dyadic residual steps in $[0,1]$; convex residual mixtures with
+coefficients in $[0,1]$ are also allowed. Allow an affine attention
+output map and an affine vocabulary head. Parameters have at most $b$ bits,
+row norms and biases are at most $s\ge1$, the temperature is
+nonnegative dyadic or $\sqrt n$, and every normalization
+has positive stabilizer at least $2^{-b}$. Each layer's fixed
+linear key map has rank at most $r$. Its keys at all positions
+must lie in one common affine space; separate rank bounds on
+position-dependent maps do not imply that promise.
+
+\begin{theorem}[Exact decoding with maintained neural keys]
+\label{thm:main-decoder}
+For each fixed $r$, there is a constructive polynomial $F_r$
+such that a prompt of length $T_0\ge1$ can be prefilled in
+\[
+ T_0F_r(n,D,V,b,s,\beta,\log(T_0+2))
+\]
+bit operations. Every subsequent token has conditional expected
+cost at most
+\[
+ F_r(n,D,V,b,s,\beta,\log(T+2)),
+\]
+given every previously sampled token history. This includes key
+and value creation, insertion, random bits, and all refinements.
+The output has the exact original autoregressive law.
+At $\beta=\sqrt n$, with $D,V,b,s$ polynomially bounded in $n$,
+the per-token bound is $\poly_r(n,\log T)$.
+The affine head's logit range is determined from the parameter
+bounds. The polynomial degree depends on $r$.
+\end{theorem}
+
+Theorem~\ref{thm:momentdecoder} proves this statement for logits
+promised to lie in $[-1,1]$, and Corollary~\ref{cor:affineheadmoment}
+removes that promise for the affine head.
+
+In a bounded chart, write a score, up to a common offset, as
+$\langle t,z_j\rangle$, where $z_j\in[-1,1]^r$ and
+$\|t\|_1\le H=\poly_r(n,s,\beta)$. A degree-$m$ Taylor
+expansion uses $\binom{m+r}{r}$ monomials. Store their sums
+and their value-weighted sums as exact integers over a common
+dyadic denominator. Each new record adds to these counters.
+Degree $m=O(H+p)$ yields certified attention accuracy $2^{-p}$;
+the average denominator is at least $e^{-H}$, so this includes
+the error of division. At $\beta=\sqrt n$, rational even and
+odd degree sums keep the specified square root exact.
+
+Attention is Lipschitz from the maximum score error to the total
+probability error with constant two, independently of the number
+of keys. For positive RMS stabilizers, the logarithm of the Lipschitz
+constant is of order $b+\log n$. Consequently errors propagate through
+the $D$ layers, with no linear factor in the number of positions.
+A precision of $p+O((D+1)[b+\log(n+s+\beta+2)]+\log(D+V+2))$ suffices.
+Rounding the normalized stream before its exact key-map product
+preserves the promised rank. This detail prevents a finite
+approximation from silently changing the structural hypothesis.
+
+Routine precision is a sufficiently large multiple of $\log T$.
+If a uniform draw is too close to a categorical boundary, replay
+the actual token history at higher precision until the sample is
+certified. An unresolved precision-$p$ comparison has probability
+at most $4V2^{-p}$. Choosing routine error of order $T^{-3}/V$
+pays for a complete replay on that rare branch. A second routine
+index replays two old tokens after each append and catches up
+before the current precision expires. Ordinary maintenance uses
+at most three deterministic token evaluations per step.
+Figure~\ref{fig:decoder-overview} shows this maintenance loop.
+
+For a basic tanh model with an affine head that is fixed in all
+parameters, the key ranks are fixed even when the key matrices have
+full rank. The explicit implementation gives
+$O_{\rm model}(\log^{2r+12}(T+2))$ expected work per token, with
+model-dependent constants that can be enormous
+(Corollary~\ref{cor:fixedmodelcontext}).
+Fixed coordinate-pair positional rotations also admit a
+$\log^{O_{\rm model}(1)}T$ bound: certified trigonometric
+evaluation costs polynomial time in precision and $\log T$
+(Corollary~\ref{cor:fixedpositionalrotation}). The same
+finite-evaluation argument covers specified GELU and SwiGLU updates
+using their polynomial range and Lipschitz bounds on bounded
+normalized inputs (Corollary~\ref{cor:momentgeluswiglu}).

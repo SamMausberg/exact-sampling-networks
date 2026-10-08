@@ -1,0 +1,49 @@
+{
+  "scope": "Illustrative rational inputs for checking the worksheet. No trained checkpoint was measured.",
+  "residual_width": 32,
+  "depth": 2,
+  "vocabulary_size": 16,
+  "cache_length": 1024,
+  "parameter_bits": 32,
+  "stage_error_factors_upper": ["4", "8", "2", "4", "8", "2", "2"],
+  "feedforward_widths": [32, 32],
+  "heads": [
+    {
+      "name": "Illustrative block 1 head",
+      "certificate_status": "Illustrative assumption, not verified",
+      "key_dimension": 8,
+      "value_dimension": 8,
+      "certified_rank": 1,
+      "finite_record_bits": 32,
+      "query_bound": "1",
+      "key_scale": "1",
+      "value_scale": "1",
+      "temperature_upper": "3",
+      "standard_scaling": true
+    },
+    {
+      "name": "Illustrative block 2 head",
+      "certificate_status": "Illustrative assumption, not verified",
+      "key_dimension": 8,
+      "value_dimension": 8,
+      "certified_rank": 1,
+      "finite_record_bits": 32,
+      "query_bound": "1",
+      "key_scale": "1",
+      "value_scale": "1",
+      "temperature_upper": "3",
+      "standard_scaling": true
+    }
+  ],
+  "normalization": {
+    "certificate_status": "Illustrative assumption, not verified",
+    "input_radius": "1",
+    "epsilon": "1/65536",
+    "certified_squared_floor": "1/16"
+  },
+  "additive_initial_radius": "1",
+  "additive_updates": [
+    {"radius_increment": "1/2", "source_bound": "3", "local_arithmetic_factor": "5"},
+    {"radius_increment": "1/2", "source_bound": "2", "local_arithmetic_factor": "3"}
+  ]
+}

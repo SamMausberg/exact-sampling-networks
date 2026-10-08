@@ -1,0 +1,828 @@
+% Finite-bit decoder theorem and proof, 8 October 2026.
+\subsection{Maintaining fixed-rank attention through exact decoding}
+\label{sec:momentdecoder}
+
+This subsection proves the decoder of Theorem~\ref{thm:main-decoder}.
+An index that accepts already computed keys leaves their construction
+outside its cost.  For a fixed key-map rank, polynomial moments also
+permit the construction of the new keys and values.  We first give a
+deterministic finite-precision evaluator.  We then use certified
+probability intervals to sample exactly, with rare precision increases
+paid for by their probability.  The maintained Taylor feature
+sums~\cite{katharopoulos2020linear,heinsen2026taylor} and exact
+sampling by interval refinement~\cite{han1997interval,brassard2019remote}
+are established; Section~\ref{sec:prior-main} says what we take from
+them.  The claims here concern finite arithmetic, a uniform depth error
+bound, maintenance while precision increases, and the exact original
+autoregressive law.
+
+\paragraph{Model.}
+The vocabulary has size $V$, the residual width is $n$, and there are
+$D$ causal attention blocks.  Each block first applies
+\[
+ N_\varepsilon(h)=
+ \frac{h}{\sqrt{\varepsilon+\|h\|_2^2/n}},\qquad \varepsilon>0,
+\]
+then affine query, key, and value maps.  Its attention scores are
+$\beta\langle q_t,k_j\rangle/n$, $j\le t$.  The attention update
+is added to the residual stream.  A second normalization followed by
+an affine map and coordinatewise tanh gives the second additive
+update.  Either additive update may be multiplied by a fixed dyadic
+coefficient $\alpha\in[0,1]$.  Convex residual mixtures with
+coefficients in $[0,1]$ are also allowed.
+An additional fixed affine attention output map can be included.
+The output consists of $V$ affine logits followed by softmax; the
+logits are promised to lie in $[-1,1]$.  Input tokens use a fixed
+dyadic embedding table with entries of magnitude at most $s$.
+
+All model parameters are dyadic with encoding length at most $b$,
+using binary integer numerators and denominators; in particular,
+their denominators divide $2^b$.
+The row sums of absolute values and the bias bounds are at most
+$s\ge1$.  Every positive normalization parameter is at least
+$2^{-b}$.  The temperature $\beta\ge0$ is dyadic of at most $b$
+bits, or $\beta=\sqrt n$.  Each layer uses one fixed affine key
+map at every position, and its linear part has rank at most the
+fixed integer $r$.  Thus there is one common known affine key
+space per layer containing the keys at all positions.  Separate
+rank bounds for position-dependent maps, such as positional
+rotations that enlarge the joint key span, do not imply this
+joint-space condition.  The affine key space is computed from the
+fixed weights, independently of the token history.
+
+The statement also applies to a bounded number of heads, with a
+separate rank promise for each head.  More generally, the number of
+heads can be included as another polynomial parameter.  We state
+the formulas for one head to keep notation short.
+
+\begin{theorem}[Exact decoding with a fixed-rank key map]
+\label{thm:momentdecoder}
+For each fixed $r$, the model above has a uniform exact autoregressive
+sampler.  Let $T_0\ge1$ be the prompt length and $T\ge T_0$ the
+current context length.  There is a constructive polynomial $F_r$
+such that prefill costs at most
+\[
+ T_0 F_r(n,D,V,b,s,\beta,\log(T_0+2)),
+\]
+and every subsequent token has expected bit cost at most
+\[
+ F_r(n,D,V,b,s,\beta,\log(T+2)).
+\]
+The expectation is conditional on every previous token history.
+It includes the construction and insertion of the new keys and
+values, random bits, and all precision refinement.  The sampler
+uses no exact-real oracle.  At standard scaling $\beta=\sqrt n$,
+if $s,D,V,b$ are polynomially bounded in $n$, the expected work is
+$\operatorname{poly}_r(n,\log T)$.  The context dependence outside
+the stored token history is polylogarithmic.
+
+The same argument applies to a specified family of other
+feedforward updates when fixed polynomial bounds for its range,
+certified evaluation cost, and logarithm of its Lipschitz bound
+are supplied as part of the theorem's assumptions.  The resulting
+polynomial also depends on those fixed bounds.  The degree of
+$F_r$ depends on $r$; the uniform polynomial dependence on width
+requires a rank bound independent of width.
+\end{theorem}
+
+We prove the theorem after three lemmas: a finite moment index
+(Lemma~\ref{lem:finitemomentindex}), uniform precision for a causal
+replay (Lemma~\ref{lem:prefixstability}), and exact sampling from
+certified replays (Lemma~\ref{lem:replayexactsampling}).
+
+\begin{lemma}[A finite moment index]
+\label{lem:finitemomentindex}
+Fix $r$.  Let $z_j\in[-1,1]^r$ and $u_j\in[-1,1]^a$ be dyadic
+records on a common grid $2^{-P}$, and let $t\in\mathbb R^r$
+satisfy $\|t\|_1\le H$, where $H\ge1$ is an integer.  The
+coordinates of $t$ are either rational with a common denominator,
+or have the form $c_i/\sqrt n$ with rational $c_i$ having a common
+denominator.  Write
+\[
+ A(t)=\frac{\sum_{j=1}^T e^{\langle t,z_j\rangle}u_j}
+              {\sum_{j=1}^T e^{\langle t,z_j\rangle}}.
+\]
+For each $p\ge1$, an append-only deterministic index returns
+certified intervals of width at most $2^{-p}$ for all coordinates
+of $A(t)$.  Its update and query costs are polynomial, at fixed
+$r$, in $a,H,P,p$, the rational coefficient lengths, $\log(T+2)$,
+and, in the second case, $\log(n+2)$.
+Its arithmetic has no error that accumulates with the number of
+insertions.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Expand the exponential in the fixed number of key coordinates.
+The index stores exact sums of monomials and value-weighted
+monomials.  Their numerator lengths grow by $\log T$.  A uniform
+Taylor error controls the normalized attention mean because its
+average denominator is at least $e^{-H}$.
+
+\begin{proof}
+Put
+\[
+ q=p+2H+6,\qquad m=\lceil8(H+q+1)\rceil,\qquad
+ \mathcal I_m=\{\nu\in\mathbb N^r:|\nu|\le m\}.
+\]
+Let $N_m=|\mathcal I_m|=\binom{m+r}{r}$.  The Taylor polynomial
+$E_m(x)=\sum_{d=0}^m x^d/d!$ satisfies
+\begin{equation}
+ \sup_{|x|\le H}|E_m(x)-e^x|\le2^{-q}.
+ \label{eq:momenttaylorerror}
+\end{equation}
+Indeed, the Lagrange remainder is at most
+$e^H H^{m+1}/(m+1)!$.  The elementary bound
+$N!\ge(N/e)^N$ follows by integrating $\log x$ below its sum.
+Since $m+1\ge8H$ and $e<4$, the remainder is at most
+$e^H2^{-(m+1)}\le2^{2H-m-1}\le2^{-q}$.
+
+Store the exact rational sums
+\[
+ S_\nu=\sum_{j=1}^T z_j^\nu,\qquad
+ M_{\nu,i}=\sum_{j=1}^T z_j^\nu u_{j,i},
+ \qquad \nu\in\mathcal I_m,\quad i\le a.
+\]
+They can be stored as integer numerators over the one denominator
+$2^{P(m+1)}$.  An insertion computes its monomials exactly and
+adds the corresponding integer increments.  The absolute value
+of every stored sum is at most $T$, so its numerator has
+$O(P(m+1)+\log(T+2))$ bits.  No rounding occurs during these
+additions.  Different dyadic coordinate grids can be put over one
+common power-of-two denominator before forming the moments.
+
+The multinomial theorem gives
+\[
+ E_m(\langle t,z\rangle)=
+ \sum_{\nu\in\mathcal I_m}\frac{t^\nu z^\nu}{\nu!}.
+\]
+Consequently the truncated numerator and denominator are computed
+from the stored moments by $O(aN_m)$ exact rational operations.
+If the common denominator of the rational coordinates of $t$ is
+$d_t$, all Taylor coefficients have a common denominator dividing
+$d_t^m m!$.  This follows because $\nu!$ divides $|\nu|!$, which
+divides $m!$.  Integer numerator lengths are polynomial in
+$m,P$, the coefficient encoding lengths, and $\log T$.
+
+Divide the true and truncated sums by $T$.  Their denominators
+are $Z$ and $\widetilde Z$, and their coordinate numerators are
+$N_i$ and $\widetilde N_i$.  Then
+\[
+ Z\ge e^{-H},\quad |N_i|\le Z,\quad
+ |Z-\widetilde Z|\le\delta,\quad
+ |N_i-\widetilde N_i|\le\delta,
+ \qquad \delta=2^{-q}.
+\]
+The choice of $q$ makes $\delta\le Z/2$.  Thus
+\[
+ \left|\frac{\widetilde N_i}{\widetilde Z}
+            -\frac{N_i}{Z}\right|
+ \le\frac{2\delta}{Z-\delta}
+ \le4\delta e^H
+ \le2^{-p-4}.
+\]
+In particular the truncated denominator is positive.  A rational
+division enclosure of width $2^{-p-2}$, enlarged by the displayed
+Taylor error on both sides, has width less than $2^{-p}$.
+
+At standard scaling the coordinates are $t_i=c_i/\sqrt n$.
+Separate multiindices by the parity of $|\nu|$.  Every truncated
+sum is then of the form $A+B/\sqrt n$ with rational $A,B$.
+A common denominator is
+$d_c^m n^{\lfloor m/2\rfloor}m!$, where $d_c$ is a common
+denominator for the $c_i$.  Its encoding length is
+$O(m\log n+m\log(m+2))$ plus the rational input lengths.
+The ratio of two such expressions is evaluated by certified
+bisection for $\sqrt n$.  The positive lower bound
+$\widetilde Z\ge e^{-H}/2$ bounds the required guard precision.
+If the rational coefficients have at most $L$ bits, precision
+$O(L+H+p+\log(T+2))$ in the square root suffices.  This remains
+polynomial.  If $n$ is a square, ordinary rational arithmetic
+suffices.  Hence the temperature is exactly $\sqrt n$ throughout;
+it has not been replaced by a floating-point constant.
+\end{proof}
+
+\paragraph{An explicit polynomial bound.}
+The preceding construction can deliberately use schoolbook integer
+arithmetic and recompute monomials.  With
+\[
+ L=C_r\{m[P+b+\log(n+m+D+V+2)]+\log(T+2)+1\},
+\]
+one may bound an entire token's deterministic finite-precision
+evaluation by
+\begin{equation}
+ C_r(D+1)(n+V+1)^2(m+1)^{2r+4}L^4.
+ \label{eq:momentexplicitcost}
+\end{equation}
+Here $b$ also bounds the fixed rational chart lengths up to a
+factor depending on $r$, and $P$ includes the guard precision
+described below.  To check \eqref{eq:momentexplicitcost}, note
+that every integer formed for one token has $O(L)$ bits, so a
+schoolbook product costs $O(L^2)$.  The layers and the output head
+use $O((D+1)(n+V+1)^2)$ products in affine maps and $O((D+1)(n+V))$
+certified scalar evaluations, each of cost $O(L^4)$ by
+Lemma~\ref{lem:newnegativeexp} and rational bisection.  The moment
+updates and queries use $O((D+1)(n+m+1)N_m)$ products, where
+$N_m=\binom{m+r}{r}\le(m+1)^r$: each monomial and each Taylor
+coefficient takes $O(m)$ products and meets $n$ value coordinates.  The total is
+$O_r((D+1)(n+V+1)^2(m+1)^{r+1}L^4)$.  The displayed bound is
+intentionally loose; it counts bit operations.
+
+\begin{lemma}[Uniform stability over a causal prefix]
+\label{lem:prefixstability}
+For the model in Theorem~\ref{thm:momentdecoder}, a token history
+of any length has a deterministic certified replay algorithm.  To
+return all output probabilities and their cumulative sums within
+absolute interval width $2^{-p}$, it uses working precision
+\[
+ P=p+O\!\left((D+1)[b+\log(n+s+\beta+2)]
+                 +\log(D+V+2)\right).
+\]
+Its work per replayed token is bounded by a fixed polynomial in
+$n,D,V,b,s,\beta,p,\log(T+2)$ at fixed $r$.  The stability guard
+does not grow linearly with the context length.
+\end{lemma}
+
+\paragraph{Proof idea.}
+An attention row is stable in the largest coordinate error, with
+a bound independent of the number of keys.  Each layer reads only
+the preceding layer's prefix.  Errors therefore propagate through
+network depth.  Exact moment counters introduce no additional
+recurrence over token positions.
+
+\begin{proof}
+For scores $a$ and values $v$, write $p(a)$ for softmax and
+$F(a,v)=\sum_j p_j(a)v_j$.  Along a differentiable score path,
+\[
+ \frac{d}{dt}p_j=p_j\left(\dot a_j-\sum_i p_i\dot a_i\right).
+\]
+Summing absolute values shows that softmax is Lipschitz from
+$\ell_\infty$ scores to $\ell_1$ probabilities with constant
+two, for every number of positions.  If the value coordinates
+are bounded by $K$, this gives
+\begin{equation}
+ \|F(a,v)-F(a',v')\|_\infty
+ \le\|v-v'\|_\infty+2K\|a-a'\|_\infty.
+ \label{eq:attentionstabilitymoment}
+\end{equation}
+For $|q_i|,|k_{j,i}|\le K$, perturbations bounded by
+$\delta_q,\delta_k$ change any score by at most
+$\beta K(\delta_q+\delta_k)$.  The same estimate follows by
+interpolating between two bounded endpoint arrays, so it has no
+extra product-error term.
+
+Normalization has a global bound independent of the residual
+radius.  Put $v=\varepsilon+\|h\|_2^2/n$.  Its Jacobian is
+\[
+ \frac{\partial N_i}{\partial h_j}
+ =\frac{\mathbf1_{i=j}}{\sqrt v}
+       -\frac{h_i h_j}{n v^{3/2}}.
+\]
+Using $|h_i|\le\sqrt{n(v-\varepsilon)}$ and
+$\|h\|_1\le n\sqrt{v-\varepsilon}$, every absolute row sum
+is at most $(1+\sqrt n)/\sqrt\varepsilon$.  Hence the
+$\ell_\infty$ Lipschitz constant is at most
+$(1+\sqrt n)2^{b/2}$.  Also $|N_i(h)|\le\sqrt n$.
+Choose a known power of two
+\[
+ K\ge s(\lceil\sqrt n\rceil+1),\qquad
+ K<2s(\lceil\sqrt n\rceil+1).
+\]
+Queries, keys, and values obtained from normalized inputs are
+bounded by $K$.  Affine maps have Lipschitz bound $s$, tanh has
+bound one, and residual addition has bound two on a product of
+streams.  A fixed affine output map only introduces another
+factor polynomial in $s$.  Thus the network is a composition of
+$J=O(D+1)$ maps on prefix arrays, each with a common Lipschitz
+bound $L_0\ge2$ satisfying
+\[
+ \log_2 L_0=O(b+\log(n+s+\beta+2)).
+\]
+These maps act on all positions with the maximum norm.  The bound
+is independent of the number of positions by
+\eqref{eq:attentionstabilitymoment}.
+
+\paragraph{Induction over depth.}
+If each primitive's computed output has local error at most
+$\delta$, induction bounds the final error by
+$J L_0^J\delta$.  Choose
+\[
+ \delta=2^{-P},\qquad
+ P\ge p+\lceil\log_2(J+1)\rceil
+       +J\lceil\log_2L_0\rceil+10.
+\]
+Known interval error bounds can be propagated with these same
+constants, so this argument returns certified enclosures.  The
+output head and its
+cumulative probabilities are evaluated with the same margin.
+Exponentials on bounded logit intervals and a positive softmax
+denominator have elementary polynomial certified evaluation cost.
+The $V$ sums and output coordinates are charged explicitly.
+
+\paragraph{Rank-preserving rounding.}
+A deterministic rounding operation first computes a certified
+interval of width at most $2^{-P-3}$, then rounds its rational midpoint to the grid
+$2^{-P}$.  Its local error is less than $2^{-P}$ after the fixed
+guard margin is included.  It does not decide the exact nearest
+grid point of an unknown real value.  Apply this rule to the output
+of normalization, clipping the rounded value to the
+rational interval $[-\lceil\sqrt n\rceil,\lceil\sqrt n\rceil]$,
+and then compute
+\[
+ \widetilde k=W_K\widetilde N+b_K
+\]
+\emph{exactly}.  The result is dyadic on the grid $2^{-(P+b)}$
+and lies exactly in $b_K+\operatorname{image}(W_K)$.  Independent
+rounding of the coordinates of $\widetilde k$ is not used.  Query
+and value affine products can be computed exactly in the same
+way.  The completed residual updates are rounded to $2^{-P}$.
+All these local rounding errors are included in $\delta$ by
+requesting a fixed number of guard bits inside each primitive.
+
+\paragraph{The moment chart.}
+Use a bounded rational coordinate chart for the key image,
+$k=c_0+A k_I$, with $|A_{ij}|\le2$.  The chart is computed once
+from the weights by Lemma~\ref{lem:dynamicchart}, applied to a
+column basis of $W_K$.  Put
+$z_j=(k_j)_I/K$.  Then $z_j\in[-1,1]^r$, and the common score
+offset $\beta\langle q,c_0\rangle/n$ cancels.  The remaining
+coefficient vector is
+\[
+ t=\frac{\beta K}{n}q^T A,\qquad
+ \|t\|_1\le2r\beta K^2.
+\]
+Take $H=\lceil\max\{1,2r\beta K^2\}\rceil$, using a rational
+upper bound for $\sqrt n$ if necessary.  Scale values by $K$ and
+apply Lemma~\ref{lem:finitemomentindex}; restoring that scale
+needs only $O(\log(K+2))$ additional requested precision bits.
+The key and value grids are common throughout a precision phase,
+so the moment additions remain exact.  The common determinant
+denominator in $A$ gives rational coefficient lengths
+$O_r(P+b+\log(n+2))$; an $n$-term projection adds $O(\log n)$
+numerator bits.
+
+\paragraph{Causal order.}
+Process a prefix in increasing position order.  At a layer and
+position $t$, first form its query, key and value from the current
+preceding-layer residual.  Append the current key and value to
+that layer's moment index \emph{before} querying it, so the
+attention range is exactly $j\le t$.  Complete the residual and
+feedforward operations, then move to the next layer.  This is
+the same deterministic computation whether performed during
+prefill, an online append, or a replay.
+
+To see why no token-count error factor is hidden, regard each
+layer's exact and approximate states as arrays over all positions
+in the current prefix.  Every attention input belongs to the
+preceding-layer array.  Its maximum error is already bounded by
+the preceding induction step.  A previous token's error is never
+fed back into the same layer's residual state.  The only
+cross-position operation is the normalized weighted average,
+whose uniform Lipschitz bound was proved above.  Exact integer
+moment sums evaluate the attention of the approximated arrays
+without a further time-accumulation error.  The induction
+therefore runs over the $J$ network stages only.  The explicit
+polynomial bound
+\eqref{eq:momentexplicitcost} completes the claim.
+\end{proof}
+
+\begin{lemma}[Exact sampling from certified replay]
+\label{lem:replayexactsampling}
+Suppose a deterministic causal evaluator can maintain a token
+history at any fixed accuracy $2^{-p}$, spending at most
+$G(p+\log(T+2))$ bits per appended token, where $G$ is a fixed
+polynomial with nonnegative coefficients.  Suppose a replay of
+all $T$ tokens costs at most $T G(p+\log(T+2))$ and returns
+certified intervals of width at most $2^{-p}$ for all categorical
+cumulative probabilities.  Then exact autoregressive sampling
+can be maintained with expected polynomial work per token,
+including precision changes, after polynomial prefill.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Routine precision is a sufficiently large multiple of $\log T$.
+Only a uniform random number close to a cumulative boundary
+requires a complete finer replay.  Background processing prepares
+the next routine index before the current precision expires.
+The interval decision is classical.  The additional point here
+is paying for a complete causal replay only on its small
+ambiguity event, while preparing routine precision increases
+with bounded work at each token.
+
+\begin{proof}
+For a power-of-two horizon $R$, choose
+\[
+ p_R=\left\lceil\log_2\bigl(64V(R+2)^3\bigr)\right\rceil.
+\]
+At a query draw the first $p_R$ bits of a fresh uniform binary
+expansion $U$.  Let $I_U=[a,b]$ be its dyadic interval, of width
+$2^{-p_R}$.  Denote the certified cumulative intervals by
+$[\underline F_i,\overline F_i]$, and use the exact endpoints
+$F_0=0$ and $F_V=1$.  If
+$\overline F_{i-1}\le a$ and $b\le\underline F_i$, output
+token $i$.  Equality at a dyadic cell endpoint is permitted; the
+rule can then differ from the inverse CDF only when $U$ equals a
+true boundary, an event of probability zero.  Otherwise
+replay the current history at accuracy $p_R+1$, reveal one more
+uniform bit, and try again.  Continue with $p_R+j$ as needed.
+Intervals from successive replays need not be nested; every one
+contains the same true cumulative probabilities.
+
+If the precision-$p$ comparison is unresolved, $U$ is within
+$2^{1-p}$ of one of the at most $V-1$ cumulative boundaries.
+The conditional probability of this event, given the token
+history, is at most
+\begin{equation}
+ 4V2^{-p}.
+ \label{eq:replayuncertainty}
+\end{equation}
+Each realized uniform number outside the finite set of true
+boundaries eventually lies in a unique certified categorical
+interval.  The algorithm therefore stops almost surely, and its
+output is exactly the inverse-CDF sample.  It does not substitute
+an approximate probability law.
+
+\paragraph{Cost of temporary replays.}
+The expected work of temporary replays is bounded by
+\[
+ 8VT2^{-p_R}
+ \sum_{j\ge0}2^{-j}G(p_R+j+\log(T+2)).
+\]
+As long as $T\le R$, its prefactor is at most a constant times
+$(R+2)^{-2}$.  If $G$ has degree $k$, the sum is polynomial
+in $p_R+\log(T+2)$.  One explicit inequality, valid for $P\ge1$,
+is
+\[
+ \sum_{j\ge0}2^{-j}(P+j)^k
+ \le2^{k+1}k!P^k.
+\]
+It follows from $(P+j)^k\le P^k(j+1)^k$ and
+$(j+1)^k\le k!\binom{j+k}{k}$, followed by the generating
+function for these binomial coefficients.  This proves the
+expected work bound without assuming finite expected stopping
+time in advance.  The same tail bounds all additional random
+bits.  After the token is returned, discard every temporary
+fine-precision index and retain the deterministic routine index.
+
+\paragraph{The background schedule.}
+It remains to maintain routine precision without a large online
+rebuild.  Let $N$ be the least power of two at least $T_0$.
+During prefill build the routine index at precision $p_{2N}$.
+This horizon is at least $2T_0$, so the first append is not forced
+to pay for a prefix rebuild.  Before context length $N$, use
+this index alone.  At length $N$, begin an empty future index at
+precision $p_{4N}$.  During each of the next $N$ appends, perform
+the current index's one-token update and replay two successive
+history tokens into the future index.  After $j$ such appends,
+the history has length $N+j$ and the future index has replayed
+$2j$ tokens.  Since $2j\le N+j$ for $j\le N$, the next replay
+tokens always exist.  At length $2N$ the future index has replayed
+exactly the entire current history.  Switch to it, replace $N$
+by $2N$, and begin the next future index.
+
+Every online append therefore performs at most three deterministic
+token evaluations.  The future precision differs from the
+current precision by only a constant number of bits in $p_R$;
+its other model-dependent guards are unchanged.  No operation
+scans the context as part of the deterministic maintenance
+schedule.  The only complete scans are temporary random
+refinements, whose expected cost was bounded above.
+
+\paragraph{The exact law.}
+Store the actual token history for all replays.  A replay is
+driven only by this history and the fixed model.  It never uses
+the approximate hidden states of a different precision index.
+Conditional on every realized token history, its intervals
+therefore enclose the same exact next-token law.  Fresh uniform
+bits give the correct next conditional distribution, and induction
+establishes the entire autoregressive joint law.  Background
+replays and temporary refinements do not change any previously
+sampled token.
+\end{proof}
+
+\paragraph{Proof idea for Theorem~\ref{thm:momentdecoder}.}
+The moment index supplies a maintained evaluator at each fixed
+precision.  Uniform stability sets the required precision from
+network depth, and the replay lemma handles its increase with
+context length.  Combining their bit bounds charges both normal
+updates and the rare refinements needed for the exact law.
+
+\begin{proof}[Proof of Theorem~\ref{thm:momentdecoder}]
+Apply Lemma~\ref{lem:prefixstability} to obtain the deterministic
+fixed-precision evaluator, with the exact moment counters of
+Lemma~\ref{lem:finitemomentindex}.  Its one-token work is bounded
+by \eqref{eq:momentexplicitcost}, with
+$m=O_r(\beta K^2+P+1)$ and the working precision stated in the
+stability lemma.  Apply Lemma~\ref{lem:replayexactsampling}.
+The explicit geometric-moment inequality converts the temporary
+replay cost into another polynomial in the same parameters.
+All storage consists of the fixed model, the token history, at
+most two routine moment indices, and temporary replay storage
+when required.  The routine indices have polynomial size in the
+displayed parameters and $\log T$.  Temporary precision has no
+deterministic upper bound, but the same geometric moment estimate
+bounds its expected space by such a polynomial.  No infinite
+expansion or real arithmetic oracle is used.
+
+For the normalized model, $K=O(s\sqrt n)$, so
+$H=O_r(1+\beta s^2n)$.  At $\beta=\sqrt n$ this is polynomial
+in $n$ and $s$.  The normalization guard depends on $b$ only
+through $\log L_0$, and the degree of the polynomial approximation
+has no factor $2^b$.  Thus a very small
+positive normalization floor changes precision polynomially.
+The stipulated bounds on the remaining parameters give the
+claimed $\operatorname{poly}_r(n,\log T)$ work.  Substituting
+other polynomially evaluable updates only changes the range and
+Lipschitz constants in the same finite-depth induction.
+\end{proof}
+
+\begin{corollary}[The affine output head needs no fixed logit range]
+\label{cor:affineheadmoment}
+The conclusions of Theorem~\ref{thm:momentdecoder} remain valid
+when the promise that logits lie in $[-1,1]$ is removed, keeping
+the stated affine-head row and bias bounds.  The cost is bounded
+by another constructive polynomial in the same parameters.
+The fixed-model corollaries below also hold for this extension.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Pre-normalization bounds every attention update, so additive
+residuals give a polynomial logit range.  Subtracting an upper
+bound for the largest logit makes all exponentials nonpositive
+and leaves a constant lower bound on their total.  Certified
+softmax evaluation therefore has no cost exponential in the
+logit range.
+
+\begin{proof}
+With the power-of-two value bound $K$ used above, the residual
+range after $D$ blocks is at most
+\[
+ R_D=s+D(sK+s+1).
+\]
+Indeed the embedding range is at most $s$; an attention mean has
+range at most $K$, its optional affine output map has range at
+most $sK+s$, and the tanh update has range at most one.  This
+bound also covers convex residual coefficients.  Hence each
+output logit has absolute value at most
+$Z=sR_D+s$, which is polynomial in $n,D,s$.
+
+For completeness, consider certified intervals of width at most
+$1/4$ for the real logits $z_1,\ldots,z_V$.  Let $A$ be the
+largest of their rational upper endpoints.  Then every
+$z_i-A$ is nonpositive and at least one is at least $-1/4$.
+Consequently
+\[
+ S=\sum_i e^{z_i-A}\ge e^{-1/4}>1/2.
+\]
+Enclose each exponential to width
+$\eta=2^{-p}/(64V)$.  On the negative half-line the exponential
+has Lipschitz constant at most one, so this only requires
+$p+O(\log(V+2))$ certified logit bits, followed by the
+negative-exponential routine.  Intersect any refined logit
+interval with its original enclosure, so its upper endpoint
+remains at most $A$.  It does not require an exact
+comparison of two unknown logits.
+
+Every numerator partial sum and the denominator has error at
+most $V\eta$.  Put $\delta=V\eta\le S/2$.  Outward interval
+division, after clipping each numerator interval to nonnegative
+values, has width at most
+\[
+ \frac{N+\delta}{S-\delta}
+ -\frac{N-\delta}{S+\delta}
+ \le\frac{4S\delta}{S^2-\delta^2}
+ \le\frac{16\delta}{3S}
+ <11\delta<2^{-p-2}.
+\]
+Here $0\le N\le S$ is the true partial sum.  A final outward
+dyadic rounding leaves
+width below $2^{-p}$.  All exponents have polynomial encoding
+length and are nonpositive; no factor $e^Z$ occurs in their
+bit cost.  The global score-to-probability Lipschitz bound for
+softmax used in Lemma~\ref{lem:prefixstability} is valid at
+every logit range.  Thus both its stability guard and the replay
+argument apply with the stated polynomial evaluation cost.
+\end{proof}
+
+\begin{corollary}[Specified GELU and SwiGLU updates]
+\label{cor:momentgeluswiglu}
+Theorem~\ref{thm:momentdecoder}, with the unrestricted affine
+head of Corollary~\ref{cor:affineheadmoment}, also holds when
+the tanh feedforward update is replaced by either exact GELU
+or SwiGLU applied to affine projections of the normalized
+stream, followed by an affine output map.  The hidden width
+is included as a polynomial parameter, or is bounded by a
+fixed polynomial in $n$.  All affine row and bias bounds
+remain at most $s$.  The update can be multiplied by any fixed
+dyadic coefficient $\alpha\in[0,1]$.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Normalization bounds each affine input independently of the
+current residual magnitude.  GELU and SwiGLU consequently
+have polynomial range and derivative bounds.  Their scalar
+functions have certified finite series evaluations, so they
+satisfy the explicit hypotheses of the decoder theorem.
+
+\begin{proof}
+Write $K=s(\sqrt n+1)$, and increase it to an integer when
+forming series bounds.  Every coordinate of every affine
+projection of a normalized vector has magnitude at most $K$.
+For exact GELU, put $g(u)=u\Phi(u)$, where $\Phi$ is the
+standard normal distribution function and $\phi$ its density.
+Since $0\le\Phi\le1$ and $0\le\phi\le1$,
+\[
+ |g(u)|\le K,\qquad
+ |g'(u)|=|\Phi(u)+u\phi(u)|\le1+K
+ \quad (|u|\le K).
+\]
+For a SwiGLU coordinate put $w(u,v)=u v\sigma(v)$, where
+$\sigma(v)=(1+e^{-v})^{-1}$.  The identities
+$\sigma'=\sigma(1-\sigma)$ and $0\le\sigma'\le1/4$ give
+\[
+ |w(u,v)|\le K^2,\quad
+ |\partial_u w|\le K,\quad
+ |\partial_v w|\le K(1+K/4).
+\]
+Thus its Lipschitz constant from the two-coordinate maximum
+norm is at most $2K+K^2/4$.  Composing the input projections
+and the output map multiplies these bounds by at most $s^2$.
+The output ranges are at most $sK+s$ and $sK^2+s$,
+respectively.  These estimates do not depend on hidden width
+because they use row sums.  Multiplication by
+$\alpha\in[0,1]$ only decreases both range and derivative bounds.
+Adding $D$ such bounded updates leaves a residual and affine
+head range polynomial in $n,D,s$, as required by
+Corollary~\ref{cor:affineheadmoment}.
+
+Here is a direct certified evaluation procedure.  The sigmoid
+uses a negative exponential and a denominator at least one:
+for $v\ge0$ use $1/(1+e^{-v})$, and for $v<0$ use
+$e^v/(1+e^v)$.  Evaluation at a dyadic argument therefore has
+polynomial cost in $K$ and the requested precision, by
+Lemma~\ref{lem:newnegativeexp}.  For GELU use
+\[
+ \Phi(u)=\frac12+\frac1{\sqrt{2\pi}}
+                  \int_0^u e^{-t^2/2}\,dt.
+\]
+Expand the integrand in powers of $-t^2/2$ and integrate its
+finite polynomial exactly.  Put $H=\max(1,K^2/2)$.  The same
+factorial remainder bound as in
+\eqref{eq:momenttaylorerror} shows that
+$O(H+p+\log(K+2))$ terms suffice for integral error
+$2^{-p-O(1)}$ uniformly on $[-K,K]$.
+The intermediate rational coefficients and arithmetic have
+polynomial bit length in $K,p,b$.  Certified values of
+$\pi$ follow from the arctangent identity used below in
+Corollary~\ref{cor:fixedpositionalrotation}, and rational
+bisection gives its square root and reciprocal.  Guard
+precision $O(K^2+p+\log(K+2))$ controls every product and
+final division.  Request an additional $\lceil\log_2(K+2)\rceil$ bits for
+$\Phi$ before multiplying it by $u$.  Thus both updates have
+polynomial certified evaluation cost.  For a real input already enclosed by a
+certified interval, evaluate at its dyadic midpoint and add
+the displayed derivative bound times its radius.  No exact
+comparison with a transcendental value is required.
+
+The range bounds, evaluation algorithms, and derivative
+bounds verify the specified-family assumptions of
+Theorem~\ref{thm:momentdecoder}.  Its depth stability and
+replay proofs therefore apply without further changes.
+\end{proof}
+
+\begin{corollary}[A completely fixed model]
+\label{cor:fixedmodelcontext}
+Fix every parameter of one finite model covered by
+Theorem~\ref{thm:momentdecoder}, including its width, depth,
+vocabulary and weights.  Its key ranks are then fixed integers,
+even if its key maps have full rank.  After prefill, exact
+autoregressive decoding takes $\log^{O_{\mathrm{model}}(1)}(T+2)$ expected bit
+work per token.  For the basic tanh model, including the affine
+head extension, the explicit implementation above permits the
+bound $O_{\mathrm{model}}(\log^{2r+12}(T+2))$.  Other specified
+feedforward families retain the $\log^{O_{\mathrm{model}}(1)}(T+2)$
+bound, whose exponent includes their evaluation polynomial.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Only the requested precision increases with context length.
+The number of monomials is a polynomial in that precision when
+the key dimension is fixed.
+
+\begin{proof}
+For a fixed model, $H$ and all stability constants are constant.
+Routine accuracy and working precision are $O_{\mathrm{model}}
+(\log(T+2))$, as is $m$.  The integer length $L$ in
+\eqref{eq:momentexplicitcost} is
+$O_{\mathrm{model}}(\log^2(T+2))$.  For the basic tanh model, substitution gives exponent
+$2r+12$, and the temporary-replay geometric moment bound
+preserves that degree.  The background schedule has constant
+overhead.  Taking the largest key rank across layers proves the
+claim.  For another specified feedforward family, replace this
+explicit polynomial by the fixed polynomial that also charges
+its certified scalar evaluations; the same argument preserves
+a model-dependent polylogarithmic exponent.
+\end{proof}
+
+\begin{corollary}[Fixed positional rotations]
+\label{cor:fixedpositionalrotation}
+In the completely fixed model of
+Corollary~\ref{cor:fixedmodelcontext}, allow query and key vectors
+at position $t$ to undergo coordinate-pair rotations with angles
+$t\omega_1,\ldots,t\omega_{\lfloor n/2\rfloor}$.
+Each frequency is fixed and comes with a specified finite
+algorithm that returns a certified interval of width $2^{-p}$
+in time polynomial in $p$.  Fixed rational and real algebraic
+frequencies satisfy this assumption.  Exact autoregressive
+decoding still has $\log^{O_{\mathrm{model}}(1)}(T+2)$ expected
+bit work at each token after prefill.
+The same conclusion holds for a fixed finite collection of such
+rotations and fixed unrotated coordinates.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Rotation does not increase Euclidean length and has a bounded
+coordinate Lipschitz factor.  Evaluating an angle at a late
+position needs additional frequency bits proportional to
+$\log T$.  The full ambient key space avoids a rank condition
+on the rotating subspaces.
+
+\begin{proof}
+A pair rotation has matrix
+\[
+ \begin{pmatrix}\cos\theta&-\sin\theta\\
+                 \sin\theta& \cos\theta\end{pmatrix}.
+\]
+Its maximum absolute row sum is at most $\sqrt2$, uniformly in
+$\theta$.  Consequently it introduces only a fixed factor in
+the key and query coordinate bounds and in their Lipschitz
+bounds with respect to preceding-layer states.  The position
+is a known exact integer and is never perturbed.
+
+We give a finite computation of its coefficients.  Fix a
+frequency bound $C_\omega\ge1+|\omega|$.  At position
+$1\le t\le T$, form a dyadic approximation $\theta_0$ to
+$t\omega$, with error at most $2^{-p-10}$, by requesting
+$p+\lceil\log_2(T+1)\rceil+O(1)$ frequency bits.
+Compute a dyadic $\pi_0\in[3,4]$ with error at most
+$2^{-p-10}/[C_\omega(T+1)]$.
+This has polynomial bit cost in $p+\log(T+2)$: for example,
+the identity
+\[
+ \pi=16\arctan(1/5)-4\arctan(1/239)
+\]
+and the alternating arctangent series give certified intervals
+using a linear number of terms in the requested precision,
+with polynomial-length integer arithmetic.
+Set $k=\lfloor\theta_0/(2\pi_0)\rfloor$ by exact rational
+division and put $u_0=\theta_0-2k\pi_0$.
+Then $0\le u_0<8$ and $|k|\le C_\omega(T+1)$.
+The true reduced argument $u=t\omega-2k\pi$ satisfies
+\[
+ |u-u_0|\le|t\omega-\theta_0|+2|k||\pi-\pi_0|
+          \le3\cdot2^{-p-10}.
+\]
+No test of whether a true angle lies exactly on a period
+boundary is made.  Sine and cosine have Lipschitz constant one.
+Their rational Taylor polynomials through degree $32(p+8)$
+on $[0,8]$ have remainder at most
+$8^{32(p+8)+1}/[32(p+8)+1]!<2^{-p-6}$.
+Evaluating these finite polynomials exactly and rounding outward
+gives certified error $2^{-p-4}$ in polynomial bit work.
+Thus both coefficients have the
+required certified evaluation bound.  For a fixed algebraic
+frequency, an isolating interval for its minimal polynomial
+and rational bisection give the assumed polynomial-time
+frequency approximations.
+
+Use the common ambient chart $A=I_n$, $c_0=0$, of dimension
+$r=n$.  After a rotation, round each approximate query and key
+coordinate to the common working grid by the certified midpoint
+rule.  The keys and the coefficient vector $t$ then have the finite
+form that Lemma~\ref{lem:finitemomentindex} requires.  At full
+dimension, rounding the keys cannot violate the key-space condition.
+Request an additional constant number of coefficient bits to
+account for the fixed coordinate range.  The rotation error
+and the final grid rounding are then included in the same
+local error budget $\delta$.  The resulting moment counters
+remain exact integers.  All score and state stability bounds
+are independent of position, while coefficient evaluation
+adds only a fixed polynomial in $p+\log(T+2)$ to per-token
+work.  Lemma~\ref{lem:replayexactsampling} applies with this
+enlarged polynomial and proves the claimed conditional exact
+law and expected cost.
+\end{proof}
+
+\paragraph{Scope.}
+For a completely fixed full-rank model,
+Corollaries~\ref{cor:fixedmodelcontext}
+and~\ref{cor:fixedpositionalrotation} are formal asymptotic
+statements with a potentially enormous model-dependent exponent and
+constant.  They do not assert a practical improvement at present
+model dimensions.  The moment dimension grows as
+$\binom{O_r(\beta s^2n+P)+r}{r}$.
+The source of the positive result is a structural restriction on
+the key maps.  The arbitrary-fresh-query attention hardness results
+of Section~\ref{sec:indexedlower} permit ranks that grow with the
+context, so they do not exclude this theorem.  Conversely, the theorem does not remove their
+barrier for unrestricted caches.
+

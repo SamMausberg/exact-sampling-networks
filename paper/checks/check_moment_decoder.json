@@ -1,0 +1,59 @@
+{
+  "status": "supplementary checks only; no exact sampler implementation or speed benchmark",
+  "decimal_precision": 120,
+  "moment_attention_coordinate_checks": 108,
+  "maximum_moment_identity_error": "1.734921177852495e-118",
+  "maximum_observed_error_over_analytic_bound": "1.115025390210379e-5",
+  "minimum_average_polynomial_kernel_mass": "0.6996204857645216",
+  "background_replay_schedules": [
+    {
+      "prefill": 0,
+      "initial_phase": 1,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 1,
+      "initial_phase": 2,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 3,
+      "initial_phase": 4,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 7,
+      "initial_phase": 8,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 31,
+      "initial_phase": 32,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 1000,
+      "initial_phase": 1024,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 1023,
+      "initial_phase": 1024,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    },
+    {
+      "prefill": 1000000,
+      "initial_phase": 1048576,
+      "switches": 2,
+      "max_replayed_per_append": 2
+    }
+  ],
+  "geometric_moment_checks": 52
+}

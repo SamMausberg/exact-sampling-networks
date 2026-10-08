@@ -1,0 +1,357 @@
+\subsection{GELU and sigmoid-gated rows}
+\label{sec:practical-feedforward}
+
+The additive composition argument applies to updates other than tanh.
+The following elementary constructions record the constants for two
+common feed-forward choices. They use fresh randomness for each factor
+in a product. Every closed gate returns a fresh fair sign.
+
+Suppose normalized-stream coordinates satisfy $|a_i|\le G$, and fresh
+signs of means $a_i/G$ are available. Let $u$ and $v$ be affine rows
+with biases of magnitude at most one and row norms at most $s$.
+Put $A=1+sG$ and $\rho=sG/2$. A sign of mean $u/A$ or $v/A$ uses
+at most one normalized-stream request, by a signed row mixture.
+Write
+\[
+ \sigma(v)=\frac1{1+e^{-v}},\qquad
+ \operatorname{GELU}(v)=\frac v2
+       \left(1+\operatorname{erf}(v/\sqrt2)\right).
+\]
+
+\begin{lemma}[Exact GELU and gated-product interfaces]
+\label{lem:gelu-swiglu}
+The following updates have exact normalized sign factories with the
+stated output radii and expected normalized-stream request counts:
+\[
+\begin{array}{ccc}
+ \toprule
+ \textup{update}&\textup{radius}&\textup{expected requests, at most}\\ \midrule
+ \operatorname{GELU}(v)&A&3/2+A^2/2\\
+ u\operatorname{GELU}(v)&A^2&5/2+A^2/2\\
+ uv\sigma(v)&A^2&2+2\rho(1+\rho)\\
+ \bottomrule
+\end{array}
+\]
+Their expected auxiliary bit costs are respectively
+$O((1+A^2)B^4)$, $O((1+A^2)B^4)$, and
+$O((1+\rho)^2B^4)$. All constants are absolute. A following affine
+projection with bias bound $b_0$ and row norm $s_0$ changes a radius
+$U$ to $b_0+s_0U$ and needs at most one such update request per
+normalized projected sign.
+\end{lemma}
+\paragraph{Proof idea.}
+Write GELU as a linear term plus a linear term times an error
+function. Independent signs realize these products exactly. For SwiGLU,
+a logistic gate selects a product of two fresh affine-row signs; the final
+projection is a signed mixture.
+
+\begin{proof}
+Let $z=v/A$. Lemma~\ref{lem:erffactory}, with $c=A/\sqrt2$, gives
+an erf sign of mean $\operatorname{erf}(v/\sqrt2)$ and source count
+at most $1+A^2$. Each of those sources is one fresh $v/A$ row sign.
+With probability one half, return a $v/A$ sign. With probability
+one half, return the product of an independent $v/A$ sign and the
+erf sign. Its mean is
+\[
+ \frac z2+\frac z2\operatorname{erf}(v/\sqrt2)
+ =\frac{\operatorname{GELU}(v)}A.
+\]
+The expected source count is $1+(1+A^2)/2$. The finite-bit erf
+implementation uses one Gaussian and a Poisson mean at most $A^2/2$;
+the rational-plus-residual Poisson construction in
+Lemma~\ref{lem:gaussianrmsbits} gives the displayed auxiliary bound.
+Multiply this output by a fresh $u/A$ sign for the gated GELU row.
+
+For the last row, the biased tanh factory produces a sign of mean
+$\tanh(v/2)$ with at most $2\rho(1+\rho)$ normalized-stream requests.
+Its positive outcome is a gate of probability
+$(1+\tanh(v/2))/2=\sigma(v)$. On an open gate, multiply independent
+signs of means $u/A$ and $v/A$. On a closed gate, return a fair sign.
+The mean is $uv\sigma(v)/A^2$. Its two additional source requests
+and the tanh factory's local bound prove the claimed costs.
+
+Finally, a signed mixture over projection-row coefficients and a known
+bias sign gives the normalized affine projection, with a fair-sign
+completion if its supplied radius exceeds the exact row bound.
+Every mixture is finite, every component factory terminates almost
+surely, and each product uses independent fresh calls. Conditional
+expectations prove exactness for every fixed input stream.
+\end{proof}
+
+Under a relative energy certificate, $G$ is a fixed normalization
+radius, so all entries of the table are constants at fixed row norms.
+Theorem~\ref{thm:pn-abstract} therefore still yields a polynomial depth
+bound, with the corresponding update radius and source count. The
+presence of these activations does not itself certify the energy floor
+or bound the learned matrix norms.
+
+\subsubsection{Reducing a supplied radius}
+
+\begin{lemma}[Amplifying a sign mean with a fixed margin]
+\label{lem:bipolar-amplification}
+Let $C\ge1$ be rational. From independent signs of unknown mean $z$
+with the promise $|z|\le1/(2C)$, one can generate an exact sign of
+mean $Cz$ using at most $722C(C+1)\le1444C^2$ source requests in
+expectation and $O(C^2B^4)$ expected auxiliary bit work. The factory
+terminates almost surely.
+\end{lemma}
+\paragraph{Proof idea.}
+Two affine changes of Bernoulli bias turn sign amplification into
+two linear factories with explicit slack. Their exact affine identities
+determine the output bias, and conditional charging multiplies their
+source budgets.
+
+\begin{proof}
+The case $C=1$ returns a source sign. Otherwise let
+\[
+ p=(1+z)/2,\quad a=(C-1)/(2C),\quad
+ D=\frac1{1-a}=\frac{2C}{C+1},\quad E=\frac{C+1}{2}.
+\]
+Apply the linear factory to a $(1-p)$-coin with multiplier $D$.
+The promise gives
+\[
+ D(1-p)\le1-\frac1{2(C+1)}.
+\]
+Complement the result. Its bias is
+$r=1-D(1-p)=(p-a)/(1-a)$. A second linear factory with multiplier $E$
+gives bias
+\[
+ Er=C(p-a)=\frac{1+Cz}{2}\in[1/4,3/4].
+\]
+Read this bit as a sign. Huber's $9.5$ bound gives at most $38C$ source
+requests for an $r$-coin, and at most $19(C+1)$ $r$-coins for the
+second factory. Predictable charging yields their product,
+$722C(C+1)$. The first factory has expected auxiliary work $O(CB^4)$;
+the second has $O(CB^4)$. Charging the expected $O(C)$ first-stage
+invocations proves the total $O(C^2B^4)$ bound. Exactness follows from
+the displayed affine identities. Almost-sure termination follows from
+the two linear factories and their almost surely finite call counts.
+\end{proof}
+
+\begin{corollary}[Reducing a supplied normalization radius]
+\label{cor:radius-reduction}
+Suppose a source returns signs of mean $F/R$, where a separately
+certified bound gives $|F|\le U$. There is an exact sign sampler for
+$F/(2U)$ with at most
+\[
+ \max\{1,361(R/U)^2\}
+\]
+expected source invocations and $O((1+(R/U)^2)B^4)$ auxiliary bit
+work. Here $R,U>0$ are finitely encoded rationals.
+\end{corollary}
+\paragraph{Proof idea.}
+A supplied radius can be increased by thinning. When it must be
+decreased, the separate magnitude certificate provides the fixed margin
+required by the sign-amplification lemma.
+
+\begin{proof}
+If $R\le2U$, use a known thinning coin of probability $R/(2U)$ and
+return a fair sign on the closed branch. If $R>2U$, apply
+Lemma~\ref{lem:bipolar-amplification} with $C=R/(2U)>1$ and
+$z=F/R$. Its premise holds since $|F|/R\le U/R=1/(2C)$. The input-count
+bound $1444C^2=361(R/U)^2$ proves the claim.
+\end{proof}
+
+\subsubsection{Depth lower bounds for GELU and SwiGLU}
+
+We now carry the relative-floor lower construction of
+Theorem~\ref{thm:pn-scaled-lower} over to GELU and SwiGLU blocks.
+Lemma~\ref{lem:gelu-swiglu} and Corollary~\ref{cor:radius-reduction}
+supply exact update factories at the declared radii.
+Corollary~\ref{cor:real-ffn-scheduled} gives the GELU and SwiGLU case of
+\eqref{eq:main-prenorm-lower} for every dyadic step schedule.
+
+\begin{theorem}[A depth obstruction with GELU or SwiGLU]
+\label{thm:real-ffn-lower}
+Fix a dyadic $s\ge2$, and set
+\[
+ \delta=s-1,\qquad C_* =\frac{s}{4(s-1)},\qquad
+ \gamma_* =\frac1{192s^2}.
+\]
+There is a positive constant $c_s^{\rm ff}$, depending only on $s$,
+with the following property.
+For every $n\ge4$, dyadic $0<\alpha\le1$, and $D$ with $\alpha D\ge4$,
+there is a one-position pre-norm additive network of width $n$ and
+depth $D$ whose feed-forward activation is either exact GELU or
+SwiGLU, with all affine row norms at most $s$, biases at most one,
+zero attention, fixed stabilizer $3$, and step $\alpha$ on every
+sublayer, for which
+\[
+ \mathbb E Q\ge
+ c_s^{\rm ff}
+ \min\{(1+\alpha D)^{2\delta},n\}.
+\]
+An explicit value for the constant is given in the proof.
+Preprocessing independent of the fresh query is arbitrary. The output
+is a fixed final $\operatorname{RMSNorm}_3$ followed by logits
+$\pm\mathcal N_3(h_D)_1/4$. These logits are bounded by one on the
+entire input sign cube. Every normalization has the relative floor
+$v_j\ge\gamma_*R_j^2$ for the valid supplied radii
+$R_j=1+4s\alpha j$. Exact update factories at these radii have costs
+depending only on $s$.
+\end{theorem}
+\paragraph{Proof idea.}
+Both activations satisfy an exact antisymmetric identity that
+recovers a linear signal. A constant hidden unit drives the carriers.
+This embeds the normalized-gain lower construction into each feed-forward
+architecture while preserving its full-cube energy floor.
+
+\begin{proof}
+Let $N$ be the largest power of two at most $n/2$, and put
+$\eta=N/n\in(1/4,1/2]$. The first $N$ coordinates are features and
+the remaining coordinates are carriers. Write
+$\phi(v)=\operatorname{GELU}(v)$ or $\phi(v)=v\sigma(v)$.
+Both choices satisfy
+\[
+ \phi(v)-\phi(-v)=v,\qquad \tfrac12<\phi(1)<1.
+\]
+The first identity follows from the oddness of the error function for
+GELU, and from $\sigma(v)+\sigma(-v)=1$ for SiLU. Use three hidden
+units with preactivations
+\[
+  \frac{s}{N}\sum_{i\le N}\mathcal N_3(h)_i,\qquad
+  -\frac{s}{N}\sum_{i\le N}\mathcal N_3(h)_i,\qquad 1.
+\]
+Every feature projection row is $(1,-1,0)$ and every carrier row is
+$(0,0,-1)$. Extra hidden coordinates may be zero. In the SwiGLU case
+$u\,v\,\sigma(v)$, the displayed preactivations are the gate arguments
+$v$, and the ungated factor $u$ of each of these three hidden units is
+the constant one. Thus the SwiGLU units equal $\phi$ exactly. The
+input rows have norms at most $s$, and the projection rows have norms
+at most two, which is allowed because $s\ge2$.
+
+For the lower-bound distribution let the features be independent
+unknown signs $x_i$ and set every initial carrier to $-1$. Put
+$M=N^{-1}\sum_i x_i$ and $c=\phi(1)$. After $j$ blocks the feature
+coordinates are $x_i-M+F_j(M)$ and all carriers are
+$C_j=-(1+\alpha jc)$, where $F_0(z)=z$ and
+\[
+ F_{j+1}(z)=F_j(z)+\alpha
+ \frac{sF_j(z)}{
+ \sqrt{3+\eta(1-z^2+F_j(z)^2)+(1-\eta)C_j^2}}.
+\]
+This follows from the exact difference identity above. These
+recurrences are odd in $z$, and $F_j(z)\ge z\ge0$ when $z\ge0$.
+
+For every input, the mean of the feature coordinates has magnitude at
+most $\sqrt{v_j/\eta}$, by Cauchy--Schwarz and the definition of the
+RMS denominator. The feature update therefore has magnitude at most
+$s/\sqrt\eta\le2s$, and the carrier update has magnitude below one.
+In particular, $|h_{j,i}|\le1+2s\alpha j$. The coordinate update
+bound $2s$ is valid on the entire sign cube.
+
+Put $r_j=1+\alpha j$. For arbitrary initial carrier signs their values
+are $e_i-\alpha jc$, with $c>1/2$. The full-cube calculation in
+Corollary~\ref{cor:pn-scaled-padding}, using the carrier fraction
+$1-\eta\ge1/2$ and the stabilizer $3$, gives
+\[
+ v_j\ge r_j^2/12.
+\]
+Because $R_j=1+4s\alpha j\le4sr_j$, this implies the stated
+$v_j\ge R_j^2/(192s^2)$. To obtain the exact update factory at radius
+$4s$, first use Lemma~\ref{lem:gelu-swiglu} and its affine projection
+to obtain a normalized sign with some fixed radius depending only
+on $s$ and the supplied floor $\gamma_*$. The actual update bound is
+$2s$. Corollary~\ref{cor:radius-reduction} supplies an exact sign at
+radius $4s$, still with costs depending only on $s$. This accounts
+for the declared radii without requiring the generic activation
+bound to equal the true update range.
+
+For the growth comparison, normalize the feature mean by $r_j$,
+writing $u_j=F_j/r_j$ and $a_j=\alpha/r_{j+1}$. After the burn-in
+$j_0=\lceil3/\alpha\rceil$, one has $4\le r_{j_0}\le5$ and
+$u_{j_0}(z)\ge z/5$. The nonsignal part of the normalized denominator
+satisfies
+\[
+ b_j(z)\le\frac{7}{2r_j^2}+\frac34\le\frac{31}{32}<1.
+\]
+Consequently, for $z\ge0$,
+\[
+ u_{j+1}\ge(1-a_j)u_j+
+          a_j\frac{s u_j}{\sqrt{1+u_j^2/2}}.
+\]
+Apply the convexity comparison used in
+Theorem~\ref{thm:pn-scaled-lower}, now with
+$g_j=1+\delta a_j$ and $d_j=a_js/(2g_j)$. Its reciprocal-square
+sum has coefficient $C_*=s/(4\delta)$. Thus, for
+$G=\prod_{j=j_0}^{D-1}g_j$,
+\[
+ u_D(z)\ge
+ \frac{G(z/5)}{\sqrt{1+C_*(G^2-1)(z/5)^2}},\qquad
+ G\ge e^{-\delta^2/8}\left(\frac{1+\alpha D}{6}\right)^\delta.
+\]
+The latter product bound is uniform in $\alpha$.
+
+It remains to control the fixed output readout. On every sign input
+the feature decomposition $h_i=x_i-M+F$ still holds, even when the
+initial carrier signs vary. Hence $|h_i|\le |F|+2$ and
+$v\ge3+\eta F^2\ge3+F^2/4$. The readout calculation in the proof of
+Theorem~\ref{thm:pn-normalized-gain} then shows that the absolute logit
+is at most $1/\sqrt3<1$.
+On the lower-bound subdomain, conditional on $M=z$, set
+$L(z)=4\sqrt{v_D(z)}$. The coordinate bound gives
+\[
+ L(z)\le4\sqrt{3+(2s r_D)^2}\le8(s+1)r_D.
+\]
+The conditional shift proof in
+Corollary~\ref{cor:pn-scaled-finalnorm-lower} applies verbatim:
+the actual and intermediate head arguments lie in $[-1,1]$,
+$\operatorname{sech}^2(1)>1/4$, and
+\[
+ \overline g(z)\ge\frac{F_D(z)}{4L(z)}
+ \ge\frac{u_D(z)}{32(s+1)}\qquad(z\ge0).
+\]
+Weighted Jensen and the Rademacher fourth-moment bound, as in the
+proof of Theorem~\ref{thm:pn-scaled-lower}, now give
+\begin{gather*}
+ H'(0)\ge
+ \frac{G}{160(s+1)\sqrt{1+3C_*G^2/(25N)}},\\
+ \mathbb E Q\ge
+ \frac{\min\{G^2,N\}}{25600(s+1)^2(1+3C_*/25)}.
+\end{gather*}
+Substitute the bound for $G$ and use $N>n/4$. This proves the theorem
+with
+\[
+ c_s^{\rm ff}=\frac{e^{-\delta^2/4}6^{-2\delta}}
+                     {102400(s+1)^2(1+3C_*/25)}.
+\]
+\end{proof}
+
+\begin{corollary}[GELU and SwiGLU with a prescribed step schedule]
+\label{cor:real-ffn-scheduled}
+Theorem~\ref{thm:real-ffn-lower} also holds for every depth $D\ge0$
+and every prescribed dyadic schedule $a_j\in[0,1]$, with $\alpha D$
+replaced by $\tau_D=\sum_{j<D}a_j$ and the condition $\alpha D\ge4$
+dropped, the supplied radius replaced by $R_j=1+4s\sum_{k<j}a_k$, and
+a positive lower-bound prefactor depending only on $s$. Its value is
+given in the proof.
+\end{corollary}
+\paragraph{Proof idea.}
+The activation identities and output-radius bounds hold at every
+step size. Replacing elapsed depth by cumulative carrier displacement
+therefore transfers the scheduled normalized-gain argument directly.
+A small total step needs only the head bound.
+
+\begin{proof}
+The states and relative floors depend on the step schedule through
+the cumulative carrier displacement and the feature recurrence.
+Put $\tau_j=\sum_{k<j}a_k$ and $r_j=1+\tau_j$. If $\tau_D\ge4$, the
+proof of Corollary~\ref{cor:pn-scheduled-lower} applies with the
+same linear-update comparison constant $C_*$. The head and source
+radius arguments in Theorem~\ref{thm:real-ffn-lower} are unchanged.
+The resulting prefactor is
+\[
+ \frac{e^{-\delta/2-\delta^2/4}5^{-2\delta}}
+ {102400(s+1)^2(1+3C_*/25)}.
+\]
+
+If $\tau_D<4$, no growth comparison is needed. The head bound in
+Theorem~\ref{thm:real-ffn-lower}, with $L(z)\le8(s+1)r_D$ and
+$F_D(z)\ge z$, gives $\overline g(z)\ge z/(32(s+1)r_D)$ for $z\ge0$.
+Hence $H'(0)\ge1/(32(s+1)r_D)$, and since $r_D<5$,
+\[
+ \mathbb EQ\ge H'(0)^2>\frac1{25600(s+1)^2}.
+\]
+Because $\min\{(1+\tau_D)^{2\delta},n\}<5^{2\delta}$, the displayed
+prefactor also covers this case.
+\end{proof}

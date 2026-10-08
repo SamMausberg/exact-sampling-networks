@@ -1,0 +1,259 @@
+\subsection{A matching query law for the carrier family}
+\label{sec:pn-family-query-law}
+
+The preceding lower construction also admits a matching upper bound
+on input probes. This result concerns that explicit family on its
+entire input sign cube. It does not identify the optimal exponent
+for arbitrary pre-norm networks.
+
+\begin{theorem}[The carrier family's query exponent]
+\label{thm:pn-family-query-law}
+Fix a legal dyadic $s>\tanh(1)/\sqrt2$. Consider the networks
+constructed in Theorem~\ref{thm:pn-normalized-gain}, allowing every
+initial feature, carrier, and inert coordinate to be an arbitrary
+sign. Let $N$ be the largest power of two at most $n/2$, put
+$\eta=N/n$, $r_D=1+\sum_{j<D}a_j$, and define
+\[
+ \nu_\eta=\frac{s}{\tanh(1)\sqrt\eta}-1.
+\]
+Their optimal worst-input expected query cost is
+\[
+ \Theta_s\!\left(\min\{r_D^{2\nu_\eta},n\}\right).
+\]
+An exact sampler attaining the upper bound has finite expected
+bit work. A direct certified implementation uses
+\[
+ O_s\!\left(
+ \min\{(D+1)r_D^{2\nu_\eta},n+D+1\}\,B^4\right),
+\]
+where $B\ge16$ includes all parameter and radius-prefix encoding
+lengths and $\log(n+D+2)$. Theorem~\ref{thm:pn-family-bit-law}
+removes the depth factor by preprocessing the two-mean function.
+\end{theorem}
+
+\paragraph{Proof idea.}
+On the full cube, the network depends on two unknown averages: the
+feature mean and the carrier mean. Its normalized scalar state
+has derivative growth $r_D^{\nu_\eta}$. The discrepancy from that
+limiting gain has summable contribution along the step schedule.
+Derivatives through order six then fit the two-variable corrected
+Bernstein factory with a base sample size of order
+$r_D^{2\nu_\eta}$. One observed feature sign determines which of
+two bounded head functions the factory must simulate.
+
+\begin{proof}
+Write $c=\tanh1$, and let $z$ and $w$ denote the initial feature
+and carrier means. Inert coordinates always have squared value one.
+Every feature coordinate is $x_i-z+F_j(z,w)$. The squared RMS
+denominator is
+\[
+ v_j=4-\eta z^2+\eta F_j^2-2\eta c\tau_j w
+                         +\eta c^2\tau_j^2,
+ \qquad \tau_j=r_j-1.
+\]
+Set $u_j=F_j/r_j$ and $q_j=a_j/r_{j+1}$. Then
+\[
+ u_{j+1}=(1-q_j)u_j+q_j T_j(z,w,u_j),\qquad
+ T_j(z,w,u)=\tanh\!\left(
+ \frac{su}{\sqrt{b_j(z,w)+\eta u^2}}\right),
+\]
+where
+\[
+ b_j(z,w)=
+ \frac{4-\eta z^2-2\eta c\tau_j w+\eta c^2\tau_j^2}{r_j^2}.
+\]
+For all $(z,w)\in[-1,1]^2$ and $j$,
+\[
+ r_j^2b_j\ge4-2\eta+\eta(c\tau_j-1)^2
+              \ge3+\eta(c\tau_j-1)^2.
+\]
+The carrier-floor identity in \eqref{eq:pn-carrier-floor}
+therefore gives $b_j\ge1/12$. Moreover
+\[
+ |b_j-\eta c^2|\le8/r_j.
+\]
+For example, expansion in $1/r_j$ gives first-order coefficient
+$-2\eta c(c+w)$ of magnitude at most two, and a second-order
+coefficient of magnitude at most six. The state satisfies
+$|u_j|\le1$, since its update is a convex combination of numbers
+in $[-1,1]$.
+
+Put $\nu=\nu_\eta$, $C_u=192s$, and $M=e^{C_u}$. Direct
+differentiation and the mean-value theorem give
+\[
+ 0\le\partial_uT_j
+ =\operatorname{sech}^2\!\left(
+       \frac{su}{\sqrt{b_j+\eta u^2}}\right)
+       \frac{s b_j}{(b_j+\eta u^2)^{3/2}}
+ \le1+\nu+C_u/r_j.
+\]
+Here the derivative of $x^{-1/2}$ on $x\ge1/12$ is at most
+$12^{3/2}/2$, and $4\cdot12^{3/2}<192$.
+Consequently a derivative of the scalar state propagated from
+level $k$ to level $j$ has multiplier at most
+\begin{equation}
+ \prod_{i=k}^{j-1}(1+\nu q_i+C_u q_i/r_i)
+ \le M(r_j/r_k)^\nu.
+ \label{eq:pn-family-derivative-product}
+\end{equation}
+This uses $\sum q_i\le\log(r_j/r_k)$ and
+$\sum q_i/r_i=1/r_k-1/r_j\le1$.
+
+We give explicit uniform local derivative bounds. Set
+\[
+ h=\frac1{10000(1+s)},\qquad C_0=1440(3/h)^6.
+\]
+For real $z,w,u\in[-1,1]$, extend $T_j$ to the complex polydisk
+of coordinate radius $h$. The squared denominator changes by
+at most $4h$, while its real value is at least $1/12$.
+The principal inverse square root is therefore holomorphic there.
+Its argument inside tanh changes by at most
+$6s h\,12^{3/2}<1/8$. Tanh has no pole there and has modulus
+at most two. Cauchy's estimates show that the entrywise $\ell_1$
+norm of every local derivative tensor of order at most six is
+at most $C_0$; the factor $3^6$ covers the sum over coordinates.
+The same bound holds for the head function, after enlarging $C_0$
+by an absolute factor if necessary; the argument below permits
+the choice $2C_0$ instead.
+
+Let $E_k(j)$ be the maximum entrywise $\ell_1$ norm of the
+$k$th derivative tensor of $u_j$ on $[-1,1]^2$. For $k=1$,
+the direct parameter derivatives have total magnitude at most
+$C_0$. Equations \eqref{eq:pn-family-derivative-product} and
+\[
+ \sum_iq_i r_{i+1}^{-\nu}\le1/\nu
+\]
+give $E_1(j)\le C_1r_j^\nu$, where
+$C_1=M(1+C_0/\nu)$.
+For $k=2,\ldots,6$, define recursively
+\[
+ H_k=\max\{2+C_1,C_2,\ldots,C_{k-1}\},\qquad
+ C_k=\frac{M C_0 k^k H_k^k}{(k-1)\nu}.
+\]
+Then
+\begin{equation}
+ E_k(j)\le C_k r_j^{k\nu}.
+ \label{eq:pn-family-derivatives}
+\end{equation}
+To verify this induction, use the multivariate chain rule in
+partition form. The single-block term is
+$\partial_uT_j\,D^ku_j$. Every other partition has at least
+two blocks, all of size below $k$. There are at most $k^k$
+partitions. The first derivative of the map
+$(z,w)\mapsto(z,w,u_j)$ has total norm at most
+$(2+C_1)r_j^\nu$; each higher derivative is bounded by the
+induction hypothesis. Thus the remainder has norm at most
+$C_0 k^kH_k^k r_j^{k\nu}$.
+After propagation by \eqref{eq:pn-family-derivative-product},
+its sum is bounded using
+\[
+ \sum_i q_i r_i^p\le(r_j^p-1)/p,
+ \qquad p>0.
+\]
+For this inequality, integrate $t^{p-1}$ on
+$[r_i,r_{i+1}]$ and use
+$t^{p-1}\ge r_i^p/r_{i+1}$. This proves
+\eqref{eq:pn-family-derivatives} with the displayed constants.
+
+Read $x_1=e\in\{-1,1\}$ once. The required output-sign mean is
+the known function
+\[
+ f_e(z,w)=\tanh\!\left(
+ \frac{u_D(z,w)+(e-z)/r_D}
+ {4\sqrt{b_D(z,w)+\eta u_D(z,w)^2}}\right).
+\]
+The full-domain head estimate in
+Theorem~\ref{thm:pn-normalized-gain} gives
+$|f_e|\le\tanh(1/\sqrt3)<4/5$, even at parameter pairs
+inconsistent with the observed sign. The same local complex
+argument just used applies to the head: its numerator has
+absolute value at most three, its squared denominator is at
+least $1/12$, and changing each variable by $h$ changes its
+tanh argument by less than $1/8$.
+The partition chain rule and \eqref{eq:pn-family-derivatives}
+therefore bound its derivatives of orders two through six by
+$A_{k,s,\eta}r_D^{k\nu}$, with explicit constants obtained
+from the displayed $C_k$ and $2C_0 k^k
+\max\{2+C_1,C_2,\ldots,C_k\}^k$.
+
+Convert the means to Bernoulli biases by
+$p_1=(1+z)/2$, $p_2=(1+w)/2$; this multiplies the order-$k$
+derivative bounds by $2^k$. The two-variable corrected Bernstein
+lemma, Lemma~\ref{lem:rank-two-bernstein}, requires known rational
+derivative budgets. Enclose
+$k\nu\log_2 r_D$ by certified logarithm and exponential
+arithmetic, and round each displayed derivative bound upward
+to a dyadic rational within a fixed factor. This costs
+$O_s(B^4)$ work and gives budgets of $O_s(B)$ encoding length.
+The lemma applies with base size $m_0=O_{s,\eta}(r_D^{2\nu})$.
+Each source bit draws a uniformly random feature or carrier
+coordinate, using at most one input probe. The two streams use
+independent coordinate draws. They are independent conditional
+on every fixed input, including the already observed $x_1$.
+The returned sign has exactly the desired mean. Alternatively,
+read all $2N$ relevant coordinates and evaluate the two known
+means directly. This proves the upper query bound.
+
+For clarity, the coefficient computations can be implemented
+directly without an uncharged function oracle. Evaluate the
+scalar recurrence and its bivariate derivatives through order
+four by the chain rule, using certified dyadic interval arithmetic.
+There are $O(D+1)$ fixed-size derivative operations. Local
+derivative coefficients are bounded by the constants above.
+Here is an explicit form of the error estimate used for guards.
+Let $e_k(j)$ bound the error in the order-$k$ derivative tensor,
+for $0\le k\le4$, and suppose every local update has absolute
+rounding error at most $\epsilon$. Clip only the approximate
+state value to $[-1,1]$, which cannot increase its error.
+On the known derivative ranges, the product rule gives
+\[
+ e_k(j+1)\le(1+\nu q_j+C_uq_j/r_j)e_k(j)
+ +C_s q_j\sum_{l<k}r_j^{(k-l)\nu}e_l(j)+\epsilon.
+\]
+For $k=0$ the sum is empty. The constants are obtained by
+differentiating the finite partition formulas; they use local
+derivatives through order five, already bounded above. Induction
+on $k$, followed by \eqref{eq:pn-family-derivative-product} and
+the integral estimate with $p=k\nu$, gives
+\[
+ e_k(j)\le A_{k,s}(D+1)\epsilon r_j^{(k+1)\nu}.
+\]
+The rounding-error sum contributes at most
+$M(D+1)\epsilon r_j^\nu$; each lower-order forcing term has
+the displayed exponent $(k+1)\nu$, which proves this claim.
+The same estimate applies to the head derivatives. Choosing
+$\epsilon\le2^{-t}/[C_s(D+1)r_D^{5\nu}]$ both gives the
+requested final accuracy and closes the assumption that the
+computed derivatives lie within one of their known bounds.
+Evaluating the fixed number of local operations to an additional
+$O_s(\log(r_D+2))$ guard bits makes their aggregate error at most
+$\epsilon$. The resulting guard length is
+$O_s(\log(D+2)+\log(r_D+2))$, already included in $O_s(B)$.
+The known constant $c$ is enclosed to the same accuracy. This
+gives $O_s((D+1)(B+t+\operatorname{bits}(p_1,p_2))^4)$
+bit work per value or derivative evaluation.
+
+A Bernstein correction at scale $m$ requires one scalar
+hypergeometric sum of $O(m)$ such evaluations. Its normalized
+coefficient needs $O_s(B+\log(m+2))$ initial precision; further
+precision has a geometric tail under the fresh uniform comparison.
+The correction masses are $O_s(m_0^2/m^2)$ on dyadic levels,
+so summing the resulting expected costs gives
+$O_s((D+1)m_0B^4)$. Reading all inputs instead costs
+$O_s((n+D+1)B^4)$. These two implementations give the displayed
+finite bit bound, including all scalar decisions and refinement.
+
+For the lower bound, repeat
+Theorem~\ref{thm:pn-normalized-gain} on the subdomain with all
+carrier signs equal to $-1$, now retaining $A_0=\eta c^2$
+and $A_1=4+2\eta c(1-c)$ in its normalized-gain comparison.
+This gives exponent $2\nu_\eta$ with the same fixed readout
+and a full-cube floor at least $1/12$.
+Finally $\eta\in[1/4,1/2]$ and
+$\nu_\eta\ge\sqrt2s/c-1>0$. All constants in both proofs
+are bounded uniformly on this compact parameter interval.
+For example, use $\eta c^2\ge c^2/4$,
+$\nu_\eta\ge\sqrt2s/c-1$, and
+$\nu_\eta\le2s/c-1$ in every prefactor. Thus the constants
+may be chosen to depend only on $s$, as claimed.
+\end{proof}

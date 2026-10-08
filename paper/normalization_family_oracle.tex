@@ -1,0 +1,307 @@
+\subsection{A finite-bit oracle for the carrier family}
+\label{sec:pn-family-oracle}
+
+The direct implementation in Theorem~\ref{thm:pn-family-query-law} has
+a factor $D+1$ in its bit work. This subsection removes that factor by
+preprocessing the two-mean function, which gives the bit bound in
+Theorem~\ref{thm:main-carrier}.
+
+\begin{theorem}[The carrier family's bit cost]
+\label{thm:pn-family-bit-law}
+Under the hypotheses of Theorem~\ref{thm:pn-family-query-law},
+weight-only preprocessing of time and storage
+$O_s((D+1)n^2B^6)$ gives an exact sampler with expected online
+bit work
+\[
+ O_s\!\left(\min\{r_D^{2\nu_\eta},n\}B^4\right).
+\]
+The lower query bound of that theorem therefore matches this
+bit bound up to the displayed factor.
+\end{theorem}
+
+\paragraph{Proof idea.}
+The normalized recurrence has a complex neighborhood whose radius
+shrinks as $r_D^{-\nu_\eta}$. Preprocessing covers the two unknown
+means with Taylor patches at that scale. A patch contains only
+polynomially many precision bits, since the recurrence propagates
+rounding error through factors $1+O_s(q_j)$. Cached values answer
+almost every factory comparison. An unusually close comparison
+recomputes the recurrence; its probability pays for the depth.
+
+\begin{proof}
+Write $r=r_D$, $\nu=\nu_\eta$, and retain $h,C_0,C_u,M$ from
+the preceding proof. We first establish a uniform complex
+neighborhood. Fix a real parameter pair $(z_0,w_0)$ and its real
+trajectory. Perturb each parameter by at most $\delta$ in the
+complex plane, and let $e_j$ be the absolute perturbation in
+$u_j$. The local derivative bounds and Taylor's formula give,
+as long as $e_j+2\delta\le h/2$,
+\[
+ e_{j+1}\le L_j e_j+C_0q_j\delta
+                  +C_2q_j(e_j+2\delta)^2,
+ \qquad L_j=1+\nu q_j+C_uq_j/r_j,
+\]
+where a fixed $C_2=100C_0$ suffices. These bounds follow either
+by integrating the second derivative along the complex segment
+or by its convergent local Taylor series. Enlarge $C_0$ by two
+if needed to cover the sum of the direct parameter derivatives.
+
+Set $K=\max\{2,2C_0/\nu\}$ and $d_j=e_j+K\delta$.
+Since $L_j-1\ge\nu q_j$,
+\[
+ d_{j+1}\le L_jd_j+C_2q_jd_j^2.
+\]
+Let $P_j=\prod_{i<j}L_i$. The preceding product estimate gives
+$P_j\le Mr_j^\nu$. For $v_j=d_j/P_j$ this implies
+\[
+ v_{j+1}\le v_j+C_2q_jP_jv_j^2,
+ \qquad
+ \sum_{j<D}q_jP_j\le Mr^\nu/\nu.
+\]
+The last inequality follows from
+$\sum q_jr_j^\nu\le(r^\nu-1)/\nu$.
+The elementary bootstrap for $v_{j+1}\le v_j+a_jv_j^2$
+says $v_j\le2v_0$ whenever $4v_0\sum a_j\le1$:
+under this bound the total increment is at most
+$4v_0^2\sum a_j\le v_0$. Taking a strict inequality first
+and then continuity handles the boundary.
+
+Choose a positive rational constant $c_s$ below
+\[
+ \min\left\{\frac{\nu}{16C_2M(K+1)},
+              \frac{h}{16M(K+1)},\frac h{16}\right\},
+ \qquad \delta=c_s r^{-\nu}.
+\]
+Uniform choices in $\eta\in[1/4,1/2]$ are possible because
+$\nu\ge\sqrt2s/c-1>0$. Then
+$e_j\le2M(K+1)\delta r_j^\nu\le h/8$.
+The local analytic extensions remain valid at every step.
+This bootstrap, first on a slightly smaller polydisk and then
+by continuation, proves that every intermediate state and the
+head are holomorphic on the parameter polydisk of radius
+$\delta$. Their moduli there are at most two.
+
+Choose a dyadic mesh spacing $a$ with
+$\delta/32<a\le\delta/16$. Cover $[-1,1]^2$ by grid squares
+with a real corner as center; truncate boundary squares at one.
+There are $O_s(r^{2\nu})$ squares. At a center $(z_*,w_*)$,
+use scaled coordinates
+$z=z_*+2aU$, $w=w_*+2aV$. A point in its square has
+$|U|,|V|\le1/2$, while all trajectories are holomorphic and
+bounded by two on $|U|,|V|\le2$. If $b_{kl}$ are Taylor
+coefficients of any such state or head, Cauchy's estimate gives
+\[
+ |b_{kl}|\le2^{1-k-l}.
+\]
+Retain the rectangle $0\le k,l\le J$. Its value error and
+its derivatives of total order at most four, with respect to
+$U,V$, are bounded by $C(J+2)^4 4^{-J}$. Conversion to the
+original parameters costs at most $(2a)^{-4}$. Thus degree
+$J=O_s(P+\log(r+2))$ and coefficient precision
+$S=P+4\lceil\log_2(1/a)\rceil+O(\log(J+2))$ suffice for
+absolute error $2^{-P}$ in the value and the derivatives
+$f_{11},f_{22},f_{1122}$ needed by the two-variable correction.
+Changing from means to Bernoulli biases changes these estimates
+only by fixed factors.
+
+We justify preprocessing these coefficient arrays without an
+exponential-in-depth precision allowance. For polynomials
+truncated to the rectangle, use the sum of absolute coefficients
+as norm. Truncation preserves submultiplicativity. The exact
+state jets have norm at most eight. All local analytic functions
+and their required inverses have bounded coefficient norm
+$O_s(1)$, by the same radius-two Cauchy estimate. In particular,
+the squared denominator, its inverse, and its inverse square
+root have such bounds; the argument remains in the right
+half-plane bounded away from zero. The exponential and its
+denominator in tanh also have bounded norms depending on $s$.
+Neumann series, or the convergent analytic power series about
+the exact jet, consequently show that each local operation is
+$O_s(1)$-Lipschitz in this coefficient norm whenever the input
+error is sufficiently small. For inverse square roots, this
+follows explicitly by writing
+$(V+E)^{-1/2}=V^{-1/2}(1+V^{-1}E)^{-1/2}$.
+
+For explicit error budgets, one may take
+\[
+ K_s=2^{100(\lceil s\rceil+2)},\qquad C_s=K_s^{100},
+ \qquad d_{\mathrm{err}}=12.
+\]
+Indeed, on the radius-two parameter polydisk the squared
+denominator has modulus at most ten and real part at least
+$1/24$. Its square root, inverse, and inverse square root
+have modulus at most $24$. The argument of tanh has modulus
+at most $10s$ and imaginary part at most $1/4$. Thus its
+exponentials, their reciprocals, and the inverse denominator
+of tanh have modulus bounded by $2e^{20s}+24$.
+Cauchy's coefficient bound multiplies these supremum bounds
+by at most four. The displayed $K_s$ bounds all these
+coefficient norms; the elementary product and inverse
+identities then give the stated larger $C_s$ as a common
+local Lipschitz and residual-error constant.
+
+At $M_*$ working bits, the polynomial procedures below
+contribute at most $C_s(J+1)^{12}2^{-M_*}$ error.
+The normalized update therefore
+satisfies
+\[
+ E_{j+1}\le(1+C_sq_j)E_j+
+                     C_s(J+1)^{12}2^{-M_*}.
+\]
+Its product is at most $r^{C_s}$, because $\sum q_j\le\log r$.
+It follows that
+\[
+ E_D\le C_s(D+1)r^{C_s}(J+1)^{12}2^{-M_*}.
+\]
+For example, take an integer $M_*$ at least
+\[
+ S+\lceil\log_2(C_s(D+1))\rceil
+   +\lceil C_s\log_2r\rceil
+   +12\lceil\log_2(J+1)\rceil
+   +\lceil\log_2(64K_s)\rceil+16.
+\]
+Certified dyadic upper enclosures of these logarithms determine
+such an integer without testing transcendental equality.
+This is $S+O_s(\log(D+2)+\log(r+2)+\log(J+2))$.
+It ensures all promised final errors and, by induction, keeps the
+intermediate errors inside the neighborhoods just used.
+The known constant $c=\tanh1$ is enclosed to the same accuracy.
+Stable evaluation of the known scalar coefficient $b_j$ uses
+\[
+ b_j=\eta c^2-\frac{2\eta c(c+w)}{r_j}
+       +\frac{4-\eta z^2+2\eta cw+\eta c^2}{r_j^2},
+\]
+so its coefficient magnitudes remain bounded.
+
+For completeness, the polynomial computations take
+$O(J^4)$ coefficient operations per layer. Multiplication and
+inversion use the elementary coefficient recurrences.
+Let $\mathcal E=U\partial_U+V\partial_V$ be the Euler
+operator, which multiplies a coefficient by its total degree.
+It satisfies the product rule in the rectangular quotient
+algebra and its inverse on zero-constant polynomials has norm
+at most one. For $Y=\exp P$, solve
+$\mathcal EY=Y\mathcal EP$ with $Y_{00}=e^{P_{00}}$;
+explicitly, for nonzero multi-index $\lambda$,
+\[
+ |\lambda|Y_\lambda
+ =\sum_{0<\mu\le\lambda}|\mu|P_\mu Y_{\lambda-\mu}.
+\]
+For $Y=V^{-1/2}$, compute $V^{-1}$ and
+$H=-V^{-1}\mathcal EV/2$, then solve
+$\mathcal EY=YH$ with $Y_{00}=V_{00}^{-1/2}$.
+Here $H_{00}=0$. Both recurrences divide by total degrees
+between one and $2J$, and use $O(J^4)$ operations.
+
+These recurrences have polynomial residual error at fixed
+precision. For the exponential, a residual $R$ obeys
+$\mathcal E(e^{-P}Y)=e^{-P}R$; for the inverse square root
+it obeys $\mathcal E(V^{1/2}Y)=V^{1/2}R$.
+Apply $\mathcal E^{-1}$ after removing the constant term,
+then multiply by the exact solution. The coefficient norms
+bounded above show that the output error is at most a fixed
+$C_s$ times the residual norm and the constant-term error.
+Each residual coefficient sums $O(J^2)$ rounded products,
+of magnitude at most $O_s(J)$, and there are $O(J^2)$
+coefficients. The exponent $d_{\mathrm{err}}=12$ therefore dominates all
+residual accumulation, including the fixed number of
+intermediate multiplications and inversions. Inversion itself
+uses the identity $VY-1=R$ and the bound on $V^{-1}$.
+A simultaneous induction over total coefficient degree keeps
+computed coefficient norms within one of their stated bounds:
+apply the same residual identity in the further quotient that
+discards all larger total degrees, and use the precision margin
+above to make the error smaller than $1/(64K_s)$. This closes
+the bounded-intermediate assumption used in charging products.
+Direct fixed-precision arithmetic and certified scalar
+exponential and square-root routines therefore take
+$O_s((D+1)B^6)$ bit work per patch when $P=O(B)$.
+The Taylor degree, coefficient precision, and all guard lengths
+are $O_s(B)$. Nested evaluation of the stored polynomial and
+its required derivatives at rational arguments uses
+$O_s((B+\operatorname{bits}(z,w))^4)$ bit work.
+
+Compute a rational $\Lambda$ with
+$r^{2\nu}\le\Lambda\le2r^{2\nu}$ by certified logarithm
+and exponential arithmetic. If $\Lambda\le n$, use the Taylor
+table; otherwise use the finite lattice table described below.
+This decision involves only rational comparisons.
+
+In the first case $r^{2\nu}\le n$. Precompute both head
+patch tables at precision
+\[
+ \epsilon=2^{-P},\qquad
+ P=32+2\lceil\log_2(D+2)\rceil.
+\]
+This costs $O_s((D+1)nB^6)$. A corrected Bernstein coefficient
+is a fixed linear combination of the value and the three
+derivatives above, followed by at most one hypergeometric
+average. The polynomial derivative prefactors have bounded
+magnitude and the averaging weights are nonnegative and sum
+to one. Hence cached evaluations determine the entire
+coefficient to error $C\epsilon$, independently of its scale.
+Rounding the rational prefactors and the averaging computation
+to the same final tolerance uses the displayed polynomial bit
+budget. For the hypergeometric average, use the mode-centered
+recurrence in the proof of Theorem~\ref{thm:implicitrankone}:
+set the mode weight to one and generate adjacent weights by
+rational ratios. All weights are at most one, their sum is
+at least one, and $O(\log(m+2))$ guard bits suffice.
+This performs $O(m)$ arithmetic steps without constructing
+binomial integers of length proportional to $m$.
+
+Let $m_0=O_s(r^{2\nu})$ be the factory base size and let
+$c_m=\overline A/(4m^2)$ be a correction mass, on dyadic
+levels $m=2^km_0$. The known constant
+$\overline A=O_s(m_0^2)$ is the sum of the derivative budgets
+from the two-variable factory. Use the cached enclosure first
+when comparing the normalized coefficient with its fresh
+uniform random number. Conditional on selecting this
+correction, a direct recurrence evaluation is necessary only
+with probability at most $C\min\{1,\epsilon/c_m\}$.
+If $c_m<\epsilon$, simply use the direct method immediately.
+Thus its unconditional probability is at most
+$C\min\{c_m,\epsilon\}$. We charge its refinements by
+unconditional interval measures. If $c_m\ge\epsilon$, after
+$t$ additional bits the unresolved set of uniform values has
+measure at most $C(\epsilon/c_m)2^{-t}$. Computing that
+enclosure costs
+$O_s((D+1)m(B+\log(m+2)+P+t)^4)$.
+Multiply by the branch mass $c_m$ and sum over $t\ge0$.
+The resulting unconditional contribution is
+$O_s((D+1)m\epsilon(B+\log(m+2)+P)^4)$.
+If $c_m<\epsilon$, start the direct computation at absolute
+precision proportional to $c_m$; the same argument gives
+$c_m$ in place of $\epsilon$. This argument does not assume
+that the work and the cache-miss event are independent.
+Since $P=O(B)$, splitting the geometric sum at
+$m\asymp\sqrt{\overline A/\epsilon}$ gives
+\[
+ \sum_{m=2^km_0}\min\{\overline A/m^2,\epsilon\}
+             m(B+\log(m+2))^4
+ =O_s\bigl(m_0\sqrt\epsilon\,B^4\bigr).
+\]
+Here $\log m_0$ and $\log(1/\epsilon)$ are $O_s(B)$; the
+remaining polynomial factors have finite geometric sums.
+Since $(D+1)\sqrt\epsilon\le1$, all direct fallbacks cost
+$O_s(m_0B^4)$ in expectation. The base comparison costs less:
+its fallback probability is $O(\epsilon)$.
+The cached work and input probes themselves have expected
+cost $O_s(m_0B^4)$ by the source-cost accounting of the factory.
+Every comparison refines certified enclosures until it decides,
+so this modification preserves the exact output law.
+
+In the second case $r^{2\nu}>n/2$. Both unknown means belong to
+the known lattice $\{-1,-1+2/N,\ldots,1\}$. Precompute the
+two head values at all $(N+1)^2$ pairs, each to error
+$\epsilon$. Direct scalar recurrence evaluation costs
+$O_s((D+1)n^2B^4)$ for this table. Read the $2N$ relevant
+input signs, retrieve the appropriate enclosure, and compare
+with a fresh uniform. With probability $O(\epsilon)$ refine
+by direct recurrence. Its expected extra cost is
+$O_s((D+1)\epsilon B^4)=O_s(B^4)$, and the total online
+cost is $O_s(nB^4)=O_s(\min\{r^{2\nu},n\}B^4)$.
+Both preprocessing alternatives meet the
+claimed budget. Upward rational enclosures decide all mesh
+sizes and derivative budgets, as in the preceding theorem.
+\end{proof}

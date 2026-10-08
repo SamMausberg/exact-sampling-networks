@@ -1,0 +1,62 @@
+{
+  "status": "all checks passed",
+  "evidence_type": "exact rational invariant checks and 120-digit numerical checks, not proofs",
+  "seed": 81973421,
+  "chart_cases": 15,
+  "maximum_row_swaps_observed": 3,
+  "within_cell_score_checks": 7425,
+  "streams": [
+    {
+      "n": 8,
+      "rank_bound": 3,
+      "T": 4339,
+      "epochs": 4,
+      "occupied_cells": 100,
+      "old_record_migrations": 0,
+      "proposal_ratio": "1.28403104910748299468714456811",
+      "mass_identity_max_error": "4.7272851e-125"
+    },
+    {
+      "n": 13,
+      "rank_bound": 2,
+      "T": 4258,
+      "epochs": 3,
+      "occupied_cells": 42,
+      "old_record_migrations": 0,
+      "proposal_ratio": "1.28403263477776929842028336734",
+      "mass_identity_max_error": "9.4545701e-125"
+    },
+    {
+      "n": 4,
+      "rank_bound": 1,
+      "T": 4177,
+      "epochs": 2,
+      "occupied_cells": 7,
+      "old_record_migrations": 0,
+      "proposal_ratio": "1.28460289547168177606949571873",
+      "mass_identity_max_error": "6.0509249e-123"
+    },
+    {
+      "n": 5,
+      "rank_bound": 2,
+      "T": 4258,
+      "epochs": 3,
+      "occupied_cells": 7,
+      "old_record_migrations": 0,
+      "proposal_ratio": "1.28403031485598751580210431982",
+      "mass_identity_max_error": "2.3636425e-125"
+    }
+  ],
+  "near_subspace_case": {
+    "n": 11,
+    "rank": 2,
+    "T": 200,
+    "eta": "1/32",
+    "occupied_cells": 182,
+    "proposal_ratio": "1.28135177521202385511903426144",
+    "mass_identity_max_error": "1.5127312e-123"
+  },
+  "near_extremal_cell_oscillation": "136902082305/549755813888",
+  "near_extremal_cell_oscillation_decimal": "0.2490234370361577",
+  "uncompiled_lean": true
+}

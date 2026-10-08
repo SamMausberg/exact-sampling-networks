@@ -1,0 +1,33 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+ >=Stealth,font=\small,
+ work/.style={draw=blue!55!black,fill=blue!4,rounded corners=2pt,
+              minimum height=8mm,align=center,inner sep=4pt},
+ terminal/.style={draw=gray!65,fill=gray!5,rounded corners=2pt,
+                  minimum height=8mm,align=center,inner sep=4pt},
+ edge/.style={->,semithick}]
+ \node[work,text width=3.6cm] (gate) at (0,0) {output amplitude gate};
+ \node[terminal,text width=2.7cm] (known) at (-4.1,-1.7) {known coin};
+ \node[work,text width=3.0cm] (factory) at (3.0,-1.7) {scalar factory};
+ \node[work,text width=2.75cm] (left) at (1.0,-3.1) {earlier row request};
+ \node[work,text width=2.75cm] (right) at (5.2,-3.1) {earlier row request};
+ \node[terminal,text width=1.65cm] (x1) at (0.0,-4.45) {input $x_i$};
+ \node[terminal,text width=1.65cm] (x2) at (4.05,-4.45) {input $x_j$};
+ \node[terminal,text width=1.65cm] (x3) at (6.45,-4.45) {input $x_k$};
+ \draw[semithick] (gate.south)--(0,-.9);
+ \draw[edge] (0,-.9)--node[above,inner sep=3pt]{closed}(-4.1,-.9)--(known.north);
+ \draw[edge] (0,-.9)--node[above,inner sep=3pt]{open}(3.0,-.9)--(factory.north);
+ \draw[edge] (factory.south)--(left.north);
+ \draw[edge] (factory.south)--(right.north);
+ \draw[edge] (left.south)--(x1.north);
+ \draw[edge] (right.south)--(x2.north);
+ \draw[edge] (right.south)--(x3.north);
+\end{tikzpicture}
+\caption{One possible request tree. Only reached calls incur work.
+ A factory may request a random number of earlier signs; the two children
+ shown here are one realization. Each call uses fresh randomness, so
+ predictable charging bounds total work. At fixed input rank, the critical
+ sampler uses the composite function through a precomputed coefficient oracle.}
+\label{fig:recursion}
+\end{figure}

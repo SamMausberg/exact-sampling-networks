@@ -1,0 +1,499 @@
+\subsection{A Gaussian construction for regularized normalization}
+\label{sec:gaussianrms}
+
+A positive stabilizer permits a factory with output radius $4\sqrt n$
+and source bound $1+nR^2/\epsilon$. The construction uses the Gaussian
+sign identity, an error-function mixture of majority rules, and a sine
+series. Its denominator parameter is the stabilizer itself.
+
+Write
+\[
+ \operatorname{erf}(x)=\frac2{\sqrt\pi}\int_0^x e^{-t^2}\,dt,
+ \qquad
+ A_k=\frac{(2k+1)\binom{2k}{k}}{4^k}.
+\]
+For a sign of mean $z$, let $M_k(z)$ be the mean of the majority of
+$2k+1$ independent copies. The derivative identity
+$M'_k(z)=A_k(1-z^2)^k$ from the proof of
+Lemma~\ref{lem:comptanharity} and $M_k(0)=0$ imply
+\begin{equation}
+ \operatorname{erf}(cz)=\sum_{k\ge0}
+ \frac{2c}{\sqrt\pi}e^{-c^2}\frac{c^{2k}}{k!A_k}M_k(z),
+ \qquad c\ge0,\quad |z|\le1.
+ \label{eq:erfmajority}
+\end{equation}
+All coefficients are nonnegative, and their sum is $\operatorname{erf}(c)$.
+
+\begin{lemma}[An error-function factory]
+\label{lem:erffactory}
+For every known computable $c\ge0$, there is an exact factory with
+output mean $\operatorname{erf}(cz)$. Its expected number of input
+signs, using complete majorities, is exactly
+\[
+ q(c)=2c^2\operatorname{erf}(c)+\frac{2c}{\sqrt\pi}e^{-c^2}
+ \le1+2c^2.
+\]
+One implementation draws $G\sim N(0,1)$. If $G^2>2c^2$, it returns
+a fair sign. Otherwise it draws
+$K\sim\operatorname{Pois}(c^2-G^2/2)$ and returns the majority of
+$2K+1$ fresh input signs.
+\end{lemma}
+\paragraph{Proof idea.}
+The derivative of an odd-majority mean is a power of $1-z^2$.
+Poisson coefficients turn their sum into the Gaussian density, and a
+truncated Gaussian draw realizes those coefficients as probabilities.
+The same integral computes the expected majority size.
+
+\begin{proof}
+Differentiating the right side of \eqref{eq:erfmajority}, and using
+nonnegative convergence on $[0,1]$, gives
+\[
+ \frac{2c}{\sqrt\pi}e^{-c^2}
+ \sum_{k\ge0}\frac{[c^2(1-z^2)]^k}{k!}
+ =\frac{2c}{\sqrt\pi}e^{-c^2z^2}.
+\]
+Both sides vanish at zero; oddness handles negative $z$. At $z=1$
+every majority has mean one, proving the coefficient sum.
+
+The variable $Y=|G|/\sqrt2$ has density
+$(2/\sqrt\pi)e^{-y^2}$ for $y\ge0$. For each $k$, the probability
+that the algorithm enters the majority branch and selects $k$ is
+\[
+ \frac2{\sqrt\pi}\int_0^c e^{-y^2}
+       e^{-(c^2-y^2)}\frac{(c^2-y^2)^k}{k!}\,dy
+ =\frac{2c}{\sqrt\pi}e^{-c^2}\frac{c^{2k}}{k!}
+       \int_0^1(1-u^2)^k\,du.
+\]
+Integration by parts, starting from $k=0$, gives
+$\int_0^1(1-u^2)^k\,du=1/A_k$. The algorithm therefore uses the
+mixture in \eqref{eq:erfmajority} exactly. It never forms a square
+of an unknown mean.
+
+The number of input signs has conditional expectation
+$1+2(c^2-G^2/2)$ on the majority branch. Consequently its mean is
+\[
+ \frac2{\sqrt\pi}\int_0^c
+   e^{-y^2}(1+2c^2-2y^2)\,dy
+ =2c^2\operatorname{erf}(c)+\frac{2c}{\sqrt\pi}e^{-c^2},
+\]
+where the last equality uses
+$(y e^{-y^2})'=e^{-y^2}-2y^2e^{-y^2}$.
+The bound $1+2c^2$ also follows directly from the conditional
+expectation. A sequential majority may stop earlier.
+\end{proof}
+
+\begin{lemma}[A sine factory]
+\label{lem:sinequarter}
+Given independent signs of unknown mean $z\in[-1,1]$, an exact
+factory of mean $\frac14\sin(\pi z/2)$ uses
+\[
+ C_{\sin}=\frac\pi8\cosh(\pi/2)<1
+\]
+input signs in expectation.
+\end{lemma}
+\paragraph{Proof idea.}
+The sine series has a summable total absolute coefficient mass
+below one at the chosen scale. Products of fresh signs realize its monomials;
+a fair-sign remainder supplies the unused probability mass.
+
+\begin{proof}
+Put $c_0=\pi/2$. For each $k\ge0$, choose degree $2k+1$ with
+probability $c_0^{2k+1}/[4(2k+1)!]$. Return $(-1)^k$ times the
+product of that many independent input signs. On the remaining
+probability return a fair sign. The total specified mass is
+$\sinh(c_0)/4<1$, and the Taylor series gives the stated mean.
+The weighted degree sum is $c_0\cosh(c_0)/4=C_{\sin}$.
+
+For an explicit rational check on the strict inequalities, use
+$\pi<22/7$ and
+\[
+ \cosh(11/7)\le
+ 1+\frac{(11/7)^2}{2!}+\frac{(11/7)^4}{4!}
+ +\frac{(11/7)^6}{6!}
+ +\frac{(11/7)^8}{8![1-(11/7)^2/90]}<\frac{101}{40}.
+\]
+Thus $C_{\sin}<2222/2240<1$, and also
+$\sinh(c_0)/4<\cosh(c_0)/4<101/160<1$.
+The series can be sampled by an odd Poisson variable with parameter
+$c_0$, preceded by the known gate $\sinh(c_0)/4$. All parameters
+are computable constants, and the degree has an exponential tail.
+\end{proof}
+
+\begin{theorem}[An intrinsic-radius RMS factory]
+\label{thm:gaussianrms}
+Let $n\ge1$, $R>0$, and $\epsilon>0$. Suppose fresh independent
+signs of means $a_j/R$ are available, where $|a_j|\le R$.
+For every coordinate $i$, an exact factory returns a sign of mean
+\[
+ \frac{a_i}{4\sqrt n\sqrt{\epsilon+n^{-1}\sum_j a_j^2}}.
+\]
+Its expected number of source-sign requests is at most
+\begin{equation}
+ C_{\sin}\left(1+\frac{R^2}{\epsilon}
+      \left[1+\frac{2(n-1)}\pi\right]\right)
+ \le1+\frac{nR^2}{\epsilon}.
+ \label{eq:gaussianrmscost}
+\end{equation}
+All Gaussian and Poisson variables can be represented by successively
+refined rational intervals. For finite rational $R,\epsilon$, and
+$B\ge16$ containing their encoding lengths and $\log(n+2)$, the
+auxiliary expected bit work is
+\[
+ O\!\left(n(1+R^2/\epsilon)B^4\right).
+\]
+This counts Gaussian draws, random bits, arithmetic, and precision
+refinement; it uses no exact-real oracle.
+\end{theorem}
+\paragraph{Proof idea.}
+A Gaussian projection converts the normalized coordinate into the
+correlation of two Gaussian signs. That correlation is an arcsine, which
+the sine factory inverts. Fresh Gaussian vectors for successive calls let
+the source costs multiply by conditional expectation.
+
+\begin{proof}
+Let $G_1,\ldots,G_n$ be independent standard Gaussian variables.
+Conditional on this vector, put
+\[
+ A=R\sum_j|G_j|,\qquad
+ c=\frac{A}{\sqrt{2n\epsilon}},\qquad
+ z=\frac{\sum_jG_ja_j}{A}.
+\]
+The event $A=0$ has probability zero. A source sign of mean $z$ is
+obtained by selecting $j$ proportionally to $|G_j|$, requesting a
+fresh sign of mean $a_j/R$, and multiplying it by $\operatorname{sgn}G_j$.
+Use Lemma~\ref{lem:erffactory} and multiply its output by
+$\operatorname{sgn}G_i$. This produces a sign whose conditional mean is
+\[
+ \operatorname{sgn}G_i\,
+ \operatorname{erf}\left(\frac{\sum_jG_ja_j}{\sqrt{2n\epsilon}}\right).
+\]
+
+Introduce an independent $G_0\sim N(0,1)$ only for the analysis.
+Integrating it out gives the error function above as the conditional
+mean of
+$\operatorname{sgn}(\sum_jG_ja_j+\sqrt{n\epsilon}G_0)$.
+The two centered Gaussian variables
+\[
+ G_i,\qquad H=\sum_jG_ja_j+\sqrt{n\epsilon}G_0
+\]
+have correlation
+$u=a_i/\sqrt{\sum_j a_j^2+n\epsilon}$.
+The Gaussian sign identity gives
+\[
+ \mathbb E[\operatorname{sgn}G_i\operatorname{sgn}H]
+ =\frac2\pi\arcsin u.
+\]
+For completeness, write a pair with correlation $u=\cos\theta$ as
+$(X,\cos\theta X+\sin\theta Y)$ with independent standard Gaussians
+$X,Y$. Their angle is uniform on the circle; the two signs disagree
+on sectors of total angle $2\theta$. Their product therefore has
+mean $1-2\theta/\pi=(2/\pi)\arcsin u$.
+
+Request independent copies of this sign as inputs to
+Lemma~\ref{lem:sinequarter}. The returned mean is
+\[
+ \frac14\sin(\arcsin u)=\frac u4,
+\]
+which is the desired output mean.
+Each request draws its own Gaussian vector and all subsequent
+randomness afresh.
+
+By Lemma~\ref{lem:erffactory}, a single intermediate sign uses at
+most $1+2c^2$ source requests. Since
+$\mathbb E G_j^2=1$ and $\mathbb E|G_j|=\sqrt{2/\pi}$,
+\[
+ 2\mathbb E c^2
+ =\frac{R^2}{n\epsilon}\mathbb E\left(\sum_j|G_j|\right)^2
+ =\frac{R^2}{\epsilon}\left[1+\frac{2(n-1)}\pi\right].
+\]
+Multiplication by the mean input count of the independent sine
+factory proves \eqref{eq:gaussianrmscost}. Its degree is drawn before
+any of its input signs, so this multiplication needs only Tonelli's
+theorem and conditional expectation. The finite-bit implementation
+is proved in the accompanying precision lemma.
+\end{proof}
+
+The vector result provides a second option when $\epsilon>0$.
+The floor factory of Theorem~\ref{thm:rmsfloor} has radius
+$2R/\sqrt\lambda$ and cost $1+228\max\{1,R^2/\lambda\}^2$.
+The Gaussian factory has radius $4\sqrt n$ and cost at most
+$1+nR^2/\epsilon$. A large promise floor $\lambda\gg\epsilon$ can
+favor the floor factory.
+
+\begin{corollary}[Centered normalization]
+\label{cor:gelulayernorm}
+For $\epsilon>0$, $\mu=n^{-1}\sum_j a_j$, and $|a_j|\le R$, regularized centered
+normalization
+\[
+ \frac{a_i-\mu}{\sqrt{\epsilon+n^{-1}\sum_j(a_j-\mu)^2}}
+\]
+has an exact sign factory at output radius $4\sqrt n$, using at most
+$1+4nR^2/\epsilon$ original source signs in expectation.
+\end{corollary}
+\paragraph{Proof idea.}
+Centering is a signed mixture of one coordinate and the uniform
+coordinate average. It enlarges the coordinate radius by a factor of two,
+after which the Gaussian normalization theorem applies directly.
+
+\begin{proof}
+A sign of mean $(a_i-\mu)/(2R)$ is a fair choice between an $a_i/R$
+sign and the negative of a sign from a uniformly chosen coordinate.
+It costs one original request. Apply Theorem~\ref{thm:gaussianrms}
+to the centered vector with coordinate bound $2R$.
+\end{proof}
+
+Thinning trades output radius for source cost. The next corollary
+opens a known gate before any Gaussian work and reaches radius
+$2R/\sqrt\epsilon$, which is the radius of the floor factory at
+$\lambda=\epsilon$.
+
+\begin{corollary}[Thinning the vector Gaussian interface]
+\label{cor:gaussian-large-radius}
+Under Theorem~\ref{thm:gaussianrms}, put $\kappa=R^2/\epsilon$ and
+suppose $\kappa\ge4n$.  There is an exact factory returning the
+normalized coordinate at radius $2\sqrt\kappa$ with at most
+\[
+ 2\sqrt{n/\kappa}\,(1+n\kappa)
+\]
+expected source requests and
+\[
+ O\!\left(B^4[1+n^{3/2}\sqrt\kappa]\right)
+\]
+expected auxiliary bit work.
+\end{corollary}
+\paragraph{Proof idea.}
+Open the radius-adjustment gate before drawing any Gaussians.
+Both the source count and the expensive local work are then charged only
+on the gate's open branch.
+
+\begin{proof}
+Before doing any Gaussian work, open a known gate with probability
+$p=2\sqrt{n/\kappa}\le1$.  On its open branch run the Gaussian
+factory at radius $4\sqrt n$, and otherwise return a fair sign.
+The output radius becomes $(4\sqrt n)/p=2\sqrt\kappa$.
+The source bound follows by multiplication.
+Lemma~\ref{lem:gaussianrmsbits} gives conditional auxiliary cost
+$O(n(1+\kappa)B^4)$.  Multiplying by $p$, and using
+$\kappa\ge4n\ge4$, gives the stated bound after adding the
+$O(B^4)$ initial gate.  As before, every gate is sampled by certified
+interval comparisons.
+\end{proof}
+
+\subsubsection{Finite-bit implementation}
+\label{sec:gaussian-rms-bits}
+
+\begin{lemma}[Linear stabilizer dependence in bit work]
+\label{lem:gaussianrmsbits}
+Let $n\ge1$ and let $R,\epsilon>0$ be rational. Put
+$\kappa=R^2/\epsilon$, and let $B\ge16$ include their binary encoding
+lengths and $\lceil\log_2(n+2)\rceil$. The factory in
+Theorem~\ref{thm:gaussianrms}, including all Gaussian draws, weighted
+coordinate selections, Poisson variables, random bits, counters, and
+precision refinement, has expected auxiliary bit work
+\begin{equation}
+ O\!\left(n(1+\kappa)B^4\right).
+ \label{eq:gaussianrmsbits}
+\end{equation}
+Source-sign invocations are charged separately. The implicit constant
+is absolute. The output radius $4\sqrt n$ may be replaced by the
+integer radius $4\lceil\sqrt n\rceil$ without increasing the expected
+source count or changing this bit bound.
+\end{lemma}
+\paragraph{Proof idea.}
+Two decompositions control precision costs. Split the Poisson mean
+into a rational bulk and a bounded residual, and select Gaussian coordinates
+from an integer envelope. Only a selected coordinate needs further
+refinement; Gaussian fourth moments then keep the stabilizer dependence
+linear.
+
+\begin{proof}
+We describe rational interval algorithms and bound their refinement
+costs. Elementary series and their arithmetic are evaluated in dyadic
+fixed-point intervals with outward rounding; logarithmically many guard
+bits in the number of summed terms bound the accumulated rounding error.
+Thus denominators from separate series terms are never multiplied together.
+Each comparison uses an independent uniform bit stream. Almost
+sure decisions suffice; equality with a random continuously distributed
+comparison variable has probability zero.
+
+\paragraph{Gaussian intervals.}
+Two independent uniform variables $U,V\in(0,1)$ give independent standard
+Gaussians by
+\[
+ G_1=\sqrt{-2\log U}\cos(2\pi V),\qquad
+ G_2=\sqrt{-2\log U}\sin(2\pi V).
+\]
+The change to polar coordinates proves this distribution. The first
+nonzero bit of $U$ locates it in $[2^{-L},2^{1-L}]$. The integer $L$
+has a geometric tail. The proof of Lemma~\ref{lem:productaritybits}
+gives certified intervals for $\pi$ and, after binary range reduction,
+for $\log U$, at a bit cost cubic in the precision. The
+usual sine and cosine series have factorial tail bounds on their
+bounded arguments. Square-root intervals can be found by rational
+bisection or integer square roots. Using twice the desired absolute
+precision before the square-root step handles arbitrarily small
+nonnegative arguments.
+These procedures produce an interval of width at most $2^{-q}$ for a
+Gaussian in $O((q+L+1)^3)$ bit operations. They never evaluate a
+Gaussian as an exact real.
+
+Generate $G_1,\ldots,G_n$ and the additional Gaussian $Z$ used by the
+erf factory in this way. Set $S=\sum_j|G_j|$. A dyadic interval locating
+$S$ within a factor of two is obtained by refinement. Its precision has
+an exponential tail after $O(\log(n+2))$ initial bits: if this search has
+not resolved at absolute precision $2^{-q}$, then
+$S\le Cn2^{-q}$ for an absolute constant $C$, whereas
+\[
+ \Pr(S\le u)\le\Pr(|G_1|\le u)\le u
+ \quad(u\ge0).
+\]
+The last bound uses the standard normal density and may be weakened to
+$2u$ without changing any estimate. The signs of the finitely many
+Gaussians are found by the same refinement; the union bound gives
+$\Pr(\min_j|G_j|\le u)\le2nu$.
+
+To simplify the remaining accounting, let $H$ be one plus the largest
+leading-zero count in the Gaussian uniforms, the largest required
+logarithmic precision for these signs and the dyadic scale of $S$, and
+the logarithmic magnitude of the Gaussian variables. It can be
+increased by an absolute multiple of $\log(n+2)$. The preceding bounds,
+the normal density bound, and the Gaussian tail give, for every fixed
+integer $r\ge1$,
+\begin{equation}
+ \mathbb E H^r\le C_r[1+\log(n+2)]^r.
+ \label{eq:gaussianHmoments}
+\end{equation}
+The constants $C_r$ are absolute. A union bound over $n+1$ variables
+followed by integration of an exponential tail proves this display.
+
+\paragraph{The erf gate.}
+The gate compares $|Z|$ with $\sqrt2 c$, where
+$c=RS/\sqrt{2n\epsilon}$. At refinement level $q$, evaluate both sides
+in intervals of absolute width $2^{-q-3}$. The arithmetic cost is
+$O(n(B+H+q)^3)$. Conditional on $G_1,\ldots,G_n$, the variable $Z$ is
+independent and its density is bounded. Therefore the probability of
+an unresolved gate at level $q$ is at most $C2^{-q}$, uniformly in the
+threshold $c$. Include the gate's extra refinement depth in $H$.
+This leaves \eqref{eq:gaussianHmoments} valid with different absolute
+constants. The event of exact equality has probability zero.
+
+\paragraph{A Poisson variable with a random computable mean.}
+On the open gate branch, $\mu=c^2-Z^2/2\ge0$. First compute a rational
+interval $[\ell_0,u_0]$ for $\mu$ of width at most $1/4$. Set
+$\ell=\max\{0,\ell_0\}$ and $r=\mu-\ell$. Then
+\[
+ 0\le\ell\le\mu\le c^2,\qquad 0\le r\le1/4.
+\]
+No decision about the fractional part of $\mu$ is needed. The lower
+approximation $\ell$ is an explicitly represented rational. Generate
+$P_\ell\sim\operatorname{Pois}(\ell)$ from $\lfloor\ell\rfloor$
+independent Poisson variables of mean one and one with the known rational
+mean $\ell-\lfloor\ell\rfloor$. This part uses no further Gaussian
+refinement. Independently generate $P_r\sim\operatorname{Pois}(r)$ by
+thinning a Poisson variable of mean one with success probability $r$.
+Each thinning test compares a fresh uniform with successive intervals
+for $r=\mu-\ell$. The retained count is exactly Poisson with mean $r$,
+so $P_\ell+P_r$ has the required Poisson law.
+
+Lemma~\ref{lem:smallpoissonattention} generates a Poisson variable
+whose mean is a rational in $[0,1]$ of bit length $b$ with $O(b^4)$
+expected bit work and finite polynomial work moments; at mean one this
+work is constant. The bulk rational part therefore costs
+$O((1+c^2)(B+H)^4)$ conditionally on the Gaussian variables. The number
+of Gaussian-dependent thinning comparisons has mean one. Each comparison
+has a geometric refinement tail, because its uniform is fresh, and
+evaluating $r$ to $q$ bits costs $O(n(B+H+q)^3)$. This part costs
+$O(n(B+H)^4)$ in conditional expectation. The denominator, scale, and
+polynomial coefficients involved have logarithmic size $O(B+H)$;
+in particular $B$ includes $\log(2+\kappa)$.
+
+Unbounded Poisson counters do not change these estimates. For every
+fixed $p$, a Poisson variable $P$ of mean $\lambda\ge1$ satisfies
+\[
+ \mathbb E[(1+P)(1+\log(P+2))^p]
+ \le C_p(1+\lambda)(1+\log(\lambda+2))^p.
+\]
+One proof divides the values into $P\le4\lambda$ and the intervals
+$2^j\lambda<P\le2^{j+1}\lambda$, and uses
+$\Pr(P\ge v)\le(e\lambda/v)^v$ for $v\ge\lambda$. Summing the
+resulting convergent series proves the display. It accounts for
+counters, majority arities, and source-address bookkeeping. The case
+$\lambda\le1$ has an absolute bound by the same argument.
+
+\paragraph{Choosing a Gaussian-weighted coordinate.}
+The Gaussian vector is fixed throughout one erf call. Find a positive
+rational $\sigma$ for which $\sigma\le S\le2\sigma$, using the interval
+scale search described above. Choose a dyadic number $h$ with
+\[
+ \frac{\sigma}{32n}\le h\le\frac{\sigma}{16n}.
+\]
+For each $j$, compute an interval for $|G_j|$ of width at most $h/4$,
+and let $b_j$ be its rational upper endpoint. Define
+\[
+ u_j=h\max\{1,\lceil b_j/h\rceil\},\qquad U=\sum_j u_j.
+\]
+Only rational rounding is used. The inequalities
+\[
+ |G_j|\le u_j\le |G_j|+2h,\qquad u_j\ge h,
+ \qquad S\le U\le S+\sigma/8\le9S/8
+\]
+follow directly. All weights $u_j/h$ are positive integers, and their
+sum is at most $66n$, hence also at most $72n$. Prepare their integer
+prefix table once. This costs $O(n(B+H)^3)$ bits of work.
+
+For every required coordinate draw, propose $j$ with probability $u_j/U$
+using the integer table and retain it with probability $|G_j|/u_j$.
+At acceptance, its law is exactly proportional to $|G_j|$. The success
+probability is $S/U\ge8/9$, so the mean number of proposals is at most
+$9/8$. A rejection comparison refines only the selected Gaussian.
+Since $u_j\ge h$, obtaining absolute error $2^{-q}$ in this ratio costs
+$O((B+H+q)^3)$, without a factor $n$. Fresh comparison uniforms give a
+geometric refinement tail. The conditional expected work per accepted
+coordinate is therefore $O((B+H)^4)$, including its address and sign.
+The majority arity is drawn before its input signs are requested, and
+has conditional mean at most $1+2c^2$. Predictable charging bounds the
+expected total coordinate-selection work by
+$O((1+c^2)(B+H)^4)$ in addition to the one-time table preparation.
+
+\paragraph{Averaging the random precision cost.}
+The preceding bounds, including the initial Gaussian interval work,
+are controlled by
+$C\,\mathbb E[(n+1+c^2)(B+H)^4]$. This expectation remains linear in
+$\kappa$. In fact, $S^4\le n^3\sum_jG_j^4$, so
+\[
+ \mathbb E c^4
+ =\frac{\kappa^2}{4n^2}\mathbb E S^4
+ \le\frac34n^2\kappa^2,
+ \qquad
+ 2\mathbb E c^2\le n\kappa.
+\]
+Consequently
+$\mathbb E(1+c^2)^2\le(1+n\kappa)^2$. By the triangle inequality in
+$L^2$, $\{\mathbb E(n+1+c^2)^2\}^{1/2}\le n+1+n\kappa$.
+Cauchy--Schwarz and \eqref{eq:gaussianHmoments}, with $r=8$, give
+\[
+ \mathbb E[(n+1+c^2)(B+H)^4]
+ \le(n+1+n\kappa)
+       \{\mathbb E(B+H)^8\}^{1/2}
+ \le Cn(1+\kappa)B^4.
+\]
+This also accounts for correlations between large Gaussian values,
+large Poisson means, and difficult comparisons. The constants do not
+depend on $R,\epsilon,n$, or the unknown source means.
+
+Finally, the sine factory draws its odd degree before any Gaussian
+factory calls. Its degree has an exponential tail and mean less than
+one; all its scalar parameters are fixed computable constants. A
+known constant gate and a bounded-parameter Poisson generator give
+$O(B^4)$ auxiliary work. Conditional charging proves
+\eqref{eq:gaussianrmsbits}. Every comparison terminates almost surely,
+every Poisson variable is finite almost surely, and every selected
+majority is finite. The entire factory therefore terminates almost
+surely.
+
+Let $m=\lceil\sqrt n\rceil$, found by integer arithmetic. Thin the
+output by the known algebraic probability $\sqrt n/m$, returning a
+fair sign otherwise. Squaring rational interval endpoints gives an
+exact implementation of this comparison with $O(B^4)$ expected work.
+The new mean is the required normalized coordinate at radius $4m$.
+\end{proof}

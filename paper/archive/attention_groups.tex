@@ -1,0 +1,317 @@
+\subsection{Exact sampling from an indexed cache with a small cover}
+\label{sec:newcover}
+
+Let $k_1,\ldots,k_T\in[-S,S]^n$ be cached keys, let
+$v_1,\ldots,v_T\in[-1,1]$ be one coordinate of the cached values,
+and let $q\in[-S,S]^n$ be a query. Here $S>0$ and $\beta\ge0$.
+Write
+\[
+ a_j(q)=\frac\beta n\langle q,k_j\rangle,
+ \qquad Z(q)=\sum_{j=1}^T e^{a_j(q)},
+ \qquad Y(q)=\frac{\sum_j e^{a_j(q)}v_j}{Z(q)}.
+\]
+A sample from attention means either an index $J$ with
+$\Pr(J=j)=e^{a_j}/Z$, or a sign whose mean is $Y$.
+The second follows from the first by a fresh sign of mean $v_J$.
+All cached coordinates in the explicit-cache model are finite dyadic
+numbers. The standard scaling $\beta=\sqrt n$ is allowed as a
+computable algebraic parameter.
+
+\begin{lemma}[A partition certificate for exact attention]
+\label{lem:newpartition}
+Suppose prefill partitions $[T]$ into nonempty groups
+$G_1,\ldots,G_M$, stores their sizes $N_g$, and chooses representatives
+$c_g\in[-S,S]^n$. Suppose a known number $\delta>0$ satisfies
+\[
+ \left|\frac\beta n\langle q,k_j-c_g\rangle\right|\le\delta
+ \quad(j\in G_g)
+\]
+for every allowed query. Put $b_g(q)=\beta\langle q,c_g\rangle/n$.
+The following procedure samples attention exactly:
+choose $g$ with probability proportional to $N_g e^{b_g(q)}$,
+choose $j$ uniformly in $G_g$, and accept it with probability
+$e^{a_j(q)-b_g(q)-\delta}$; repeat after rejection.
+It uses at most $e^{2\delta}$ proposals in expectation.
+\end{lemma}
+\paragraph{Proof idea.}
+The group proposal and the within-group uniform choice cancel the group size.  The final exponential correction leaves exactly the desired member weight, while the certificate bounds the rejection loss.
+
+\begin{proof}
+The probability of proposing and accepting a particular $j\in G_g$
+in a trial is
+\[
+ \frac{N_ge^{b_g}}{\sum_hN_he^{b_h}}\frac1{N_g}
+ e^{a_j-b_g-\delta}
+ =\frac{e^{a_j-\delta}}{\sum_hN_he^{b_h}}.
+\]
+Conditioning on success gives the asserted index law. Moreover,
+$e^{-\delta}\sum_gN_ge^{b_g}\le Z\le
+e^{\delta}\sum_gN_ge^{b_g}$, so the success probability is at
+least $e^{-2\delta}$. Independent trials have geometric length.
+The requested value sign is fresh after acceptance, which gives its
+mean by conditioning on the accepted index.
+\end{proof}
+
+\begin{theorem}[An explicit query and a finite cache]
+\label{thm:newexplicitcover}
+Fix a partition as above. Suppose all explicit coordinates, $S$,
+and $\delta$ are dyadic of encoding length at most $b$, and
+$\beta$ is either such a dyadic or $\sqrt n$.
+If $q$ is explicitly supplied, there is an exact finite-bit sampler
+using at most $(9/8)e^{2\delta}$ proposals in expectation. For
+\[
+ B\ge 8+b+\lceil\log_2(T+n+2)\rceil,
+\]
+its expected online work is
+\[
+ O\bigl((nM+ne^{2\delta})B^4\bigr).
+\]
+The $nM$ term is setup for the query; it can be shared by repeated
+samples from that same query. There is no further dependence on
+the numerical magnitude of the scores. Prefill stores the group
+members in contiguous arrays.
+\end{theorem}
+\paragraph{Proof idea.}
+Compute one representative score per group, then replace its exponential by a certified dyadic upper bound.  The total added mass is small, and the final correction uses the actual selected member score.
+
+\begin{proof}
+Compute the $M$ representative inner products, and find their
+largest score $b_*$. Since the temperature is nonnegative, the
+comparisons use exact dyadic inner products even when
+$\beta=\sqrt n$. Put
+\[
+ w_g=e^{b_g-b_*}\le1,\qquad W=\sum_gN_gw_g\ge1,
+ \qquad P=\lceil\log_2(16T)\rceil.
+\]
+The negative-exponential routine in
+Lemma~\ref{lem:newnegativeexp} returns dyadic upper bounds $u_g$
+with
+\[
+ 2^{-P}\le u_g,\qquad w_g\le u_g\le w_g+2^{1-P}.
+\]
+Obtain them by adding $2^{-P}$ to the upper endpoints of enclosures
+of width $2^{-P}$. Exact integer prefix sums for the weights
+$N_gu_g$ sample a group; then choose a uniform member $j$.
+For that member accept with probability
+\[
+ \frac{\exp(a_j-b_*-\delta)}{u_g}.
+\]
+The certificate gives $a_j-b_*-\delta\le b_g-b_*\le0$, and
+the acceptance probability is at most one. Writing
+$W'=\sum_gN_gu_g$, we have
+\[
+ W'\le W+T2^{1-P}\le W+\tfrac18\le\tfrac98W.
+\]
+The accepted mass of $j$ is $e^{a_j-b_*-\delta}/W'$. Therefore
+its conditional law is exact, and the mean number of proposals is
+\[
+ \frac{W'e^{b_*+\delta}}{Z}
+ \le\frac98\frac{e^\delta\sum_gN_ge^{b_g}}Z
+ \le\frac98e^{2\delta}.
+\]
+
+All stored proposal weights have $O(P)$ bits after a common dyadic
+scaling. The prefix data structure takes $O(MP)$ bit operations to
+construct and samples a group with $O(P\log(M+1))$ bit operations
+and $O(P)$ random bits in expectation. A uniform group member has
+$O(\log T)$ bit cost. To implement its acceptance coin at precision
+$t$, evaluate the nonpositive exponential to precision $P+t+3$,
+since $u_g\ge2^{-P}$. Its exponent is a rational plus a rational
+divided by $\sqrt n$ in the standard-scaled case. The proof of
+Lemma~\ref{lem:newnegativeexp} applies to that form as well.
+It costs $O(n(B+t)^4)$ including the fresh inner product.
+A lazy-uniform comparison has refinement tail at most $2^{2-t}$.
+Summing stage costs against that tail and multiplying by the
+proposal bound gives the asserted expected work. Only
+$M$ representative inner products are needed for setup.
+\end{proof}
+
+The next lemma records a classical ingredient with explicit source
+counts. It is the polynomial logistic race of Dughmi, Hartline,
+Kleinberg, and Niazadeh, specialized to an integer temperature.
+Its proof is included to specify the interface used by the index.
+
+\begin{lemma}[Polynomial logistic race]
+\label{lem:newpolyrace}
+Let $m\ge1$ and let $\lambda\ge8$ be an integer. Given independent
+access to coins of unknown biases $p_1,\ldots,p_m\in[0,1]$, one can
+sample an index with law proportional to $e^{\lambda p_i}$ using at
+most
+\[
+ C\lambda^4m^2\log(4m\lambda)
+\]
+input-coin calls in expectation, for an absolute constant $C$.
+The construction uses only integer
+or rational bookkeeping, a scalar linear Bernoulli factory with
+known slack, and Poisson coins of a rational parameter. It has
+finite expected bit work polynomial in $m$, $\lambda$, and the
+source-address length.
+\end{lemma}
+\paragraph{Proof idea.}
+An empirical maximum gives a coin near the largest unknown bias.  Subtracting that estimate through a linear factory creates uniformly favorable acceptance probabilities while preserving all relative exponential weights.
+
+\begin{proof}
+Put $\epsilon=1/\lambda$ and choose an integer
+$N\ge2\lambda^2\log(4m\lambda)$ with
+$N\le2\lambda^2\log(4m\lambda)+2$.
+For each $i$, take $N$ input samples and form its empirical mean
+$\widehat p_i$. Let $Z$ be a coin with conditional probability
+$\max_i\widehat p_i$, implemented by a uniform integer in $[N]$.
+Hoeffding's inequality and a union bound show
+\[
+ \Pr\!\left(\max_i|\widehat p_i-p_i|>\epsilon/2\right)
+ \le2m e^{-N\epsilon^2/2}\le\epsilon/2.
+\]
+Consequently the unknown bias $z$ of $Z$ satisfies
+$|z-p_{\max}|\le\epsilon$. Every call for a $Z$ coin uses a fresh
+empirical experiment.
+
+For each $i$, a fair choice between a $p_i$ coin and a complement
+of a $Z$ coin gives a coin of bias $(p_i+1-z)/2$. Apply the linear
+factory with multiplier $C=2(1-2\epsilon)$ to obtain a coin of bias
+\[
+ p'_i=(1-2\epsilon)(p_i+1-z).
+\]
+It has slack at least $\epsilon$ because
+$p'_i\le(1-2\epsilon)(1+\epsilon)\le1-\epsilon$.
+Huber's linear-factory bound $9.5C/\epsilon$ gives at most
+$19\lambda$ mixture-coin calls. The largest new bias is at least
+$1-3\epsilon$.
+
+Run a uniform Bernoulli race on the acceptance coins
+$\exp[-\lambda'(1-p'_i)]$, where
+$\lambda'=\lambda/(1-2\epsilon)\le4\lambda/3$.
+Each acceptance coin is a Poisson product of $p'_i$ coins.
+Since $\lambda'(1-p'_{\max})\le4$, a trial succeeds with
+probability at least $e^{-4}/m$. The accepted law is correct because
+$\lambda'p'_i=\lambda p_i+\lambda(1-z)$, with a common second term.
+Even without early termination of the Poisson product, there are at
+most $(4/3)e^4\lambda m$ calls to the $p'_i$ factories.
+Each costs at most $(19/2)\lambda(1+mN)$ original coin calls.
+Since $N+1\le3\lambda^2\log(4m\lambda)$, their product is at most
+$38e^4\lambda^4m^2\log(4m\lambda)$, so $C=4096$ suffices.
+The case $m=1$ can simply return its sole index.
+
+The sample counts, empirical maximum, uniform integer, and rational
+parameters have polynomial bookkeeping cost. Huber's construction
+with rational multiplier and slack has polynomial expected bit
+cost; the finite-bit implementation used for the normalization
+factory applies here with inverse slack $\lambda$.
+Poisson parameters are rational and at most $4\lambda/3$, and can
+be split into $O(\lambda)$ bounded-parameter Poisson variables.
+Certified scalar comparisons have exponentially decreasing
+refinement tails as in Theorem~\ref{thm:newexplicitcover}.
+\end{proof}
+
+\begin{theorem}[An implicit query]
+\label{thm:newimplicitcover}
+Suppose query coordinate $q_i$ is accessible through a fresh sign
+of mean $q_i/S$. Assume the stronger, query-independent certificate
+\[
+ \frac{\beta S}{n}\sum_{i=1}^n|k_{j,i}-c_{g,i}|\le\delta
+ \qquad(j\in G_g).
+\]
+Let $\bar A$ be a positive integer with
+$\beta S^2\le\bar A\le\beta S^2+2$, and put
+$\lambda=2\bar A+\lceil\log_2T\rceil+8$.
+An exact attention index can be sampled using at most
+\[
+ Ce^{2\delta}\lambda^4 M^2\log(4M\lambda)
+       +e^{2\delta}-1
+\]
+query-coordinate signs in expectation, for an absolute constant $C$.
+One additional fresh value
+sign produces a sign of mean $Y(q)$. All auxiliary work has finite
+expectation polynomial in $\lambda,M,B$ for fixed $\delta$.
+\end{theorem}
+\paragraph{Proof idea.}
+Include group multiplicities in their proposal scores through known logarithmic coins.  A polynomial logistic race selects the group, and a stopped Poisson product corrects its representative score to the chosen member score.
+
+\begin{proof}
+The representative score $b_g$ is a signed linear combination of
+query-coordinate means with sum of absolute coefficients at most
+$A\le\bar A$. Thus a coin with bias $(1+b_g/\bar A)/2$ needs at
+most one query-coordinate sign, using a rational alias table for the absolute representative
+coordinates.  Its total coefficient mass, divided by $\bar A$,
+is a known gate; a closed gate returns a fair sign.  At standard
+scaling this gate can be algebraic, and is sampled by certified
+intervals.  No table stores irrational probabilities exactly. A mixture with known coins gives a coin of bias
+\[
+ p_g=\frac{b_g+\bar A+\log N_g}{\lambda}\in[0,1].
+\]
+Explicitly, use the preceding unknown coin with probability
+$2\bar A/\lambda$; on the other branch use a known coin of bias
+$\log N_g/(\lambda-2\bar A)$. Apply
+Lemma~\ref{lem:newpolyrace}. Since
+$e^{\lambda p_g}=e^{\bar A}N_ge^{b_g}$, it generates exactly the
+group proposal of Lemma~\ref{lem:newpartition}.
+
+The score difference $d_j=a_j-b_g$ is a signed linear combination
+with coefficient mass at most $\delta$. A coin of bias
+$(1+d_j/\delta)/2$ therefore costs at most one query-coordinate
+sign.  As for the representatives, a rational alias table for
+$|k_{j,i}-c_{g,i}|$ is combined with a known gate for its total
+coefficient mass divided by $\delta$. A stopped product with Poisson parameter $2\delta$ accepts
+with probability $e^{d_j-\delta}$.
+The geometric proposal bound multiplies the group cost by at most
+$e^{2\delta}$. The stopped-Poisson identity
+\[
+ g(p)=\frac{1-e^{-2\delta(1-p)}}{1-p}
+ \le(e^{2\delta}-1)e^{-2\delta(1-p)}
+\]
+shows, after averaging over the proposed groups and members and
+dividing by the trial acceptance probability, that all the
+difference tests together need at most $e^{2\delta}-1$ query signs.
+Fresh randomness for every recursive request proves the required
+conditional independence. Known logarithmic coins are implemented
+by rational enclosures and the same lazy-uniform comparison.
+\end{proof}
+
+\begin{corollary}[A cover from affine dimension]
+\label{cor:newrankcover}
+Suppose the cached keys have affine dimension at most $r$. For
+$\beta S>0$, a greedy Euclidean cover with radius
+\[
+ \rho=\frac{\delta\sqrt n}{\beta S}
+\]
+has at most $M\le(1+2\beta S^2/\delta)^r$ representatives and
+satisfies both certificates above. It can be constructed in
+$O(TnM)$ distance-arithmetic operations and stored, with all alias
+tables, in $O(Tn+Mn)$ numbers and $O(T)$ position addresses.
+At standard scaling and fixed $r,S,\delta$, its preprocessing is
+$T\operatorname{poly}(n,B)$ and its expected online work is
+$\operatorname{poly}(n,B,\log T)$, including for implicit queries.
+\end{corollary}
+\paragraph{Proof idea.}
+A Euclidean cover controls every allowed score difference by Cauchy--Schwarz.  Disjoint smaller balls in the affine span bound the number of representatives, and squared-distance comparisons make the construction exact.
+
+\begin{proof}
+Greedily make a new representative whenever a key is farther than
+$\rho$ from all existing representatives. Final representatives
+are $\rho$-separated, and each assigned key is within $\rho$ of
+its representative. Cauchy--Schwarz gives
+\[
+ \frac{\beta S}{n}\|k_j-c_g\|_1
+ \le\frac{\beta S}{\sqrt n}\|k_j-c_g\|_2\le\delta.
+\]
+All keys lie in the Euclidean ball of radius $S\sqrt n$. Projecting
+the origin orthogonally onto their affine span gives a center in
+that span at distance at most $S\sqrt n$ from every key. Within
+the affine span, disjoint balls of radius $\rho/2$ around the
+representatives lie in a ball of radius $S\sqrt n+\rho/2$.
+Comparison of $r$-dimensional volumes proves the bound. If $r=0$,
+there is one representative. Squared distances and $\rho^2$ are
+rational for dyadic $\beta$, and also when $\beta=\sqrt n$, so
+all greedy decisions are exact finite arithmetic. Alias tables for
+representatives and within-group differences take linear space in
+the total number of their coordinates.
+\end{proof}
+
+\paragraph{Scope.}
+The cover is a sufficient, verifiable certificate. No converse is
+asserted. A cache can have large affine dimension and still be easy,
+for example if all relevant values are equal. A nonlinear factory
+that requests independent attention signs can use this index as a
+subroutine. Its number of attention requests must still be included
+in the total cost. This is also why the result does not assert a
+depth-independent bound for an arbitrary transformer.

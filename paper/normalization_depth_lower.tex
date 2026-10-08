@@ -1,0 +1,553 @@
+\subsection{Lower bounds for additive depth}
+\label{sec:pn-depth-lower}
+
+\subsubsection{A fixed-stabilizer lower bound}
+
+Theorem~\ref{thm:pn-relative} needs its relative floor. With a fixed
+stabilizer alone, logarithmic depth can force a cost linear in the
+context length, even at zero attention scores.
+The following construction concerns weight-only preprocessing, as in the
+input-probe model. It also applies when the unknown signs arrive as a
+fresh query. It is not a lower bound against an index that has already
+read and summarized these particular signs during prefill.
+
+\begin{theorem}[Additive pre-norm blocks can reveal a majority]
+\label{thm:pn-absolute-lower}
+For every $T\ge2$, there is a width-three instance of
+\eqref{eq:pn-att}--\eqref{eq:pn-ff}, with $s=4$, stabilizer
+$\epsilon=3$ at every normalization, zero attention scores, and
+$O(\log T)$ blocks, whose bounded two-logit exact-token query complexity
+is at least $T/2^{17}$ in the worst context. All nonzero weights are in
+$\{1,2,-2\}$ except a dyadic final readout coefficient. The input alphabet
+is $\{(-1,1,-1),(1,1,-1)\}$, and every normalization denominator is at
+least $\sqrt3$.
+\end{theorem}
+\paragraph{Proof idea.}
+Uniform attention writes a hidden input average into one coordinate.
+Subsequent normalized residual updates amplify small averages until their
+sign becomes visible at a bounded readout. A fourth-moment estimate and the
+transcript score convert this sensitivity into a linear query bound.
+
+\begin{proof}
+Write the unknown first coordinates as $x_1,\ldots,x_T$. Initially every
+coordinate has magnitude one, so the first normalization denominator is
+exactly two. Use zero queries and keys. The sole nonzero value row is
+row two, with coefficients $2$ on coordinate one and $-2$ on coordinate
+two. The attention residual therefore changes the stream at position
+$t$ to
+\[
+ (x_t,M_t,-1),\qquad M_t=\frac1t\sum_{j\le t}x_j.
+\]
+Take the tanh update of this first block to be zero. All later attention
+updates are zero. In each later feed-forward sublayer, the sole nonzero
+row is row two, selecting its own normalized coordinate with weight one.
+At the last position this produces the scalar recurrence
+\[
+ F_0(z)=z,\qquad
+ F_{r+1}(z)=F_r(z)+
+   \tanh\!\left(\frac{F_r(z)}
+      {\sqrt{11/3+F_r(z)^2/3}}\right),
+ \qquad z=M_T.
+\]
+Every recurrence is odd and increasing. If $0\le y\le1$, its normalized
+argument is at least $y/2$ and at most one. The inequality
+$\tanh v\ge v/2$ for $0\le v\le1$ therefore gives an increment at least
+$y/4$. If $y\ge1$, the argument is at least $1/2$, so the increment is
+at least $1/4$.
+
+Set
+\[
+ k=\left\lceil\log_{5/4}(2\sqrt T)\right\rceil,
+ \qquad d=2^{\lceil\log_2(2k)\rceil}.
+\]
+Thus $2k\le d<4k$. Starting at $z\ge1/(2\sqrt T)$, the recurrence
+reaches one within $k$ steps. During its remaining $d-k$ steps it
+increases by at least $1/4$ per step. Consequently
+$F_d(z)\ge d/8$. The trivial upper bound $|F_d(z)|\le1+d\le2d$ holds
+for all $|z|\le1$. Take logits $\pm F_d(M_T)/(2d)$, a legal dyadic
+readout. Their output-sign mean is
+\[
+ g(M_T)=\tanh(F_d(M_T)/(2d)).
+\]
+For $z\ge1/(2\sqrt T)$, one has $g(z)\ge1/32$. Oddness gives the
+corresponding negative inequality.
+
+Let the input signs be independent with common mean $t$, and put
+$H(t)=\mathbb E_tg(M_T)$. Differentiating the finite input sum at zero
+gives
+\[
+ H'(0)=T\mathbb E_0[M_Tg(M_T)].
+\]
+Now $\mathbb E_0M_T^2=1/T$ and
+$\mathbb E_0M_T^4=(3T^2-2T)/T^4\le3/T^2$. The elementary
+second-moment inequality gives
+\[
+ \Pr_0\{|M_T|\ge1/(2\sqrt T)\}\ge3/16.
+\]
+Indeed, Cauchy--Schwarz applied to that event gives
+\[
+ \Pr\{M_T^2\ge(\mathbb E M_T^2)/4\}
+ \ge(3/4)^2\frac{(\mathbb E M_T^2)^2}{\mathbb E M_T^4}.
+\]
+Hence
+\[
+ H'(0)\ge
+ T\frac1{32}\frac1{2\sqrt T}\frac3{16}
+ =\frac{3\sqrt T}{1024}.
+\]
+For any exact sampler, expose only its distinct unknown input probes.
+At $t=0$, the transcript score $Z$ has
+$\mathbb E Z^2=\mathbb E Q$ and $H'(0)=\mathbb E[YZ]$, where
+$Y\in\{-1,1\}$ is the output sign. Cauchy--Schwarz gives
+$\mathbb E Q\ge H'(0)^2\ge9T/2^{20}\ge T/2^{17}$.
+The average lower bound implies a worst-context lower bound. The
+construction has $d+1=O(\log T)$ blocks and row norms at most four.
+\end{proof}
+
+The public constant coordinates make the denominator floor explicit.
+The lower bound does not rely on normalization being undefined on any
+input, on growing row norms, or on nonzero attention temperature. An
+index built after reading the context can store all prefix means in this
+example. It consequently evades this particular probe lower bound,
+which is why cache preprocessing must be stated separately.
+
+
+\begin{corollary}[A fresh-query obstruction survives a cache]
+\label{cor:pn-fresh-query}
+For every power-of-two width $n\ge2$, a pre-norm additive network with
+one position, row norms at most four, stabilizer three, and
+$O(\log n)$ blocks has a bounded binary output whose exact sampler
+requires at least $n/2^{17}$ expected fresh-query coordinate probes in
+the worst query. Any preprocessing independent of that query is allowed.
+\end{corollary}
+\paragraph{Proof idea.}
+At one position, an affine attention value map averages the unknown
+query coordinates. This places the same hard scalar recurrence inside a
+single fresh query, so preprocessing independent of that query cannot
+remove the information bound.
+
+\begin{proof}
+The query is $x\in\{-1,1\}^n$. Its first RMSNorm denominator is two.
+At the sole position, attention has weight one. Give its value map the
+matrix
+\[
+ V=2(J_n-I_n),\qquad (J_n)_{ij}=1/n.
+\]
+The first residual becomes $J_nx=M\boldsymbol1$, where
+$M=n^{-1}\sum_i x_i$. Every row has norm $4(1-1/n)<4$, and the
+coefficients are dyadic. Use a zero first tanh update, zero attention
+updates thereafter, and identity tanh rows. All coordinates now obey
+\[
+ F_{r+1}(z)=F_r(z)+\tanh(F_r(z)/\sqrt{3+F_r(z)^2}).
+\]
+For $0\le y\le1$ this adds at least $y/4$, and for $y\ge1$ it adds at
+least $1/4$. Choose $d$ exactly as in the preceding theorem with $n$ in
+place of $T$, and use logits $\pm F_d(M)/(2d)$. The same moment and
+finite-transcript argument gives $n/2^{17}$. An index built before $x$
+arrives is part of the fixed preprocessed state in that argument.
+\end{proof}
+
+\subsubsection{Relative-floor lower bounds}
+
+The next constructions keep a relative energy floor on the entire input
+cube. They show that the polynomial dependence on the cumulative
+residual radius in Theorem~\ref{thm:pn-relative} cannot be removed.
+
+\begin{theorem}[A relative-floor depth lower bound, uniform in the step size]
+\label{thm:pn-scaled-lower}
+Fix a dyadic $s>1$ and put
+\[
+ \delta=s-1,\qquad C=\frac{s(s^2+1/2)}{2(s-1)}.
+\]
+There is a positive constant $c_s$, depending only on $s$,
+with the following property.
+For every power-of-two $N\ge2$, every dyadic $0<\alpha\le1$, and every
+integer $D$ with $\alpha D\ge4$, there is a one-position, width-$2N$
+pre-norm additive network with $D$ blocks, row norms at most $s$,
+stabilizer $\epsilon=3$ in every normalization, and the same step
+size $\alpha$ on every residual sublayer, whose exact binary output
+requires
+\begin{equation}
+ \mathbb E Q\ge
+ c_s
+ \min\{(1+\alpha D)^{2\delta},N\}
+ \label{eq:pn-scaled-lower}
+\end{equation}
+expected fresh-query coordinate probes in the worst input. Arbitrary
+preprocessing independent of that query is allowed. On the entire input sign cube, every actual
+normalization denominator squared satisfies
+\[
+ v_j\ge\frac1{12}(1+\alpha j)^2
+\]
+at the corresponding residual radius $R_j=1+\alpha j$.
+Attention updates are zero, so the temperature is arbitrary. The
+output uses one coordinate and a dyadic readout, and its logits lie
+in $[-1,1]$ on every permitted input. The constant in
+\eqref{eq:pn-scaled-lower} is given explicitly in the proof.
+\end{theorem}
+\paragraph{Proof idea.}
+Separate feature coordinates from deterministic carriers that
+control the normalization scale. Dividing by the residual radius gives a
+scalar gain whose product grows polynomially. A reciprocal-square comparison
+keeps that gain valid through nonlinear saturation, and the transcript score
+turns it into a probe lower bound.
+
+\begin{proof}
+The network accepts every input in $\{-1,1\}^{2N}$. For its lower-bound
+distribution, let the first $N$ coordinates be unknown signs
+$x_1,\ldots,x_N$ and fix the remaining $N$ coordinates to $-1$. All query, key, and value maps are zero. Every feature tanh row
+places weight $s/N$ on each of the first $N$ normalized coordinates,
+with zero bias. Every carrier row has zero weights and bias $-1$.
+These are legal dyadic parameters with the asserted row norms.
+
+Let $M=N^{-1}\sum_i x_i$ and $t_0=\tanh1$. After $j$ blocks the feature
+coordinates are
+\[
+ x_i-M+F_j(M),
+\]
+and all carrier coordinates are $C_j=-(1+\alpha jt_0)$. This follows
+by induction, with $F_0(z)=z$ and
+\begin{equation}
+ F_{j+1}(z)=F_j(z)+\alpha
+ \tanh\!\left(
+ \frac{sF_j(z)}{
+  \sqrt{3+[1-z^2+F_j(z)^2+C_j^2]/2}}
+ \right).
+ \label{eq:pn-scaled-meanrec}
+\end{equation}
+Indeed, the mean of the feature coordinates is $F_j(M)$, and their
+mean square is $1-M^2+F_j(M)^2$. Every coordinate has magnitude at
+most $R_j=1+\alpha j$. Since $t_0>1/2$,
+$|C_j|\ge R_j/2$, so the denominator squared is at least $R_j^2/8$.
+The attention residual has zero update and leaves these statements
+unchanged. The network also has a relative floor on the entire sign cube.
+For arbitrary initial carrier signs $e_i\in\{-1,1\}$, their values are
+$e_i-\tau t_0$, with $\tau=\alpha j$. If $\tau\le2$, the stabilizer alone
+gives $v_j\ge3\ge(1+\tau)^2/12$. If $\tau\ge2$, every carrier has
+magnitude at least $\tau/2-1$, so
+\[
+ 12v_j-(1+\tau)^2
+ \ge12\left[3+\frac12(\tau/2-1)^2\right]-(1+\tau)^2
+ =\frac12(\tau-8)^2+9>0.
+\]
+Thus the claimed floor $R_j^2/12$ holds on every sign input; the stronger
+$R_j^2/8$ remains available on the lower-bound subdomain.
+
+For $z\ge0$, all $F_j(z)$ are nonnegative and $F_j(z)\ge z$; the
+recurrences are odd. Set $u_j=F_j/R_j$ and
+$a_j=\alpha/R_{j+1}$. Their normalized update is
+\[
+ u_{j+1}=(1-a_j)u_j+
+ a_j\tanh\!\left(\frac{s u_j}{\sqrt{b_j(z)+u_j^2/2}}\right),
+\]
+where
+\[
+ b_j(z)=\frac{3+(1-z^2)/2+C_j^2/2}{R_j^2}
+ \le\frac{7}{2R_j^2}+\frac12.
+\]
+Let $j_0=\lceil2/\alpha\rceil$. Then $3\le R_{j_0}\le4$, hence
+$u_{j_0}(z)\ge z/4$, and for every $j\ge j_0$ one has
+$b_j(z)\le8/9<1$.
+
+For $u\ge0$, the bound $\tanh y\ge y/\sqrt{1+y^2}$ gives
+\[
+ \tanh\!\left(\frac{s u}{\sqrt{b_j(z)+u^2/2}}\right)
+ \ge\frac{s u}{\sqrt{1+(s^2+1/2)u^2}}.
+\]
+Put $g_j=1+\delta a_j$ and
+$d_j=a_js(s^2+1/2)/g_j$. Convexity of
+$v\mapsto(1+v)^{-1/2}$ gives
+$u_{j+1}\ge g_ju_j/\sqrt{1+d_ju_j^2}$. Define
+\[
+ G=\prod_{j=j_0}^{D-1}g_j.
+\]
+For a positive $z$, write $G_j=\prod_{r=j_0}^{j-1}g_r$. The
+reciprocal-square inequality gives
+\[
+ \frac{G_{j+1}^2}{u_{j+1}(z)^2}
+ \le\frac{G_j^2}{u_j(z)^2}+d_jG_j^2.
+\]
+The initial reciprocal term is at most $16/z^2$. Moreover,
+$d_j\le a_js(s^2+1/2)$ and $g_j^2-1\ge2\delta a_j$, so
+\[
+ \sum_{j=j_0}^{D-1}d_jG_j^2
+ \le C\sum_{j=j_0}^{D-1}(g_j^2-1)G_j^2=C(G^2-1).
+\]
+Summing and inverting therefore gives
+\begin{equation}
+ u_D(z)\ge
+ \frac{G(z/4)}{\sqrt{1+C(G^2-1)(z/4)^2}},\qquad z\ge0.
+ \label{eq:pn-scaled-comparison}
+\end{equation}
+Continuity covers $z=0$. The calculation uses the pointwise comparison
+at each step and does not assume that $b_j(z)$ is independent of $z$.
+
+Choose the least power of two $L\ge R_D$. Then $R_D\le L<2R_D$.
+The logits are plus and minus the first feature coordinate divided
+by $L$. They lie in $[-1,1]$, and $1/L$ is dyadic. Conditional on
+$M=z$, the selected sign $x_1$ has mean $z$. Put
+\[
+ k=1/L,\qquad A=(F_D(z)-z)/L\ge0.
+\]
+The conditional output-sign mean is
+\[
+ \overline g(z)
+ =\frac{1+z}{2}\tanh(A+k)+
+   \frac{1-z}{2}\tanh(A-k).
+\]
+At $A=0$, this equals $z\tanh k\ge zk/4$. Increasing $A$ from zero
+to its actual value keeps both arguments in $[-1,1]$, since
+$F_D(z)-z\le\alpha D=R_D-1$. Throughout that interval the derivative
+of the displayed conditional mean with respect to $A$ is at least
+$\operatorname{sech}^2(1)>1/4$. Consequently
+\begin{equation}
+ \overline g(z)\ge\frac{zk+A}{4}
+ =\frac{F_D(z)}{4L}\ge\frac{u_D(z)}8,\qquad z\ge0.
+ \label{eq:pn-scaled-coordinatehead}
+\end{equation}
+Oddness gives the signed counterpart for negative $z$.
+
+Give the unknown query signs independent common mean $t$, and let
+$H(t)$ be the output-sign mean. Differentiating the finite input sum
+at zero and conditioning on $M$ gives
+$H'(0)=N\mathbb E_0[M\overline g(M)]$. Apply
+\eqref{eq:pn-scaled-comparison}--\eqref{eq:pn-scaled-coordinatehead}
+and Jensen's inequality weighted by $M^2$. Since
+$\mathbb E M^2=1/N$ and $\mathbb E M^4/\mathbb E M^2\le3/N$,
+\[
+ H'(0)\ge\frac{G}{32\sqrt{1+3CG^2/(16N)}}.
+\]
+The finite-transcript information inequality therefore gives
+\[
+ \mathbb E Q\ge
+ \frac{G^2}{1024(1+3CG^2/(16N))}
+ \ge\frac{\min\{G^2,N\}}{1024(1+3C/16)}.
+\]
+It holds on average over unbiased inputs, and hence for a worst input.
+
+It remains to bound $G$ uniformly in $\alpha$. Monotonicity of
+$x\mapsto(1+x)^{-1}$ and its square implies
+\[
+ \sum_{j=j_0}^{D-1}a_j
+ \ge\log\frac{R_{D+1}}{R_{j_0+1}},\qquad
+ \sum_{j=j_0}^{D-1}a_j^2
+ \le\frac{\alpha}{R_{j_0}}\le\frac13.
+\]
+Also $R_{j_0+1}\le5$ and $R_{D+1}\ge1+\alpha D$.
+The inequality $\log(1+x)\ge x-x^2/2$ gives
+\[
+ G\ge e^{-\delta^2/6}
+       \left(\frac{1+\alpha D}{5}\right)^\delta.
+\]
+Since $e^{-\delta^2/3}5^{-2\delta}\le1$, substitution into the
+minimum bound proves \eqref{eq:pn-scaled-lower} with
+\[
+ c_s=\frac{e^{-\delta^2/3}5^{-2\delta}}
+              {1024(1+3C/16)}.
+\]
+The assumption
+$\alpha D\ge4$ ensures $D\ge j_0$; all sums and comparisons above
+are then valid.
+\end{proof}
+
+
+\begin{corollary}[A fixed final RMSNorm readout]
+\label{cor:pn-scaled-finalnorm-lower}
+In Theorem~\ref{thm:pn-scaled-lower}, replace the depth-dependent readout
+by a final $\operatorname{RMSNorm}_3$. Use the fixed logits
+$\pm\mathcal N_3(h_D)_1/4$. On the entire sign cube their absolute
+values are at most $\sqrt{12}/4<1$. The lower bound
+\eqref{eq:pn-scaled-lower} remains valid with $c_s/16$ in place
+of $c_s$. Every normalization, including the final one,
+has the same fixed stabilizer and the relative floor $R_D^2/12$.
+\end{corollary}
+\paragraph{Proof idea.}
+The final normalization denominator stays between two fixed
+multiples of the residual radius. Replacing the scaled readout by this
+denominator therefore preserves the mean sensitivity up to a constant.
+
+\begin{proof}
+Conditional on $M=z$ in the lower-bound distribution, write
+$L(z)=4\sqrt{v_D(z)}$. The full-domain floor gives $L(z)\ge R_D$.
+The coordinate-radius bound gives $v_D(z)\le3+R_D^2\le4R_D^2$, hence
+$L(z)\le8R_D$. The conditional shift calculation in
+\eqref{eq:pn-scaled-coordinatehead} now gives
+\[
+ \overline g(z)\ge\frac{F_D(z)}{4L(z)}\ge\frac{u_D(z)}{32}
+ \qquad(z\ge0).
+\]
+The denominator is even in $z$, so oddness remains valid. The score
+lower bound loses a factor four, and its square loses a factor sixteen.
+This gives the asserted constant. The full-domain logit bound is
+$|h_{D,1}|/(4\sqrt{v_D})\le\sqrt{12}/4$, and the readout coefficient
+$1/4$ is fixed and dyadic.
+\end{proof}
+
+\begin{corollary}[Padding to every width]
+\label{cor:pn-scaled-padding}
+There is a constant $c_s^{\rm pad}>0$, depending only on $s$, such
+that for every integer $n\ge4$, the fixed final-normalization construction
+can be made at width $n$, with all the assumptions of
+Corollary~\ref{cor:pn-scaled-finalnorm-lower}, and with
+\[
+ \mathbb E Q\ge
+ c_s^{\rm pad}
+ \min\{(1+\alpha D)^{2\delta},n\}.
+\]
+An explicit value for the constant is given in the proof.
+The relative floor $1/12$, fixed stabilizer $3$, and fixed readout
+coefficient $1/4$ hold on the entire input sign cube.
+\end{corollary}
+\paragraph{Proof idea.}
+Use a power-of-two feature group so its averaging weights remain
+dyadic, and fill the remaining coordinates with carriers. Their positive
+fraction preserves the energy floor, while the feature group still contains
+a constant fraction of the unknown input.
+
+\begin{proof}
+Choose the largest power of two $N\le n/2$. Use $N$ feature
+coordinates and $n-N$ carrier coordinates. Put $\eta=N/n$, so
+$1/4<\eta\le1/2$. Each feature row still has the dyadic weights
+$s/N$. On the lower-bound subdomain the squared denominator is
+\[
+ 3+\eta(1-z^2+F_j(z)^2)+(1-\eta)C_j^2.
+\]
+The carrier fraction is at least $1/2$, so the full-cube floor proof
+above is unchanged. Use $j_0=\lceil3/\alpha\rceil$. Then
+$4\le R_{j_0}\le5$, $u_{j_0}\ge z/5$, and the normalized nonsignal
+part of the denominator satisfies
+\[
+ b_j(z)\le\frac{7}{2R_j^2}+\frac34\le\frac{31}{32}<1.
+\]
+Because $\eta\le1/2$, the same Jensen comparison applies with the
+same $C$, replacing $z/4$ by $z/5$. The fixed final-normalization
+head still gives $\overline g(z)\ge u_D(z)/32$. Thus the score and
+query inequalities become
+\[
+ H'(0)\ge\frac{G}{160\sqrt{1+3CG^2/(25N)}},\qquad
+ \mathbb E Q\ge\frac{\min\{G^2,N\}}{25600(1+3C/25)}.
+\]
+Now $\sum a_j^2\le1/4$ and $R_{j_0+1}\le6$, whence
+$G\ge e^{-\delta^2/8}((1+\alpha D)/6)^\delta$.
+Finally, $N>n/4$ implies
+$\min\{x,N\}\ge\min\{x,n\}/4$ for $x\ge0$. These estimates
+give the explicit constant
+\[
+ c_s^{\rm pad}=\frac{e^{-\delta^2/4}6^{-2\delta}}
+                         {102400(1+3C/25)}.
+\]
+Since $\alpha D\ge4$,
+$D\ge j_0$ as required.
+\end{proof}
+
+\begin{corollary}[Prescribed bounded step schedules]
+\label{cor:pn-scheduled-lower}
+The arbitrary-width construction in Corollary~\ref{cor:pn-scaled-padding}
+also permits prescribed dyadic block steps $a_j\in[0,1]$ for $0\le j<D$,
+used on both residual sublayers of their respective blocks. Put
+$\tau_j=\sum_{k<j}a_k$, and suppose $\tau_D\ge4$.
+For a positive constant $c_s^{\rm sched}$ depending only on $s$,
+its fixed final readout requires
+\[
+ \mathbb E Q\ge
+ c_s^{\rm sched}
+ \min\{(1+\tau_D)^{2\delta},n\}.
+\]
+The constant is specified in the proof.
+All full-cube floors hold at radius $r_j=1+\tau_j$ with the same
+constant $1/12$.
+\end{corollary}
+\paragraph{Proof idea.}
+The carrier displacement depends on the cumulative step size.
+Reciprocal increments telescope even for an irregular schedule, and their
+squares have a bounded sum. These two facts control the product of normalized
+gains without a regularity assumption on the steps.
+
+\begin{proof}
+Replace every occurrence of $\alpha j$ in the carrier and feature
+recurrences by $\tau_j$, and every increment $\alpha$ by $a_j$.
+Let $j_0$ be the first index with $\tau_{j_0}\ge3$. Since $a_j\le1$,
+$4\le r_{j_0}\le5$, so the same initial value $u_{j_0}\ge z/5$
+and nonsignal denominator bound apply. The normalized branch size is
+$q_j=a_j/r_{j+1}$. Let $G=\prod_{j=j_0}^{D-1}(1+\delta q_j)$.
+The reciprocal-square comparison and the score lower bound are
+unchanged.
+
+For completeness, the needed product estimate follows without any
+regularity assumption on the schedule. Since $r_{j+1}-r_j=a_j$,
+\[
+ q_j^2\le\frac{a_j^2}{r_jr_{j+1}}
+ \le\frac1{r_j}-\frac1{r_{j+1}}.
+\]
+Also, integrating $1/r-1/r_{j+1}$ over $[r_j,r_{j+1}]$ gives
+\[
+ 0\le\log\frac{r_{j+1}}{r_j}-q_j
+ \le\frac{a_j^2}{r_jr_{j+1}}.
+\]
+Therefore $\sum q_j^2\le1/4$ and
+$\sum q_j\ge\log(r_D/r_{j_0})-1/4$. The inequality
+$\log(1+x)\ge x-x^2/2$ yields
+\[
+ G\ge e^{-\delta/4-\delta^2/8}
+       \left(\frac{1+\tau_D}{5}\right)^\delta.
+\]
+Substitution into the score lower bound proves the claim with
+\[
+ c_s^{\rm sched}=\frac{e^{-\delta/2-\delta^2/4}5^{-2\delta}}
+                           {102400(1+3C/25)}.
+\]
+Zero steps
+leave the state unchanged and cause no exception in these identities.
+\end{proof}
+
+\begin{corollary}[An effective-depth threshold for the certified pre-norm class]
+\label{cor:pn-effective-threshold}
+Fix $s>1$, a nonnegative temperature $\beta$, a rational
+$0<\gamma\le1/12$, an output row-norm bound $u\ge1/4$, and an
+output bias bound $c_{\rm out}\ge0$, all independent of width and depth.
+Consider widths tending to infinity, polynomially
+bounded position counts and depths, and encoding/address length
+$B=\log^{O(1)}n$. Use a common dyadic residual step $\alpha\in[0,1]$.
+For each attention update take the valid radius
+$U_j=G\max_i\sum_k|V_{j,ik}|$, and for a tanh update take $U_j=1$,
+omitting updates certified to be zero. Let
+$R_j=1+\alpha\sum_{k\le j}U_k$. Restrict to networks whose pre-norm
+and final-normalization denominators satisfy the relative certificate
+$v_j\ge\gamma R_{j-1}^2$ of \eqref{eq:pn-relative-floor}, with
+$j=2D+1$ for the final normalization. The affine output logits lie in $[-1,1]$;
+their row norms are at most $u$ and their biases have magnitude
+at most $c_{\rm out}$.
+
+This class has a uniform polylogarithmic worst-case exact-sampling
+bound if and only if
+\[
+ \alpha D=\log^{O(1)}n.
+\]
+The equivalence concerns asymptotic families. It determines the scale
+of effective depth; it does not identify the optimal polynomial
+exponent.
+\end{corollary}
+\paragraph{Proof idea.}
+The composition theorem gives the upper bound from the cumulative
+residual radius. For the converse, one fixed gain above one yields a
+positive lower exponent on every width, so a radius larger than every
+polylogarithm cannot have a uniform polylogarithmic sampling bound.
+
+\begin{proof}
+The positive direction follows from
+Corollary~\ref{cor:pn-stepsizes}, since $U_j\le sG$ at attention and
+$U_j\le1$ at tanh, while all local factory constants are fixed.
+The final-normalization interface has fixed radius and cost.
+
+For necessity, choose a fixed dyadic $\sigma$ with $1<\sigma\le s$
+(if $s$ is dyadic, take $\sigma=s$). For every width $n\ge4$,
+use Corollary~\ref{cor:pn-scaled-padding} with gain $\sigma$. Its attention update
+radii are zero and its tanh update radii are one, so the certificate
+radii are exactly $1+\alpha j$. Its full-domain floor $1/12$ meets
+any stated $\gamma\le1/12$. Its fixed coefficient $1/4$ gives bounded
+affine logits. The lower bound is a constant depending only on $s$
+times $\min\{(1+\alpha D)^{2(\sigma-1)},n\}$. If $\alpha D$ is not bounded
+by a fixed power of $\log n$, this lower bound is not uniformly
+polylogarithmic. The regime $\alpha D<4$ cannot cause that failure,
+so the lower theorem's cutoff has no effect on the equivalence.
+\end{proof}

@@ -1,0 +1,787 @@
+\subsection{Residual layers and effective depth}\label{sec:residual}
+
+Consider the architecture
+\begin{equation}\label{eq:residualarchitecture}
+h_{\ell,i}=(1-\alpha)h_{\ell-1,i}
+ +\alpha\tanh\!\left(b_{\ell,i}
+       +\sum_jw_{\ell,ij}h_{\ell-1,j}\right),
+\qquad 0\le\alpha\le1.
+\end{equation}
+The scalar $\alpha$ is known and belongs to the same
+$2^{-b}\mathbb Z$ grid as the network parameters.
+For a more finely encoded $\alpha$, replace $b$ by the larger
+fractional bit length in the definition of $\bits$ and in the
+preprocessing bound. Put $\tau=\alpha D$.
+A skip step preserves the coordinate, so a geometrically distributed
+jump can bypass many layers. This observation is essential when $D$
+is large and $\alpha$ is small.
+
+\begin{theorem}[Residual bound]\label{thm:residualupper}
+Suppose that the actual maximum row norm is $S\le2$ and the biases
+have absolute value at most one. The exact sampler can be extended
+to \eqref{eq:residualarchitecture} with
+$O(Dn^2\bits^6)$ preprocessing and $O(Dn^2\bits)$ stored bits.
+Let $J$ count the root operation, the geometric-jump proposals, and
+the input leaves in the compressed recursion. Then
+\begin{align}
+\E J&=O((1+\tau)^2) &&(S\le1),\label{eq:rescriticalupper}\\
+\E J&=O((1+\tau)^2e^{7000(S-1)\tau}) &&(1<S\le2).\label{eq:ressuperupper}
+\end{align}
+With the scalar and geometric implementations described below,
+the expected online bit work is $O(\bits^4\E J)$.
+All implied constants are absolute; explicit choices are given in
+the proof. The product bound
+\eqref{eq:resproduct} is more informative for a particular network.
+\end{theorem}
+
+For fixed $1<s\le2$, the lower bound proved below has exponential
+factor $(1+\alpha(s-1))^{2D}$. Since
+\[
+\frac{\alpha(s-1)}2\le\log(1+\alpha(s-1))
+\le\alpha(s-1),
+\]
+the upper and lower exponential scales agree up to absolute
+constant factors. At unit norm, the upper cost is polynomial in
+$1+\alpha D$, and Theorem~\ref{thm:residualfused} lowers its exponent
+to $35/32$. The critical exponent remains open for the full class.
+
+\subsubsection{Intervals whose endpoints stay inside the output range}
+
+Use $g=\max\{1,S\}$ and
+$\varepsilon=2^{-P}$ with the precision $P$ in
+\eqref{eq:precision}. In particular,
+$\varepsilon\le[100(D+1)^4]^{-1}$.
+Set $r_0=1$, $c_{0,i}=0$, and choose dyadic radii satisfying
+\begin{equation}\label{eq:resrounded}
+f_{\alpha,g}(r_{\ell-1})+2\alpha\varepsilon
+\le r_\ell\le
+f_{\alpha,g}(r_{\ell-1})+3\alpha\varepsilon,
+\qquad
+f_{\alpha,g}(r)=(1-\alpha)r+\alpha\tanh(gr).
+\end{equation}
+All stored radii and centers are rounded onto the fixed grid
+$2^{-(P+b+6)}\mathbb Z$. Since a nonzero $\alpha$ is at least
+$2^{-b}$, this grid is finer than $\alpha\varepsilon/64$.
+Approximating the displayed scalar expression and then adding
+$5\alpha\varepsilon/2$ supplies \eqref{eq:resrounded} on this
+grid. Denominators therefore do not grow with the layer index.
+When $\alpha=0$, the network is the identity and the sampler returns
+$x_1$ immediately. Hence assume $\alpha>0$ below.
+
+For a row, put $p=1-\alpha$ and retain the definitions
+$\sigma,a,\rho,m,R$ from \eqref{eq:rowdata} and
+\eqref{eq:midrad}. The residual interval has midpoint and radius
+\[
+M=p c_{\ell-1,i}+\alpha m,
+\qquad
+V=p r_{\ell-1}+\alpha R.
+\]
+Approximate $M$ to error at most $\alpha\varepsilon$, then project
+that approximation onto $[-1+r_\ell,1-r_\ell]$ to obtain
+$c_{\ell,i}$. The resulting invariant is
+\begin{equation}\label{eq:resinvariant}
+|h_{\ell,i}-c_{\ell,i}|\le r_\ell,
+\qquad |c_{\ell,i}|+r_\ell\le1.
+\end{equation}
+Indeed, both endpoints $M\pm V$ lie in $[-1,1]$, because the
+previous interval and both tanh endpoints do. Also
+$V+\alpha\varepsilon\le r_\ell$.
+Before projection the center belongs to $[M+V-r_\ell,M-V+r_\ell]$.
+Projection onto $[-1+r_\ell,1-r_\ell]$ preserves membership in this
+interval: its upper endpoint is at least $-1+r_\ell$, and its lower
+endpoint is at most $1-r_\ell$.
+This proves both inequalities in \eqref{eq:resinvariant}.
+The projection may move the center by more than the approximation
+error. The unweighted offspring proof below does not require a
+small displacement from the midpoint.
+
+The normalized residual sampler chooses the same-coordinate skip
+with probability
+\begin{equation}\label{eq:resskip}
+p_\ell=\frac{p r_{\ell-1}}{r_\ell},
+\end{equation}
+and the centered tanh factory with probability
+$\alpha R/r_\ell$. Its two constant masses complete the mixture
+and contribute mean $(M-c_{\ell,i})/r_\ell$.
+The interval invariant makes these masses nonnegative.
+Its mean is therefore $(h_{\ell,i}-c_{\ell,i})/r_\ell$.
+At the root, open this normalized sampler with probability $r_D$
+and otherwise use constant masses $(1-r_D\pm c_{D,1})/2$.
+The second invariant in \eqref{eq:resinvariant} makes this root
+mixture valid.
+
+\subsubsection{Compressing the skips}
+
+Let $R_0=1$ and $R_{j+1}=f_{\alpha,g}(R_j)$.
+This ideal sequence is decreasing. Concavity gives
+$f'_{\alpha,g}(R_j)\le R_{j+1}/R_j\le1$, so the proof of
+Lemma~\ref{lem:rounding} applies with per-step error
+$3\alpha\varepsilon$:
+\begin{equation}\label{eq:resroundingerror}
+0< R_j\le r_j\le1,
+\qquad 0\le r_j-R_j\le3j\alpha\varepsilon.
+\end{equation}
+The upper bound one follows from
+$f_{\alpha,g}(1)+3\alpha\varepsilon<1$.
+Moreover $\tanh(gr_j)\le r_j$: the ratio
+$\tanh(gu)/u$ decreases with $u$, and this inequality holds at
+$R_j$ because the ideal sequence decreases.
+
+For $g=1$, Jensen's inequality applied to
+$u\mapsto(1+u)^{-1/2}$ and the tanh lower bound gives
+$f_{\alpha,1}(r)\ge r/\sqrt{1+\alpha r^2}$.
+Monotonicity in $g$ consequently gives
+\begin{equation}\label{eq:resradiuslower}
+r_j\ge R_j\ge(1+\alpha j)^{-1/2}\qquad(g\ge1).
+\end{equation}
+Writing $r_\ell=f_{\alpha,g}(r_{\ell-1})+e_\ell$,
+$0\le e_\ell\le3\alpha\varepsilon$, one obtains
+\[
+1-p_\ell
+=\alpha+\frac{p(r_\ell-r_{\ell-1})}{r_\ell}
+\le\alpha+\frac{3\alpha\varepsilon}{r_\ell}
+\le2\alpha.
+\]
+Thus $h=\min\{2\alpha,1\}$ dominates every non-skip hazard.
+From the current layer, draw a truncated geometric waiting time
+with success probability $h$. Bypass the intervening layers.
+At a proposal layer $\ell$, retain the proposal with probability
+$(1-p_\ell)/h$. A rejected proposal takes one skip step; a retained
+proposal uses the conditional non-skip mixture. If the waiting time
+passes layer zero, probe the current input coordinate.
+Independent geometric waiting times and thinning reproduce the
+original skip probabilities exactly.
+
+Truncated geometric sampling does not scan the skipped layers.
+For a proposed gap $k\le D$, evaluate $(1-h)^k$ by fixed-point
+binary powering and compare it with a lazy uniform random number.
+Binary search locates the inverse distribution function.
+There are at most $D+1$ boundaries. At precision
+$m+3\lceil\log_2(D+2)\rceil$ the probability that any boundary
+remains ambiguous is $O(2^{-m})$.
+Binary powering needs $O(\log D)$ multiplications, and binary search
+needs $O(\log D)$ comparisons. Schoolbook arithmetic with
+$O(\bits+m)$ guarded bits therefore gives $O((\bits+m)^4)$ work per
+refinement round and $O(\bits^4)$ expected work.
+The arithmetic computes certified intervals and never decides an
+equality of real numbers.
+
+\subsubsection{A product bound for the compressed recursion}
+
+For $0<r\le1$ and $1\le g\le2$, define
+\begin{align*}
+\chi_g(r)=\min\biggl\{&
+\frac{\tanh(gr)}r
+ \exp\!\left(\frac53g^2r^2+g^4r^4\right),\;
+g(1+g^2r^2)e^{g^2r^2}\biggr\},\\
+G_j&=1-\alpha+\alpha\chi_g(r_j).
+\end{align*}
+The first expression is Lemma~\ref{lem:offspring} before dividing
+by the new radius. For the second expression, the full majority
+has expected source count at most
+$\rho(1+\rho^2)/\tanh\rho$, and the joint race factor is at most
+$e^{\rho^2}$. Both bounds increase with the actual row norm,
+so using $g$ is valid.
+The expected number of normalized children at layer $j+1$ is at
+most $(r_j/r_{j+1})G_j$.
+After the root gate, the expected number of reached uncompressed
+calls at layer $k$ is at most
+$r_k\prod_{j=k}^{D-1}G_j$.
+Each such call is a proposal with probability $h\le2\alpha$.
+Nonnegative summation and the predictable trial-cost lemma give
+\begin{equation}\label{eq:resproduct}
+\E(J-1)\le
+\prod_{j=0}^{D-1}G_j
++2\alpha\sum_{k=1}^{D}r_k\prod_{j=k}^{D-1}G_j.
+\end{equation}
+The empty product is one. This derivation also counts branches
+that reach an input without any proposal.
+
+\begin{lemma}[A radial comparison for the offspring factor]
+\label{lem:resradial}
+Put $d_g(r)=1-\tanh(gr)/r$. Whenever $0<r\le1$,
+$1\le g\le2$, and $d_g(r)\ge0$,
+\begin{align}
+\chi_1(r)&\le1+4d_1(r)+5r^4,\label{eq:reschicritical}\\
+\chi_g(r)&\le1+4d_g(r)+5r^4+6000(g-1).
+\label{eq:reschisuper}
+\end{align}
+\end{lemma}
+\paragraph{Proof idea.}
+Relate the excess offspring cost to the amount by which one residual step
+decreases its radius. Elementary Taylor bounds control the critical term and
+its change when the row norm exceeds one.
+
+\begin{proof}
+Since $r-\tanh r=\int_0^r\tanh^2u\,du$ and
+$\tanh^2u\ge u^2/(1+u^2)\ge u^2-u^4$,
+\[
+d_1(r)\ge r^2/3-r^4/5.
+\]
+Write $t=r^2$. All Taylor coefficients of
+$E(t)=\exp(5t/3+t^2)$ are nonnegative. On $0\le t\le2/5$,
+they give $E(t)\le1+5t/3+4t^2$, because
+$E(2/5)=e^{62/75}<173/75$.
+Here is one rational verification of this numerical inequality:
+$e<68/25$ by the exponential series and its geometric tail,
+$e^{1/6}\ge85/72$, and therefore
+$e^{62/75}<e^{5/6}<4896/2125<173/75$.
+Multiplication by $1-d_1(r)$ and
+$d_1(r)\ge t/3-t^2/5$ now gives
+$\chi_1(r)\le1+4d_1(r)+5t^2$.
+For $2/5\le t\le1$, the second expression defining $\chi_1$
+and positivity of the series for $(1+t)e^t$ give
+$\chi_1(r)\le1+2t+(5/2)t^2$.
+This is at most $1+4d_1(r)+5t^2$, since
+$(17/10)t^2-(2/3)t\ge0$ for $t\ge2/5$.
+
+Let $\delta=g-1$. If $\delta\le1/10$, differentiating the first
+expression defining $\chi_g$ with respect to $g$ bounds its
+derivative by 400. Indeed, $gr\le11/10$,
+$5g^2r^2/3+g^4r^4<7/2$, and the remaining derivative factor is
+less than 11; $e^{7/2}<36$ suffices.
+The derivative of the second expression is
+\[
+e^{g^2r^2}(1+5g^2r^2+2g^4r^4)<40
+\]
+on the same interval. Both functions are therefore
+400-Lipschitz in $g$, and so is their minimum.
+Also $d_1(r)\le d_g(r)+\delta$, by the unit Lipschitz bound for
+tanh. This proves \eqref{eq:reschisuper} with 404 in place of 6000
+in this case. If $\delta\ge1/10$, the second expression gives
+$\chi_g(r)\le10e^4<600$, which proves the stated bound.
+\end{proof}
+
+\paragraph{Proof idea.}
+The residual radius supplies a telescoping potential for the offspring
+product. Summing the remaining fourth-order and rounding terms over the
+effective depth gives the stated bound for compressed skips.
+
+\begin{proof}[Proof of Theorem~\ref{thm:residualupper}]
+We prove the explicit prefactors $9e^{21}$ in the critical case
+and $10e^{30}$ in the supercritical case.
+Write $d_j=d_g(r_j)$ and
+$F_j=f_{\alpha,g}(r_j)=r_j(1-\alpha d_j)$.
+The preceding lemma, $\log(1+u)\le u$, and
+$-\log(1-v)\ge v$ give
+\begin{equation}\label{eq:reslogproduct}
+\log G_j\le
+4\log\frac{r_j}{r_{j+1}}+5\alpha r_j^4
++6000\alpha(g-1)+\frac{12\alpha\varepsilon}{F_j}.
+\end{equation}
+Here the last term accounts for
+$r_{j+1}=F_j+e_{j+1}$ and
+$4\log(1+e_{j+1}/F_j)\le12\alpha\varepsilon/F_j$.
+By \eqref{eq:resradiuslower}, its sum over all layers is less than
+one.
+
+At $g=1$, Lemma~\ref{lem:radius} and convexity imply
+\[
+\frac{\tanh r}{r}\le(1+2r^2/3)^{-1/2}\le1-r^2/5,
+\qquad 0\le r\le1.
+\]
+The last inequality follows from the chord between zero and one
+and $\sqrt{3/5}<4/5$.
+Thus the ideal critical recurrence obeys
+$R_j\le(1+2\alpha j/5)^{-1/2}$.
+Integral bounds and \eqref{eq:resroundingerror} yield
+\begin{equation}\label{eq:resintegrals}
+\alpha\sum_{j=0}^{D-1}r_j^4\le4,
+\qquad
+\alpha\sum_{j=1}^{D}r_j^5\le3.
+\end{equation}
+For clarity, the ideal sums are at most
+$1+\int_0^\infty(1+2t/5)^{-2}\,dt=7/2$ and
+$1+\int_0^\infty(1+2t/5)^{-5/2}\,dt=8/3$.
+The rounding contributions are at most
+$6\varepsilon D^2$ and $15\varepsilon D(D+1)/2$, respectively.
+Summing \eqref{eq:reslogproduct} therefore gives
+\[
+\prod_{j=k}^{D-1}G_j\le e^{21}(r_k/r_D)^4.
+\]
+Insert this inequality into \eqref{eq:resproduct}, use
+\eqref{eq:resintegrals}, and finally use
+$r_D^{-4}\le(1+\tau)^2$. Adding the root operation proves
+\eqref{eq:rescriticalupper}.
+
+For $g=1+\delta$, the unit Lipschitz bound gives
+$d_g(r)\ge r^2/5-\delta$. Since $0\le d_j\le1$,
+\[
+\alpha r_j^2d_j\le r_j^2-F_j^2
+\le r_j^2-r_{j+1}^2+2e_{j+1}.
+\]
+Consequently
+\[
+\alpha\sum_{j=k}^{D-1}r_j^4
+\le5+5\delta\alpha(D-k)+30\alpha(D-k)\varepsilon.
+\]
+Equation \eqref{eq:reslogproduct} now gives
+\[
+\prod_{j=k}^{D-1}G_j
+\le e^{30}(r_k/r_D)^4
+       e^{6025\delta\alpha(D-k)}.
+\]
+Put $a=1+\alpha\delta$. Concavity and
+$\tanh(gr)\le g\tanh r$ show
+$f_{\alpha,g}(r)\le a f_{\alpha,1}(r)$.
+Induction gives $R_j^{(g)}\le a^jR_j^{(1)}$.
+Hence, using the same rounding estimates,
+\[
+\alpha\sum_{j=1}^D r_j^5\le4e^{5\delta\tau}.
+\]
+Substitution in \eqref{eq:resproduct} proves
+\eqref{eq:ressuperupper}, with room in the displayed constants.
+
+The normalized construction is exact by induction on the depth.
+Geometric thinning preserves its transition probabilities.
+Almost sure termination follows first for the finite-depth
+recursion and then for each scalar comparison; no expected-work
+bound is assumed in this argument.
+Each reached proposal has conditional expected scalar cost
+$O(\bits^4)$ for $g\le2$. The hazard ratio introduces no small-$\alpha$
+division in the cost: $\tanh(gr)/r\ge\tanh1>3/4$ implies
+$1-p_\ell\ge\alpha/2$ under the chosen rounding precision.
+The predictable trial-cost lemma charges scalar operations,
+weighted index selection, and geometric jumps by $O(\bits^4\E J)$.
+Centers, radii, and row data use $O(\bits)$ bits; their preprocessing
+fits the stated budget.
+\end{proof}
+
+\subsubsection{A simple construction for large row norms}
+
+The preceding estimates use small uncertainty radii to exploit
+near-criticality. A simpler construction gives a useful branch
+bound for every finite norm $s$.
+
+\begin{proposition}[Quadratic single-row branch cost]
+\label{prop:largerow}
+For a row of norm $\sigma$ and bias $b_0$, set
+$u=\sigma+|b_0|$. There is an exact tanh-row sampler using at
+most $2\sigma(1+\sigma)$ expected recursive child requests.
+If every residual row has norm at most $s$, put
+$C_s=2s(1+s)$ and $b_s=1-\alpha+\alpha C_s$.
+There is an exact residual sampler whose expected number of
+input leaves plus active residual rows is at most
+\begin{equation}\label{eq:largeresidual}
+b_s^D+\alpha\sum_{j=0}^{D-1}b_s^j.
+\end{equation}
+In particular, for $s\ge1$ this is at most $4b_s^D/3$.
+For each fixed $s$, expected bit work is
+$O_s(\bits^4[1+b_s^D+\alpha\sum_{j<D}b_s^j])$.
+For arbitrary $s\ge1$, Corollary~\ref{cor:largeresidualsharpbits}
+gives the uniform bit bound $O(\bits_s^4b_s^D)$, where
+$\bits_s=\bits+\lceil\log_2(s+2)\rceil$.
+Its preprocessing consists of rational row sums and prefix tables
+and takes $O(Dn^2\bits_s^2)$ bit operations.
+\end{proposition}
+\paragraph{Proof idea.}
+At each active update, sample the bias and row through one scalar source.
+Consecutive skip choices can be generated in a single geometric jump, so the
+accounting counts active updates only.
+
+\begin{proof}
+The row sampler is Corollary~\ref{cor:comptanhrow} with $R=1$, the
+children being the source signs. Its proof bounds the expected child
+requests by $2\sigma\max\{1,u\}\le2\sigma(1+\sigma)$, and its
+conditional charging covers a majority that stops early.
+
+At each residual row, first select the nonlinear branch with
+probability $\alpha$. Otherwise skip to the preceding layer.
+Geometric waiting times implement these skips directly.
+The expected number of descendant input leaves is at most $b_s^D$,
+and the expected number of active rows is at most
+$\alpha\sum_{j<D}b_s^j$. This proves \eqref{eq:largeresidual}.
+For $s\ge1$, $C_s\ge4$ and the geometric sum contributes at most
+$(b_s^D-1)/(C_s-1)\le b_s^D/3$.
+Theorem~\ref{thm:quadraticradiusbits} gives scalar cost
+$O((1+s)^2\bits_s^4)$ at each active row, excluding child
+computations. Compressed skips and input leaves cost
+$O(\bits_s^4)$ each. For fixed $s$, the predictable trial-cost
+lemma proves the stated bit bound. Corollary~\ref{cor:largeresidualsharpbits}
+absorbs the quadratic row factor into the branching sum.
+\end{proof}
+
+
+
+\begin{proposition}[The quadratic norm scale is necessary in one layer]
+\label{prop:residuallargeslower}
+Let $s\ge2$ and $0\le\alpha\le1$.
+For an unknown source sign of mean $z$, the optimal worst-mean
+source count for the target
+$f(z)=(1-\alpha)z+\alpha\tanh(sz)$ satisfies
+\[
+\frac3{64}(1+\alpha s^2)\le U\le2(1+\alpha s^2).
+\]
+For one residual layer with zero biases, uniform row weights
+$s/m$, and even $m\ge2$, the optimal worst-input expected
+number of distinct probes satisfies
+\begin{equation}\label{eq:residuallargeslower}
+\frac1{130}(1+\alpha\min\{s^2,m\})
+\le Q^*\le2(1+\alpha\min\{s^2,m\}).
+\end{equation}
+The uniform weights are assumed legal on the parameter grid.
+Thus the one-layer scale $\alpha s^2$ is necessary as well as
+sufficient, until the finite input size becomes the limiting
+resource. This statement does not assert that the factor
+multiplies optimally across arbitrary depth.
+\end{proposition}
+\paragraph{Proof idea.}
+A skip-or-update choice gives the upper bound. For the lower bound, a mean
+network retains a large derivative at zero; the transcript inequality
+converts this derivative into a probe requirement.
+
+\begin{proof}
+The upper bound chooses the skip with probability $1-\alpha$
+and the global tanh majority with probability $\alpha$.
+Its source count is at most $1-\alpha+2\alpha s^2$.
+For a finite input, one may instead scan all $m$ coordinates on
+the nonlinear branch. Choosing the cheaper construction gives
+$1-\alpha+\alpha\min\{2s^2,m\}$ expected probes and proves
+the finite upper bound.
+Endpoint coupling gives both lower-bound quantities at least
+$(1-\alpha)+\alpha\tanh s\ge1/2$.
+For the unknown-source problem, the second transcript inequality,
+justified by the truncation argument preceding
+\eqref{eq:unknownlower}, applies at $z=1/s$.
+Since $\tanh1\ge1/2$ and $\sech^2 1\ge1/4$,
+\[
+U\ge\frac{1-s^{-2}}2\,2\alpha s^2\tanh1\sech^21
+\ge3\alpha s^2/32.
+\]
+Combining this with $U\ge1/2$ proves the stated bound.
+
+For the finite network, under independent inputs of mean $t$,
+put $G(t)=\E_t\tanh(sM)$, $R=\tanh s$, and
+$q_0=\min\{s^2,m\}$. The averaged output is
+$H(t)=(1-\alpha)t+\alpha G(t)$.
+The same weighted Jensen argument as in
+\eqref{eq:derivativelower} gives
+\[
+h:=G'(0)\ge\frac{s}{\sqrt{1+3s^2/m}},
+\qquad h^2\ge q_0/4.
+\]
+If $q_0\ge64$, set $T=2R/h\le1/2$.
+Since $G(0)=0$, $G'(0)=h$, and $G(T)\le R$, the bending argument
+before \eqref{eq:bending} gives some $t\in[0,T]$ with
+$|G''(t)|\ge h^2/(2R)$.
+The linear skip contributes no second derivative, so the finite
+transcript inequality yields
+\[
+Q^*\ge\frac{3\alpha h^2}{16R}
+\ge\frac{3\alpha q_0}{64}.
+\]
+Together with $Q^*\ge1/2$, this is stronger than the lower bound
+in \eqref{eq:residuallargeslower}.
+If $q_0<64$, the endpoint bound alone gives
+$Q^*\ge1/2\ge(1+\alpha q_0)/130$.
+\end{proof}
+
+\input{tanh_residual_large_bits.tex}
+
+\subsubsection{A matching law for residual mean networks}
+
+Let $m\ge2$ be even. Use zero biases and put $w_{\ell,ij}=s/m$
+on the same $m$ relevant coordinates in every row and layer.
+The displayed weights are assumed to be legal on the dyadic grid.
+For class lower bounds at fixed $s>1$, a downward dyadic
+approximation to $s$ makes them legal and preserves the stated
+exponential order.
+Define
+\begin{equation}\label{eq:reschainparameters}
+\begin{aligned}
+p&=1-\alpha,\qquad a=p+\alpha s,\qquad \lambda=a^D,\\
+F_0(z)&=z,\qquad
+F_{j+1}(z)=pF_j(z)+\alpha\tanh(sF_j(z)),\\
+A&=\frac{\alpha s^3}{a}\sum_{j=0}^{D-1}a^{2j}.
+\end{aligned}
+\end{equation}
+Here $0<s\le2$, so $a>0$; $\alpha=0$ is permitted.
+Writing $M=m^{-1}\sum_i x_i$, direct induction gives
+\begin{equation}\label{eq:resmeanidentity}
+h_{D,1}=F_D(M)+p^D(x_1-M).
+\end{equation}
+
+\begin{theorem}[Uniform residual mean-network law]
+\label{thm:resmeanlaw}
+For the network \eqref{eq:resmeanidentity}, define
+\[
+\Xi=\lambda\min\left\{\sqrt{1+A},\frac m{\sqrt{1+A}}\right\}.
+\]
+Its optimal worst-input expected number of distinct input probes
+satisfies
+\begin{equation}\label{eq:resmeanlaw}
+\frac\Xi{512}\le Q^*\le3\Xi.
+\end{equation}
+The constants are uniform in $s,\alpha,D,m$ in the stated range.
+For an unknown source coin and target mean $F_D(z)$, the optimal
+worst-mean source count $U$ satisfies
+\begin{equation}\label{eq:resunknownlaw}
+\frac1{81}\lambda\sqrt{1+A}\le U
+\le2\lambda\sqrt{1+A}.
+\end{equation}
+These statements concern source or input queries; auxiliary
+arithmetic is excluded from this particular measure.
+\end{theorem}
+
+\begin{lemma}[Residual range comparison]\label{lem:resrange}
+For $0\le z\le1$,
+\begin{equation}\label{eq:resrangesandwich}
+\frac{\lambda z}{\sqrt{1+Az^2}}
+\le F_D(z)\le
+\frac{\lambda z}{\sqrt{1+Az^2/5}}.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+Compare one residual step with reciprocal-square maps above and below it.
+Composing these inequalities gives explicit bounds for the range of the full
+scalar chain.
+
+\begin{proof}
+Set $v=\alpha s/a$ and $\theta=\alpha s^3/a$.
+The one-step ratio is
+\[
+\frac{p z+\alpha\tanh(sz)}{az}
+=(1-v)+v\frac{\tanh(sz)}{sz}.
+\]
+The tanh lower bound and convexity of $(1+u)^{-1/2}$ give the lower
+bound $(1+\theta z^2)^{-1/2}$ for this ratio.
+For $0\le y\le2$, the coth inequality \eqref{eq:cothradius} and a
+chord bound give
+\[
+\frac{\tanh y}y\le(1+2y^2/3)^{-1/2}\le1-y^2/10.
+\]
+The last chord uses $(1+8/3)^{-1/2}<3/5$.
+Since $1-w/2\le(1+w)^{-1/2}$ for $w\ge0$, the ratio is at most
+$(1+\theta z^2/5)^{-1/2}$.
+Every iterate remains in $[0,1]$.
+Iterating these reciprocal-square bounds gives
+\eqref{eq:resrangesandwich}; the accumulated sum is precisely $A$.
+\end{proof}
+
+\begin{lemma}[A positive majority expansion for residual compositions]
+\label{lem:resglobalmajority}
+The function $H(w)=F_D'(\sqrt w)$ is completely monotone on
+$(0,\infty)$ and holomorphic on the right half-plane.
+It therefore has a representation
+\[
+H(1-v)=\sum_{k\ge0}d_kv^k,
+\qquad d_k\ge0,\qquad \sum_kd_k=\lambda.
+\]
+If $R=F_D(1)$, then
+$F_D(z)=\sum_k(d_k/C_k)M_k(z)$ and
+$\sum_kd_k/C_k=R$.
+\end{lemma}
+\paragraph{Proof idea.}
+The derivative of the composed scalar map has a nonnegative expansion in the
+majority basis. Closure properties of the squared residual map preserve this
+positivity through every layer.
+
+\begin{proof}
+Retain $C(w)=\sech^2\sqrt w$ and
+$T(w)=\tanh\sqrt w/\sqrt w$ from the scalar proof.
+The square of the residual map is
+\[
+g(w)=p^2w+2p\alpha\sqrt w\tanh(s\sqrt w)
+       +\alpha^2\tanh^2(s\sqrt w).
+\]
+It is Bernstein: each summand is Bernstein, and
+\[
+\frac d{dw}\bigl[\sqrt w\tanh(s\sqrt w)\bigr]
+=\frac s2\{T(s^2w)+C(s^2w)\}
+\]
+is completely monotone.
+Also the one-step derivative
+$p+\alpha s C(s^2w)$ is completely monotone.
+The closure facts already proved for the scalar composition show
+that the product expressing $H$ is completely monotone.
+
+If $\sqrt w=x+iy$ with $\Re w>0$, then $x>|y|$.
+Both $x+iy$ and $\tanh(s(x+iy))$ lie in the cone
+$\Re z>|\Im z|$: for tanh this follows from
+$\sinh(2sx)>|\sin(2sy)|$ and its positive denominator.
+Their nonnegative linear combination lies in the same cone.
+Thus $g$ maps the right half-plane into itself and the composed
+derivative is holomorphic there.
+The Taylor expansion and derivative integration from the scalar
+case now prove all remaining claims.
+\end{proof}
+
+\paragraph{Proof idea.}
+Sample one global majority for the whole residual chain and retain its
+output-range gate. A rare scan of all inputs supplies the alternative bound
+when the input is short.
+
+\begin{proof}[Upper bounds in Theorem~\ref{thm:resmeanlaw}]
+Use the global majority mixture and its gate $R$.
+At a positive input $z$, the derivative product satisfies
+\[
+\frac{F_D'(z)}\lambda
+=\prod_{j=0}^{D-1}\left(1-\frac{\alpha s}{a}
+                       \tanh^2(sF_j(z))\right).
+\]
+Since $F_j(z)\le a^jz$, the loss from one is at most
+$\min\{1,Az^2\}$. The computation of \eqref{eq:chainarity} and
+\eqref{eq:chainQ}, with $s^D$ replaced by $\lambda$, bounds the
+full-majority source count by $2\lambda\sqrt{1+A}$.
+This proves the unknown-source upper bound.
+
+For the actual network output in \eqref{eq:resmeanidentity}, the
+unconditional mass of the majority-of-one component is
+$d_0=F_D'(1)\ge p^D$.
+Replace mass $p^D$ of that component's uniform-coordinate request
+by a request for $x_1$. This changes its mean by exactly
+$p^D(x_1-M)$ and leaves its cost unchanged.
+All mixture masses remain nonnegative.
+A second strategy uses the same gate $R$, then scans all $m$
+coordinates and evaluates the resulting scalar target.
+The modified positive majority representation has total mass
+$R$, so it also proves $|h_{D,1}|\le R$ for every context.
+This verifies that the gated scan uses a valid conditional sign.
+The range lemma gives $mR\le\sqrt5\lambda m/\sqrt{1+A}$.
+Select the first strategy when $1+A\le m$, and the second
+otherwise. This proves $Q^*\le3\Xi$.
+\end{proof}
+
+\paragraph{Proof idea.}
+Separate the unknown-source lower bound from the finite-input lower bound.
+Endpoint coupling controls the range, while the score of the empirical input
+mean captures the derivative growth and its saturation.
+
+\begin{proof}[Lower bounds in Theorem~\ref{thm:resmeanlaw}]
+Endpoint coupling gives $U\ge R$ and $Q^*\ge R$.
+For the unknown-source problem, if $A<80$, the lower range bound
+gives $R\ge\lambda\sqrt{1+A}/81$.
+If $A\ge80$, then $T=2R/\lambda\le2/\sqrt{17}<1/2$, and
+$F_D'(0)=\lambda$. The bending bound \eqref{eq:bending} with the
+scalar cost bound \eqref{eq:unknownlower} yields
+\[
+U\ge\frac{3\lambda^2}{16R}
+\ge\frac3{16\sqrt5}\lambda\sqrt{1+A}
+\ge\frac1{81}\lambda\sqrt{1+A}.
+\]
+
+For the finite network, under independent input signs of mean $t$,
+the expected correction $p^D(X_1-M)$ in
+\eqref{eq:resmeanidentity} is zero. Thus its averaged output is
+$H(t)=\E_tF_D(M)$.
+The weighted Jensen argument used in
+\eqref{eq:derivativelower}, applied to the lower range bound, gives
+\begin{equation}\label{eq:resfinitehprime}
+h:=H'(0)\ge\frac\lambda{\sqrt{1+(3m-2)A/m^2}}
+\ge\frac\lambda{\sqrt{1+3A/m}}.
+\end{equation}
+If $A<400$, endpoint coupling gives $Q^*\ge\Xi/401$.
+If $A,m\ge400$, put $T=2R/h$. Then
+\[
+T^2\le\frac{4(1+3A/m)}{1+A/5}
+\le20/A+60/m\le1/5<1/4.
+\]
+The bending bound \eqref{eq:bending} and the second transcript
+bound give
+\[
+Q^*\ge\frac{3h^2}{16R}
+\ge\frac{3\lambda\sqrt{1+A/5}}{16(1+3A/m)}
+\ge\frac3{64\sqrt5}\Xi.
+\]
+
+It remains to consider $m<400$ and $A\ge400$.
+At a balanced input, flipping coordinate $i$ changes the output
+mean by absolute amount
+\[
+F_D(2/m)+2p^D\mathbf1_{\{i=1\}}-2p^D/m.
+\]
+These amounts are nonnegative because $F_D(z)\ge p^Dz$.
+Their sum is $mF_D(2/m)$.
+Lemma~\ref{lem:attentioncoupling}, summed over the coordinates, gives
+\[
+Q^*\ge\frac m2F_D(2/m)
+\ge\frac\lambda{\sqrt{1+4A/m^2}}.
+\]
+If $A\le m^2$, this is at least $\lambda/\sqrt5$, while
+$\Xi\le\lambda\sqrt m<20\lambda$.
+If $A>m^2$, it is at least
+$m\lambda/\sqrt{5A}\ge\Xi/\sqrt5$.
+Every resulting constant is at least $1/512$.
+\end{proof}
+
+\begin{corollary}[Residual amplification lower bound]
+\label{cor:reslower}
+Every exact sampler for the residual mean network satisfies
+\begin{equation}\label{eq:resfisherlower}
+\sup_x\E[Q\mid x]\ge
+\frac{\lambda^2}{1+(3m-2)A/m^2}.
+\end{equation}
+For $1<s\le2$, put $\delta=s-1$. Then, uniformly in
+$0\le\alpha\le1$,
+\begin{equation}\label{eq:ressuperlower}
+\sup_x\E[Q\mid x]\ge
+\frac{2\delta}{2\delta+3s^3}
+\min\{(1+\alpha\delta)^{2D},m\}.
+\end{equation}
+At $s=1$, the matching mean-network law becomes
+\begin{equation}\label{eq:rescriticalmean}
+\frac1{512}\min\!\left\{\sqrt{1+\alpha D},
+                   \frac m{\sqrt{1+\alpha D}}\right\}
+\le Q^*\le
+3\min\!\left\{\sqrt{1+\alpha D},
+                   \frac m{\sqrt{1+\alpha D}}\right\}.
+\end{equation}
+\end{corollary}
+\paragraph{Proof idea.}
+Insert the finite-input derivative estimate into the transcript inequality.
+Elementary bounds on the accumulated residual gain yield the supercritical
+and critical consequences.
+
+\begin{proof}
+Square \eqref{eq:resfinitehprime} and apply the first transcript
+bound. If $\alpha>0$ and $s>1$, then
+\[
+A=\frac{\alpha s^3}{a}\frac{a^{2D}-1}{a^2-1}
+\le\frac{s^3}{2\delta}\lambda^2.
+\]
+Use $1+(3m-2)A/m^2\le1+3A/m$ and the elementary minimum
+inequality from the feed-forward lower bound.
+For $\alpha=0$, the target is $x_1$ and the displayed inequality
+holds directly. At $s=1$, $a=\lambda=1$ and $A=\alpha D$.
+\end{proof}
+
+These bounds identify the residual scaling that permits
+polylogarithmic work at polynomial depth.
+
+\begin{corollary}[Residual depth for polylogarithmic work]
+\label{cor:residual-loglog-depth}
+Fix $s>1$. Consider residual networks \eqref{eq:residualarchitecture}
+of width $n$ with row norms at most $s$, biases of absolute value at
+most one, and $\alpha$ and all parameters on the grid
+$2^{-b}\mathbb Z$, where $20\lceil\log_2n\rceil\le b\le\log^{O(1)}n$
+and $D\le n^{O(1)}$. Let $\alpha=\alpha_n$ and $D=D_n$ vary with $n$.
+If $\alpha D=O(\log\log n)$, one uniform exact sampler has expected
+online bit work $\log^{O(1)}n$ on every such network and context.
+Conversely, if some exact sampler has worst-network, worst-context
+expected online bit work $\log^{O(1)}n$, then
+$\alpha D=O(\log\log n)$.
+\end{corollary}
+\paragraph{Proof idea.}
+The raw residual sampler costs at most an exponential of a fixed
+multiple of $\alpha D$. The mean-network lower bound grows
+exponentially in $\alpha D$ until it saturates at the width.
+
+\begin{proof}
+Here $\bits=\log^{O(1)}n$. For sufficiency,
+Corollary~\ref{cor:largeresidualsharpbits} gives expected online bit
+work $O(\bits_s^4b_s^D)$ with $b_s^D\le\exp(4\alpha s^2D)$. This is
+polylogarithmic when $\alpha D=O(\log\log n)$.
+
+For necessity, choose a fixed dyadic gain
+$s_0\in(1,\min\{s,2\}]$, put $\delta=s_0-1$, and let
+$m=2^{\lfloor\log_2n\rfloor}\ge n/2$. For large $n$ the weights
+$s_0/m$ lie on the grid, so the residual mean network of gain $s_0$
+belongs to the class. By \eqref{eq:ressuperlower} and
+$\log(1+\alpha\delta)\ge\alpha\delta/2$, every exact sampler makes
+at least $c\min\{e^{\delta\alpha D},m\}$ expected probes on some
+input, where $c=2\delta/(2\delta+3s_0^3)$. Each probe costs at least
+one bit operation. Suppose the work is at most $\log^Kn$ for a fixed
+$K$. Since $cm>\log^Kn$ for all sufficiently large $n$, the minimum
+is then the exponential term, and $e^{\delta\alpha D}\le
+c^{-1}\log^Kn$. Taking logarithms gives $\alpha D=O(\log\log n)$.
+\end{proof}

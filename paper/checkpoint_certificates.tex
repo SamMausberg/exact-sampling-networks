@@ -1,0 +1,613 @@
+\section{Certificates and checkpoint cost formulas}
+\label{app:checkpoint}
+
+This appendix specifies the measurements behind
+Section~\ref{sec:checkpoint}. The encoded parameters define a
+mathematical network with the stated nonlinearities. A deployed
+floating-point operation order or an additional token filter would
+need its own target specification. A checkpoint measurement is
+evidence about the measured inputs unless it yields a certificate
+over the theorem's allowed input set.
+
+\subsection{Dimensions, gains, and common spaces}
+
+Let $n$ be residual width, $d_h$ and $a_h$ the key and value
+dimensions of head $h$, and $V$ the vocabulary size. A head score is
+$\beta_h\langle q,k\rangle/d_h$. Its standard scaling is
+$\beta_h=\sqrt{d_h}$. The RMS denominator continues to use $n$.
+For column-vector conventions, a learned normalization gain $g$
+is absorbed into the next map as
+$W^{\rm eff}=W\operatorname{diag}(g)$.
+All row norms and parameter lengths below refer to these complete
+effective matrices. They include a base matrix and any learned
+updates. Finite dyadic rank can be computed by exact elimination.
+
+For an unrotated key map, a common affine containing space is
+$b_K+\operatorname{image}(W_K^{\rm eff})$.
+For position-dependent linear maps $R_t$, a sufficient space with
+fixed center $c$ has direction
+\[
+ S=\operatorname{span}\left\{
+ \operatorname{image}(R_tW_K^{\rm eff}),\
+ R_tb_K-c:\ t\text{ is allowed}\right\}.
+\]
+Thus its rank is $\dim S$. An observed numerical rank with a
+threshold is a different datum; record its norm and absolute
+residual. A smaller rank under general rotations requires a
+certified common containing space. The full ambient choice
+$S=\mathbb R^{d_h}$ is always available in the fixed-rotation
+corollary. No claim of exact symbolic rank computation from an
+arbitrary computable frequency is needed.
+
+\begin{corollary}[Rectangular heads]
+\label{cor:checkpoint-rectangular}
+The exact decoder theorem extends to residual width $n$, head
+dimensions $d_h,a_h$, feed-forward widths $f_\ell$, and a specified
+finite number of heads. Suppose each head has a fixed affine key
+map of rank at most $r$, and use a dyadic temperature or
+$\beta_h=\sqrt{d_h}$. Include these dimensions and the head count
+among the size parameters. At fixed $r$, prefill is linear in the
+prompt length times a polynomial in those parameters and their
+encoding lengths. Every subsequent token has conditional expected
+work polynomial in the same parameters and $\log(T+2)$.
+\end{corollary}
+
+\paragraph{Proof idea.}
+The key-coordinate dimension controls the feature expansion.
+Residual width controls normalization. The exact arithmetic uses
+the square root in the head's score scaling, and never requires
+these dimensions to agree.
+
+\begin{proof}
+RMSNorm has coordinate bound $\sqrt n$ and the Lipschitz bound
+proved below. A bounded chart $C_h$ for a head's key space has
+$d_h$ rows, $r_h\le r$ columns, and $|C_{h,ij}|\le2$.
+With coordinate bound $K_h$, write
+\[
+ t_h=\frac{\beta_hK_h}{d_h}q^TC_h.
+\]
+If $|q_i|\le Q_h$, summing the $d_h$ terms gives
+$\|t_h\|_1\le2r_h\beta_hQ_hK_h$.
+The finite moment lemma already permits arbitrary value
+dimension $a_h$.
+At standard scaling, the even and odd total degrees produce
+sums of the form $A+B/\sqrt{d_h}$ with rational $A,B$.
+The same certified square-root arithmetic therefore applies.
+The dense products use their actual rectangular sizes.
+Concatenation and the attention output map are affine operations.
+Taking the maximum coordinate error over all heads gives the
+same prefix stability induction. Summing their finite work gives
+a polynomial at fixed $r$.
+The exact counters, causal insertion order, categorical stopping
+estimate, and background replay are unchanged. The replay lemma
+then proves the asserted conditional expected bound.
+\end{proof}
+
+Sometimes only a projection of the keys affects the scores. The
+following certificate is computable from unrotated affine maps.
+
+\begin{corollary}[Effective rank of an unrotated score]
+\label{cor:checkpoint-score-rank}
+Write an unrotated head as
+$q=W_Qu+b_Q$, $k_j=W_Kv_j+b_K$, where $u,v_j\in\mathbb R^n$
+are normalized streams and all matrices include learned gains.
+Define the dyadic matrix
+\[
+ S=\begin{bmatrix}W_Q^TW_K\\ b_Q^TW_K\end{bmatrix},
+ \qquad r_{\rm score}=\operatorname{rank}S.
+\]
+The complete moment decoder can use $r_{\rm score}$ in place
+of the affine key-map rank for this head, with polynomial changes
+in its other parameters. In particular,
+\[
+ r_{\rm score}\le
+ \min\{\operatorname{rank}W_K,\operatorname{rank}W_Q+1\}.
+\]
+This assertion assumes the displayed maps are independent of
+position. Position-dependent rotations require a certificate for
+the resulting common score space.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Remove the score terms that are common to all keys. The remaining
+bilinear form has a finite dyadic key map of the displayed rank.
+The moment construction evaluates this identical score law.
+
+\begin{proof}
+For every key,
+\[
+ \langle q,k_j\rangle
+ =u^TW_Q^TW_Kv_j+b_Q^TW_Kv_j
+    +u^TW_Q^Tb_K+b_Q^Tb_K.
+\]
+The last two terms do not depend on $j$ and cancel from softmax.
+Set $\widetilde q=(u,1)$ and $\widetilde k_j=Sv_j$.
+Their position-dependent score is exactly
+$(\beta/d)\widetilde q^T\widetilde k_j$.
+The matrix $S$ is a fixed dyadic $(n+1)$ by $n$ map.
+If every original row norm and bias magnitude is bounded by
+$s\ge1$, then its row norms are at most $ds^2$:
+\[
+ \sum_b|(W_Q^TW_K)_{ab}|
+ \le\sum_i|W_{Q,ia}|\sum_b|W_{K,ib}|
+ \le ds^2,
+\]
+and the same calculation applies to the last row.
+Its coefficients have at most $2b+O(\log(d+2))$ encoding bits
+when the effective input matrices have length at most $b$.
+Computing $S$ takes polynomial weight preprocessing.
+
+Apply the moment construction to this new key map and its
+$r_{\rm score}$-dimensional chart. The coefficient $\beta/d$
+retains its original value. At standard scaling it equals
+$1/\sqrt d$, so the moment coefficients remain in the same
+quadratic extension handled by the rectangular proof. The
+internal feature dimension $n+1$ does not change that radicand.
+All numerical range and stability bounds remain polynomial in
+the original size parameters. To evaluate the recoded cost, let
+$G_N$ bound the exact and rounded normalized streams, choose a
+power-of-two virtual-key scale $K_S\ge G_N\|S\|_{\infty\to\infty}$,
+and let $C_S$ be its bounded chart. Then the moment coefficients
+and a sufficient integer bound are
+\[
+ t_S=\frac{\beta K_S}{d}(u,1)^TC_S,\qquad
+ H_S=\left\lceil\max\left\{1,
+ \frac{2r_{\rm score}|\beta|K_S}{d}(nG_N+1)\right\}\right\rceil.
+\]
+Recompute this bound when substituting $r_{\rm score}$ in the
+feature count. If $r_{\rm score}=0$, attention
+is uniform and exact value sums suffice.
+The factorization
+$S=[W_Q^T;b_Q^T]W_K$ proves the rank inequalities.
+Thus the original head and the recoded evaluator have identical
+attention and final-token laws.
+\end{proof}
+
+If $W_Q$ and $W_K$ both have full row rank $d$, this certificate
+still has rank $d$: $W_Q^T$ is injective and $W_K$ is surjective
+onto $\mathbb R^d$. The recoding therefore gives no hidden rank
+reduction in that case. The observation is a direct linear-algebra
+consequence of the score representation; no novelty claim is
+attached to it.
+
+\begin{proposition}[An illustrative rank-one rotational example]
+\label{prop:checkpoint-rotary-span}
+Let $d=2m$ with $m\ge1$. Let $R$ be block diagonal with plane rotations through
+angles $\omega_1,\ldots,\omega_m$, and suppose all $d$ complex
+numbers $e^{i\omega_j},e^{-i\omega_j}$ are distinct.
+Let $v\in\mathbb R^d$ have a nonzero component in every coordinate
+pair. The common containing space for the rank-one key images
+$\operatorname{span}(R^tv)$, $0\le t<d$, has dimension $d$.
+The $d+1$ actual keys $R^tv$, $0\le t\le d$, also have affine
+dimension $d$.
+\end{proposition}
+
+\paragraph{Proof idea.}
+In complex eigen-coordinates, each rotation multiplies a component
+by one eigenvalue. The successive rotated vectors form a
+Vandermonde matrix with nonzero row factors.
+
+\begin{proof}
+Over $\mathbb C$, diagonalize each two-dimensional rotation.
+The resulting eigenvalues $\lambda_1,\ldots,\lambda_d$ are the
+listed numbers. The two eigen-coordinates contributed by a real
+pair of $v$ are nonzero because that pair is nonzero.
+Write these coordinates as $c_i\ne0$.
+The matrix with columns $v,Rv,\ldots,R^{d-1}v$ is therefore,
+after an invertible change of basis,
+\[
+ \operatorname{diag}(c_i)\,[\lambda_i^t]_
+       {1\le i\le d,\ 0\le t<d}.
+\]
+Its determinant is a nonzero constant times
+$\prod_{i<j}(\lambda_j-\lambda_i)$.
+The usual Vandermonde identity follows by viewing the determinant
+as an alternating polynomial of that degree with leading
+coefficient one. Thus the original real matrix has rank $d$.
+Every indicated key image contains zero, so its common affine
+containing space is linear and has that same dimension.
+
+The distinct paired eigenvalues also exclude $1$: otherwise
+the two eigenvalues of one rotation pair would coincide.
+Augment the columns $R^tv$, $0\le t\le d$, by a coordinate one.
+The same argument is the Vandermonde determinant for
+$1,\lambda_1,\ldots,\lambda_d$, with nonzero row factors.
+This augmented matrix has rank $d+1$, which proves full affine
+rank of the $d+1$ records.
+\end{proof}
+
+The distinction between $d$ position-dependent key
+images and $d+1$ actual records is necessary: $T$ points have
+affine dimension at most $T-1$.
+
+\subsection{Normalization floors and a one-sided error bound}
+
+For $\varepsilon>0$ put
+\[
+ r_\varepsilon(h)=
+   \sqrt{\varepsilon+\|h\|_2^2/n},\qquad
+ N_\varepsilon(h)=h/r_\varepsilon(h).
+\]
+Then $\|N_\varepsilon(h)\|_2\le\sqrt n$.
+If $|h_i|\le R$ and $r_\varepsilon(h)^2\ge\lambda$, also
+\[
+ \|N_\varepsilon(h)\|_\infty
+ \le \min\{\sqrt n,R/\sqrt\lambda\}.
+\]
+The floor $\lambda$ bounds the squared denominator. The relative
+quantity $\gamma=\lambda/R^2$ is dimensionless.
+
+\begin{lemma}[Error control from the exact state's floor]
+\label{lem:checkpoint-rms-lipschitz}
+For $n\ge1$, $\varepsilon>0$, and $h,\widetilde h\in\mathbb R^n$,
+\[
+ \|N_\varepsilon(h)-N_\varepsilon(\widetilde h)\|_\infty
+ \le
+ \frac{1+\sqrt n}{r_\varepsilon(h)}
+          \|h-\widetilde h\|_\infty.
+\]
+Consequently a floor $\lambda$ certified only for legal exact
+states gives the error factor $(1+\sqrt n)/\sqrt\lambda$.
+No floor hypothesis on $\widetilde h$ or on the line segment
+between the two states is required.
+\end{lemma}
+
+\paragraph{Proof idea.}
+The denominator is a Euclidean norm of an augmented vector.
+Its change is bounded by the coordinate error. The normalized
+approximate vector has a universal coordinate bound.
+
+\begin{proof}
+The reverse triangle inequality applied to
+$(\sqrt\varepsilon,h/\sqrt n)$ gives
+\[
+ |r_\varepsilon(h)-r_\varepsilon(\widetilde h)|
+ \le \|h-\widetilde h\|_2/\sqrt n
+ \le \|h-\widetilde h\|_\infty.
+\]
+Both denominators are positive, and
+$\|\widetilde h\|_\infty/r_\varepsilon(\widetilde h)\le\sqrt n$.
+Use the exact identity
+\[
+ N_\varepsilon(h)-N_\varepsilon(\widetilde h)
+ =\frac{h-\widetilde h}{r_\varepsilon(h)}
+  +\frac{\widetilde h}{r_\varepsilon(\widetilde h)}
+   \frac{r_\varepsilon(\widetilde h)-r_\varepsilon(h)}
+        {r_\varepsilon(h)}.
+\]
+Taking the maximum coordinate norm proves the result.
+\end{proof}
+
+A fixed positive stabilizer always permits $\lambda=\varepsilon$.
+Lemma~\ref{lem:checkpoint-rms-lipschitz}
+allows a stronger true-history certificate to improve the replay
+precision without extending that promise to rounded states.
+For maintained decoding, a floor used to set the routine precision
+must cover the allowed future histories as well. Discovering or
+weakening such a certificate online requires charging its
+verification and any precision-change replay. The universal
+$\lambda=\varepsilon$ schedule remains valid without this
+additional future-history certificate.
+
+For the sign factory, use
+\[
+ \kappa=\max\{1,R^2/\lambda\},\quad
+ G\ge2R/\sqrt\lambda,\quad K_N=1+228\kappa^2,
+\]
+after replacing $\lambda$ by $\max\{\lambda,\varepsilon\}$.
+Choose the next power of two for $G$. It is less than twice
+the displayed natural radius. The source and local bit bounds
+are $K_N$ and $O(\kappa^2B^4)$.
+The Gaussian alternative has radius $4\sqrt n$, source count
+$1+nR^2/\varepsilon$, and local work
+$O(n(1+R^2/\varepsilon)B^4)$.
+These radii enter later row budgets, so source count alone does
+not determine the better composition.
+
+\subsection{Certified approximate key spaces}
+
+\begin{proposition}[A residual bound obtained from the weights]
+\label{prop:checkpoint-key-residual}
+Fix a rational chart $C$, selected coordinates $I$, and projection
+$P=CR_I$, with $C_I=I_r$ and $|C_{ij}|\le2$.
+For $k=b_K+W_K^{\rm eff}N_\varepsilon(h)$ set
+$c_0=(I-P)b_K$. Suppose
+$\|N_\varepsilon(h)\|_\infty\le G_{\rm true}$.
+Either of the following is a valid upper bound on the coordinate
+residual $\|k-c_0-Pk\|_\infty$:
+\[
+ \eta_1=G_{\rm true}\|(I-P)W_K^{\rm eff}\|_{\infty\to\infty},
+ \qquad
+ \eta_2=\sqrt n\,\max_i
+       \|[(I-P)W_K^{\rm eff}]_{i,:}\|_2.
+\]
+Choose a rational $\eta\ge\min\{\eta_1,\eta_2\}$.
+If finite supplied records obey this residual certificate and
+$\bar\beta Q_{\max}\eta\le1/8$, the approximate-space finite-cache
+index applies. It has cell bound
+\[
+ M_T\le\min\{T,(5+64r\bar\beta Q_{\max}K)^r\}.
+\]
+\end{proposition}
+
+\paragraph{Proof idea.}
+The key residual is a fixed matrix applied to the normalized
+stream. Its row norms provide a uniform certificate. The index
+then uses the projected scores for proposals and the actual
+scores for acceptance.
+
+\begin{proof}
+Since $P^2=P$ and its selected rows agree with the coordinate
+selector, $(c_0)_I=0$. Direct subtraction gives
+\[
+ k-c_0-Pk=(I-P)W_K^{\rm eff}N_\varepsilon(h).
+\]
+The maximum absolute row-sum inequality gives $\eta_1$.
+Cauchy--Schwarz and
+$\|N_\varepsilon(h)\|_2\le\sqrt n$ give $\eta_2$.
+Each right-hand side therefore bounds the same residual.
+Corollary~\ref{cor:dynamicapproximatespace} proves the index claim.
+Its exact-score acceptance preserves the original attention law.
+\end{proof}
+
+If a stored key has coordinate error at most $\delta$ relative to
+the mathematical key, enlarge its residual allowance by
+$(1+2r)\delta$, since $\|I-P\|_{\infty\to\infty}\le1+2r$.
+For already supplied dyadic cache records the residual can instead
+be checked directly on insertion. Positional transforms require a bound after
+every allowed transform. This proposition is an extension for the
+finite-cache index. The moment decoder still needs an exact fixed
+key-space certificate, or the exact score recoding above.
+
+\subsection{Three distinct score bounds}
+
+Let $A_{\rm range}$ denote a certified bound on the absolute
+centered scores. Record an empirical score maximum separately.
+A Poisson factory additionally needs an independent sign with
+mean equal to score divided by its chosen radius $A_{\rm coin}$.
+For normalized input signs at radius $G$, affine mixtures give
+\[
+ Q_i^{\rm coin}=|b_{Q,i}|+G\|W_{Q,i}^{\rm eff}\|_1,\qquad
+ K_i^{\rm coin}=|b_{K,i}|+G\|W_{K,i}^{\rm eff}\|_1.
+\]
+The weighted coordinate draw and two independent signs give
+\[
+ A_{\rm coin}=\frac{|\beta|}{d}
+       \sum_i Q_i^{\rm coin}K_i^{\rm coin}.
+\]
+Zero coordinate budgets are omitted. If $A_{\rm coin}=0$, uniform
+attention suffices. Otherwise the attention sign uses at most $2e^{2A_{\rm coin}}-1$
+normalized-stream requests and $O(B^4e^{2A_{\rm coin}})$ local
+bits. A request to the normalization factory is charged in
+addition. A common position-independent key bias may be removed
+from the score law. Any other score centering must retain and
+charge an exact sign interface.
+
+Finite evaluation can use smaller range certificates. For example,
+\[
+ |q_i|\le |b_{Q,i}|+
+ \min\left\{
+ G_{\rm true}\|W_{Q,i}^{\rm eff}\|_1,\
+ \sqrt n\,\|W_{Q,i}^{\rm eff}\|_2
+ \right\}.
+\]
+The key and value inequalities are the same.
+Replacing a coin budget by this range may require an additional
+factory, since the direct affine mixture supplies signs only at the
+coin radius.
+
+The moment construction uses a third quantity. For chart $C$ and
+key scale $K$, choose an integer
+\[
+ H\ge\max\left\{1,\sup_{q\ {\rm allowed}}
+          \left\|\frac{\beta K}{d}q^TC\right\|_1\right\}.
+\]
+A computable choice from coordinate bounds is
+\[
+ H=\left\lceil\max\left\{1,\frac{|\beta|K}{d}
+              \sum_{a=1}^r\sum_{i=1}^d Q_i|C_{ia}|\right\}\right\rceil.
+\]
+It is at most $\lceil\max\{1,2r|\beta|Q_{\max}K\}\rceil$ for a common
+$Q_{\max}$. Include the finite evaluator's rounding margins in those
+bounds. The original proof-safe choice uses
+$K\in[s(\lceil\sqrt n\rceil+1),2s(\lceil\sqrt n\rceil+1))$.
+Thus $H=O_r(1+\beta s^2n)$ follows from row budgets alone.
+Small empirical $A_{\rm range}$ need not make this cube bound $H$
+small.
+
+\subsection{A precision guard from individual stages}
+
+\begin{lemma}[A variable-stage precision certificate]
+\label{lem:checkpoint-precision}
+Suppose a prefix evaluator has $J$ stages. For each stage $j$,
+let $\Lambda_j\ge0$ bound the change between its legal exact input
+and every approximate input encountered by the evaluator.
+Suppose each stage can be enclosed with local error at most
+$2^{-P}$. To make the final error less than $2^{-p}$, it suffices
+to take
+\[
+ P=p+\lceil\log_2(J+1)\rceil
+     +\sum_{j=1}^J
+          \lceil\log_2\max\{1,\Lambda_j\}\rceil+10.
+\]
+\end{lemma}
+
+\paragraph{Proof idea.}
+Each local error is multiplied only by the later stage bounds.
+Enlarging every factor to at least one permits one common
+product to bound their sum.
+
+\begin{proof}
+Let $e_j$ be the maximum error after stage $j$, with $e_0=0$.
+Then $e_j\le\Lambda_je_{j-1}+2^{-P}$. Induction gives
+\[
+ e_J\le2^{-P}\sum_{i=1}^J\prod_{j=i+1}^J\Lambda_j
+     \le J2^{-P}\prod_{j=1}^J\max\{1,\Lambda_j\}.
+\]
+The prescribed ceilings make the last quantity less than
+$2^{-p}$. Rational upper enclosures for the $\Lambda_j$ and
+rational comparisons with powers of two implement this choice
+without an exact-real comparison.
+\end{proof}
+
+For an RMS stage, Lemma~\ref{lem:checkpoint-rms-lipschitz} supplies
+$\Lambda_{N,j}=(1+\sqrt n)/\sqrt{\lambda_j}$.
+An additive attention stage with step $\alpha_j$, output-map row
+norm $s_{O,j}$, and value bound $U_j$ has a valid bound
+\[
+ \Lambda_{A,j}\le
+ 1+\alpha_js_{O,j}\Lambda_{N,j}
+   [s_{V,j}+2U_j|\beta_j|
+             (K_js_{Q,j}+Q_js_{K,j})].
+\]
+Here $Q_j,K_j,U_j$ must bound both the exact arrays and the
+approximate arrays used in the comparison. The universal RMS
+range supplies such bounds; a sharper true-state bound can be
+enlarged by the certified rounding error.
+The formula follows from
+$\|F(a,v)-F(a',v')\|_\infty
+\le\|v-v'\|_\infty+2U_j\|a-a'\|_\infty$
+and the score difference bound
+$|\beta_j|(K_j\delta_q+Q_j\delta_k)$.
+For a single affine-tanh update,
+$\Lambda_{F,j}\le1+\alpha_js_{F,j}\Lambda_{N,j}$.
+For a convex mixture replace the leading $1$ by $1-\alpha_j$.
+A two-affine update uses its two row norms and a certified
+activation derivative bound. An affine head followed by softmax
+cumulative sums has Lipschitz bound at most twice its row norm.
+The cost of enumerating its $V$ logits is still included.
+
+\subsection{Construction sizes and a numerical worksheet}
+
+Let $R_T$ be a routine precision horizon with $T\le R_T\le2T$,
+distinct from residual radius. At context length $T$, the comparison
+in Lemma~\ref{lem:replayexactsampling} permits
+\[
+ p_T=\lceil\log_2(64V(R_T+2)^3)\rceil.
+\]
+The maintenance schedule in its proof keeps the routine index and the
+future index at power-of-two horizons in $(T,4T]$. Since
+$(4R_T+2)^3\le64(R_T+2)^3$, their routine precision is at most
+$p_T+6$.
+Use Lemma~\ref{lem:checkpoint-precision} to choose $P$.
+If the value coordinate scale is $U$, request normalized
+attention precision
+$p_{\rm att}=P+\lceil\log_2\max\{1,U\}\rceil+4$.
+Then set
+\[
+ m=\lceil8(p_{\rm att}+3H+7)\rceil,\qquad
+ N_m=\binom{m+r}{r}.
+\]
+The exact number of integer counters per head and precision
+index is $(a+1)N_m$. Their numerator lengths are
+$O(P_{\rm grid}(m+1)+\log(T+2))$, where $P_{\rm grid}$ includes
+the affine-product grid and the key and value scaling.
+Several heads contribute the sum of these counts.
+
+In the original equal-width dimensions,
+\eqref{eq:momentexplicitcost} is a proved conservative token work
+bound. For rectangular heads, the sum of the actual dimensions can
+replace $n+V+1$ there as a coarse size bound, with the number of
+stages charged as well. The constants $C_r$ remain rank dependent.
+
+Routine maintenance uses at most three token passes. The
+unresolved comparison probability is at most $4V2^{-p_T}$.
+For any chosen implementation whose further precision cost is a
+degree-$k$ polynomial, the replay proof charges the rare complete
+replays using
+\[
+ \sum_{j\ge0}2^{-j}(P+j)^k
+       \le2^{k+1}k!P^k.
+\]
+The degree $k$ also grows with rank in the present implementation.
+The included worksheet takes $R_T$ to be the least power of two at
+least $T$. It computes the routine precision, chart
+bound, exact binomial count, counter count, and a coarse work
+proxy with $C_r$ left unspecified. Its supplied inputs are
+explicitly illustrative.
+
+\subsection{An arbitrary initial residual radius}
+
+Embedding coordinates need not have radius one. The following version
+of Theorem~\ref{thm:pn-abstract} lets a bound $R_0$ on the initial
+coordinates enter the additive formula directly.
+
+\begin{corollary}[An arbitrary initial residual radius]
+\label{cor:checkpoint-initial-radius}
+In Theorem~\ref{thm:pn-abstract}, suppose $R_0>0$ is rational,
+$|H_{0,t,i}|\le R_0$, and an exact sign of mean $H_{0,t,i}/R_0$
+has the stipulated input cost. Retain the uniform conditional
+source and local arithmetic assumptions, and put
+\[
+ R_j=R_0+\sum_{k\le j}u_k,\quad
+ P_j=\prod_{k\le j}\left(1+\frac{u_km_k}{R_{k-1}}\right),
+\]
+where $u_j$ includes the update step size. Then
+\[
+ Q_{\rm leaves}\le\frac{R_0P_J}{R_J},\qquad
+ W_{\rm add}\le C_0B^4\frac{P_J}{R_J}
+  \left(2R_0+\sum_{j=1}^J\frac{u_j(1+L_j)}{P_j}\right).
+\]
+All rational radius lengths are included in $B$.
+\end{corollary}
+
+\paragraph{Proof idea.}
+The direct origin draw gives the initial state mass $R_0/R_J$.
+The same cost recurrence starts with the initial radius $R_0$
+in place of one.
+
+\begin{proof}
+Use origin weights $R_0,u_1,\ldots,u_j$.
+The leaf count starts at one and its recurrence telescopes to
+$R_0P_J/R_J$. For bit work the equality majorant for $R_jT_j$
+starts at $2R_0C_0B^4$ and obeys
+\[
+ W_j=\left(1+\frac{u_jm_j}{R_{j-1}}\right)W_{j-1}
+         +C_0B^4u_j(1+L_j).
+\]
+This follows by subtracting the direct-origin equalities, whose
+nonrecursive term is $C_0B^4(R_j+R_0)$.
+Division by $P_j$ and summation prove the display. All choices
+are the same exact mixtures as in the additive theorem, so its
+conditional charging and finite-depth termination proof apply.
+\end{proof}
+
+With uniform $m_j\le m$, $m\ge1$, and $L_j\le L$, the resulting
+bit bound is
+$O(B^4(2+L)(1+\log(R_J/R_0))(R_J/R_0)^{m-1})$.
+Indeed, $P_J\le(R_J/R_0)^m$ and
+$\sum_j u_j/P_j\le R_0\log(R_J/R_0)$ for the uniform
+majorant. The chosen final head supplies its additional factor. These
+expressions preserve variation between layers. The carrier
+family's matching exponent applies to its specific construction;
+it does not assign an exponent to an arbitrary checkpoint.
+
+\subsection{Other positive cases}
+
+The finite-query-list theorem applies when all permitted queries
+are known before the table is built and the online input specifies
+one by its list identifier. Record the list size $M$ and a certified
+cost $H_0(B+p)^c$ for enclosing all probabilities of one candidate,
+where $H_0\ge V$ and $c\ge2$ is fixed.
+The prefill and expected sample bounds are respectively
+\[
+ O(MH_0[B+\log(VH_0+2)]^c),\qquad
+ O([B+\log(VH_0+2)]^c).
+\]
+The list and its table are specific to that cache. A vocabulary
+size alone does not provide a fixed query list across all histories.
+
+The implicit rank-one query of Theorem~\ref{thm:implicitrankone}
+needs the slopes of its one-dimensional score functions. A slope bound $\Lambda$ gives
+$O(1+\Lambda^2)$ source requests and
+$O((1+\Lambda^2)B^4)$ auxiliary work for the stated attenuated
+value-sign interface. Its certified table construction is charged
+in prefill. This interface and the ordered rank-one index of
+Corollary~\ref{cor:dynamicrankone} cannot be substituted for each
+other without their final head and source costs.
+
+For the fixed-first-layer-rank bound of
+Theorem~\ref{thm:fixed-rank-critical}, fix the rank cap $r$
+independently of width. At logarithmic depth and parameter precision,
+that theorem gives $O_r(Dn^2\log^6n)$ preprocessing. Its constants
+depend on $r$.

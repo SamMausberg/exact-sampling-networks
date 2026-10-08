@@ -1,0 +1,52 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+ >=Stealth,font=\small,
+ access/.style={draw=blue!55!black,fill=blue!5,rounded corners=2pt,
+                text width=4.1cm,minimum height=13mm,align=center,
+                inner sep=4pt},
+ result/.style={draw=gray!55,fill=gray!3,rounded corners=2pt,
+                text width=9.8cm,minimum height=13mm,align=left,
+                inner sep=5pt},
+ edge/.style={->,semithick}]
+ \node[access] (fresh) at (0,0)
+   {\textbf{\mbox{Fresh input}}\\\mbox{weights preprocessed}};
+ \node[result] (freshcost) at (7.85,0)
+   {Zero biases, row norms $\le1$: $\Omega(\sqrt D)$ to $O(D)$ probes.\\
+    Fixed first-layer rank or bounded column envelope:\\
+    sharp $\Theta(\sqrt D)$ probes, with polynomial bit overhead.};
+ \node[access] (cache) at (0,-2.0)
+   {\textbf{\mbox{Indexed cache}}\\\mbox{finite keys and values}};
+ \node[result] (cachecost) at (7.85,-2.0)
+   {Fixed affine key rank $r$ and bounded coordinates:\\
+    append $O_r((n+\log T)B^3)$;\\
+    sample $O_{r,Q_{\max},K}((n+n^{r/2}+\log T)B^4)$.};
+ \node[access] (neural) at (0,-3.55)
+   {\textbf{\mbox{Maintained decoder}}\\\mbox{neural keys computed}};
+ \node[result] (neuralcost) at (7.85,-3.55)
+   {Fixed key-map rank $r$, row norms $\le s$, RMSNorm floor\\
+    $\varepsilon\ge2^{-b}$: $\operatorname{poly}_r(n,D,V,b,s,\log T)$ per token.};
+ \draw[edge] (fresh)--(freshcost);
+ \draw[edge] (cache)--(cachecost);
+ \draw[edge] (neural)--(neuralcost);
+ \node[draw=orange!65!black,fill=orange!6,rounded corners=2pt,
+       align=left,text width=14.9cm,inner sep=5pt]
+       at (5.35,-5.25)
+   {\textbf{Lower bounds and scope.}
+    Fresh input: $\Omega(\sqrt D)$ probes. Without a context index,
+    attention can require $\Omega(T)$ probes. With polynomial prefill,
+    some families of growing dimension face an OVH barrier.
+    Polynomial degrees in the fixed-rank bounds grow with $r$.};
+\end{tikzpicture}
+\caption{What preprocessing changes. The first row counts expected input
+ probes; the other rows count expected bit work. Every law is exact.
+ Here $n$ is width, $D$ depth, $T\ge2$ cache length, and $V$ vocabulary;
+ $B$ includes parameter encodings and address bits. Attention uses
+ $\beta=\sqrt n$. Finite-cache coordinate bounds $Q_{\max},K$ are fixed;
+ the decoder incorporates them through $n,s$. Fresh-input preprocessing
+ uses $D=\lceil\log_2n\rceil$ and
+ $\lceil\log_2(D+1)\rceil\le b=O(\log n)$, where $b$ is
+ parameter precision. Its column envelope is $\sum_j\max_i|w_{1,ij}|$.
+ OVH is the randomized Orthogonal Vectors Hypothesis.}
+\label{fig:assumptions-to-costs}
+\end{figure}

@@ -1,0 +1,331 @@
+\subsection{A rank-one cache with an implicit query}
+\label{sec:implicitrankone}
+
+An explicit query can locate its score order.  When the query is supplied
+only through fresh signs of an unknown scalar mean, that comparison is
+unavailable.  A prefilled scalar factory still gives a polynomial source
+bound at standard scaling.  We use a bias-corrected Bernstein expansion.
+Bernstein approximation and smoothness-based simulation are established
+Bernoulli-factory methods~\cite{nacuperes2005,holtz2011}; the role of
+prefill here is to store their cache-dependent coefficient computations.
+The correction is needed because the ordinary Bernstein approximation
+has an error of order $m^{-1}$, whose direct mixture has infinite mean
+source work.
+
+\begin{lemma}[A summable Bernstein correction]
+\label{lem:correctedbernstein}
+Let $f\in C^4([0,1])$ satisfy $\|f\|_\infty\le4/5$.
+Suppose $f$ and $f''$ have algorithms returning certified absolute
+enclosures at every rational argument and requested precision.
+Let known nonnegative rational numbers
+$M_j\ge\|f^{(j)}\|_\infty$ be supplied for $j=2,3,4$.  Put
+\[
+ A=M_2+M_3+M_4,\qquad h(p)=p(1-p)f''(p),\qquad
+ g_m(p)=f(p)-\frac{h(p)}{2m}.
+\]
+For $K\in\{0,\ldots,2m\}$, let $J$ be hypergeometric, counting
+the successes in a uniformly selected half of a population of $2m$
+bits containing $K$ successes.  Write $p=K/(2m)$ and
+\[
+ d_{m,K}=g_{2m}(p)-\mathbb E g_m(J/m).
+\]
+Then
+\begin{equation}
+ |d_{m,K}|\le\frac{A}{4m^2}.
+ \label{eq:correctedcoefficientbound}
+\end{equation}
+If $m_0$ is a power of two satisfying
+$m_0\ge\max\{1,2M_2,2\sqrt A\}$, there is an exact factory
+returning a sign of mean $f(p)$ from independent source bits of
+unknown mean $p$, using at most
+\begin{equation}
+ \frac78m_0+\frac{A}{m_0}
+ \label{eq:correctedsourcecost}
+\end{equation}
+source bits in expectation.  This count does not include the work
+needed to evaluate the known coefficient coins.
+\end{lemma}
+
+\paragraph{Proof idea.}
+The second-derivative correction cancels the leading Bernstein approximation error.  Degree elevation is described by a symmetric hypergeometric sample, so a fourth-moment estimate leaves summable correction coefficients.  A mixture of these corrections yields the exact scalar mean.
+
+\begin{proof}
+Put $Y=J/m$ and $\Delta=Y-p$.  A sample and its complement have
+the same distribution, so $\Delta$ is symmetric.  In particular
+$\mathbb E\Delta=\mathbb E\Delta^3=0$, and the usual two-indicator
+calculation gives
+\[
+ \nu:=\mathbb E\Delta^2=\frac{p(1-p)}{2m-1}.
+\]
+We also need the bound $\mathbb E\Delta^4\le m^{-2}$.
+Here is an elementary derivation.  Reveal the $m$ sampled bits in
+order, and take the Doob martingale of their final mean.  At reveal
+$i$, its increment is
+\[
+ \frac{X_i-\mathbb E[X_i\mid X_1,\ldots,X_{i-1}]}{2m-i}.
+\]
+Its conditional range has length at most $1/m$.  The elementary
+Hoeffding moment bound for a centered variable in an interval of
+length $c$, $\mathbb E e^{tX}\le e^{t^2c^2/8}$, follows by
+convexity of the exponential and one-variable differentiation.
+Indeed convexity bounds the moment by that of the two endpoints
+with the same mean.  After scaling by $c$, the logarithm of this
+endpoint moment has value and derivative zero at the origin, and
+its second derivative is the variance of a tilted Bernoulli bit,
+at most $1/4$.  Integrating twice proves the bound for either sign
+of $t$.
+Iterating this bound gives
+$\Pr(|\Delta|>x)\le2e^{-2mx^2}$.
+Integrating the tail yields
+$\mathbb E\Delta^4\le8\int_0^\infty x^3e^{-2mx^2}\,dx=m^{-2}$.
+
+\paragraph{The coefficient bound.}
+The second derivative of $h$ satisfies
+\[
+ H_2:=\|h''\|_\infty\le2M_2+2M_3+M_4/4.
+\]
+Taylor expansion of $f$ through degree three, symmetry, and the
+fourth-moment bound give
+\[
+ \mathbb E f(Y)=f(p)+\frac12 f''(p)\nu+R,
+ \qquad |R|\le\frac{M_4}{24m^2}.
+\]
+The first-order expansion of $h$ gives
+$|\mathbb E h(Y)-h(p)|\le H_2\nu/2$.
+The leading terms cancel as follows:
+\[
+ \frac{h(p)}{4m}-\frac12f''(p)\nu
+ =-\frac{h(p)}{4m(2m-1)}.
+\]
+Since $|h|\le M_2/4$ and $\nu\le1/(4m)$, it follows that
+\[
+ |d_{m,K}|
+ \le\frac1{m^2}\left(\frac{M_2+H_2}{16}+\frac{M_4}{24}\right)
+ \le\frac{M_2+M_3+M_4}{4m^2}.
+\]
+
+\paragraph{The factory.}
+Let $B_m g$ denote the degree-$m$ Bernstein polynomial of $g$.
+Conditional on the total number $K$ of successes among $2m$
+independent source bits, the number in their first half is the
+hypergeometric variable above.  Therefore the coefficient of
+degree $2m$ in $B_{2m}g_{2m}-B_mg_m$ is exactly $d_{m,K}$.
+Also $B_mg_m\to f$ uniformly: ordinary Bernstein approximation
+converges uniformly for continuous functions, and
+$\|g_m-f\|_\infty\le M_2/(8m)$.
+For the former claim, if $X\sim\operatorname{Bin}(m,p)$, split
+$\mathbb E|f(X/m)-f(p)|$ at $|X/m-p|\le\delta$.
+Uniform continuity bounds the first part, and Chebyshev's
+inequality bounds the other part by
+$2\|f\|_\infty/(4m\delta^2)$, uniformly in $p$.
+Thus, for $m_\ell=2^\ell m_0$,
+\[
+ f=B_{m_0}g_{m_0}
+   +\sum_{\ell\ge0}(B_{2m_\ell}g_{2m_\ell}-B_{m_\ell}g_{m_\ell}).
+\]
+Set $b_0=7/8$ and $c_\ell=A/(4m_\ell^2)$.
+We have $\|g_{m_0}\|_\infty\le4/5+1/16<7/8$, and
+\[
+ \sum_{\ell\ge0}c_\ell=\frac{A}{3m_0^2}\le\frac1{12}.
+\]
+Select the base with probability $b_0$, select correction $\ell$
+with probability $c_\ell$, and otherwise return a fair sign.
+On the base draw $m_0$ source bits and, conditional on their count
+$K$, return a known sign of mean $g_{m_0}(K/m_0)/b_0$.
+On correction $\ell$ draw $2m_\ell$ bits and return a known sign
+of mean $d_{m_\ell,K}/c_\ell$.
+All these means are in $[-1,1]$.  The absolutely convergent
+displayed identity proves exactness.  The mean source count is
+\[
+ b_0m_0+\sum_{\ell\ge0}2m_\ell c_\ell
+ =\frac78m_0+\frac{A}{m_0}.
+\]
+If $A=0$, omit all corrections.  Otherwise the conditional level
+law is $(3/4)4^{-\ell}$, sampled by pairs of fair random bits.
+The level, source count, and every known coefficient comparison
+are finite almost surely.
+\end{proof}
+
+\begin{lemma}[Uniform scalar softmax derivatives]
+\label{lem:scalarsoftmaxderivatives}
+Let $|v_j|\le1$ and $|a_j|\le\Lambda$, and define
+\[
+ u(p)=\frac{\sum_{j=1}^T v_j e^{a_jp+c_j}}
+            {\sum_{j=1}^T e^{a_jp+c_j}},\qquad
+ f(p)=u(p)/2.
+\]
+For arbitrary real offsets $c_j$ and $p\in[0,1]$,
+\[
+ \|f\|_\infty\le1/2,\qquad
+ \|f''\|_\infty\le3\Lambda^2,\quad
+ \|f'''\|_\infty\le13\Lambda^3,\quad
+ \|f''''\|_\infty\le75\Lambda^4.
+\]
+The bounds are independent of $T$ and of the score offsets.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Differentiate the numerator identity repeatedly, dividing throughout by the positive softmax denominator.  The bounded slopes control each normalized derivative independently of the number of keys and their offsets.
+
+\begin{proof}
+Write the numerator as $N$ and denominator as $Z$.  Then
+$|N^{(k)}|/Z\le\Lambda^k$ and
+$|Z^{(k)}|/Z\le\Lambda^k$.
+Differentiating $uZ=N$ inductively gives
+\[
+ |u'|\le2\Lambda,\quad |u''|\le6\Lambda^2,\quad
+ |u'''|\le26\Lambda^3,\quad |u''''|\le150\Lambda^4.
+\]
+Dividing these inequalities by two proves the claim.  The radius
+bound follows from $|u|\le1$.
+\end{proof}
+
+\begin{theorem}[A prefilled scalar softmax factory]
+\label{thm:implicitrankone}
+Consider the family in Lemma~\ref{lem:scalarsoftmaxderivatives}.
+Assume $a_j,c_j,v_j$ and a rational bound $\Lambda$ have at most
+$b$ bits, or that the slopes and offsets are rational multiples
+of a common $1/\sqrt n$ with rational encodings of at most $b$ bits.
+The online input consists of independent source bits of an unknown
+mean $p\in[0,1]$.  Put
+\[
+ M_2=3\Lambda^2,\quad M_3=13\Lambda^3,\quad
+ M_4=75\Lambda^4,\quad A=M_2+M_3+M_4,
+\]
+and let $m_0$ be the least power of two at least
+$\max\{1,2M_2,2\sqrt A\}$.  Then a finite-bit data structure
+samples a sign of mean $u(p)/2$ exactly, using at most
+$(7/8)m_0+A/m_0=O(1+\Lambda^2)$ source requests and expected
+auxiliary bit work
+\[
+ O\bigl((1+\Lambda^2)B^4\bigr),\qquad
+ B=16+b+\lceil\log_2(T+n+\Lambda+2)\rceil.
+\]
+The preprocessing work is
+$O(T^3(1+\Lambda^4)B^4)$ and stored bits are
+$O(T(1+\Lambda^2)B)$.
+All constants are absolute.  No exact-real operations are required.  The output is an attention-coordinate sign at radius
+two.  It need not reveal an attention index.
+More explicitly, the source count is less than
+$45\max\{1,\Lambda^2\}$: one has
+$A\le91\max\{\Lambda^2,\Lambda^4\}$,
+$m_0<40\max\{1,\Lambda^2\}$, and $A/m_0\le m_0/4$.
+\end{theorem}
+
+\paragraph{Proof idea.}
+Prefill stores the corrected Bernstein coefficients through a context-dependent cutoff.  The geometric correction law makes higher levels rare enough to evaluate when requested, and certified intervals resolve coefficient coins without altering their biases.
+
+\begin{proof}
+If $A=0$, omit every correction table and correction branch below;
+the base branch alone suffices.  Assume $A>0$ whenever a correction
+is normalized by its mixture mass.
+We first specify a certified coefficient routine.  For rational
+$x\in[0,1]$, a precision-$p$ enclosure for $f(x)$ and $f''(x)$
+costs $O(T(B+\log m+p)^4)$ bit operations when
+$x$ has $O(\log m)$ bits.  To see this, subtract the largest score
+before evaluating exponentials.  Its weight is one, so the
+denominator is at least one.  Weighted moments of the slopes up
+to order two give $u,u',u''$ by the quotient rule, and division
+by two gives $f,f''$.  The slope bounds require only
+$O(B)$ extra guard bits.  Certified negative-exponential enclosures
+have fourth-power bit cost by the preceding arithmetic lemma.
+In the common quadratic-field case, score comparisons
+reduce to rational comparisons, and certified square-root
+enclosures suffice for all evaluations.
+
+\paragraph{Correction coefficients.}
+For a correction coefficient, the hypergeometric mass is proportional to
+\[
+ w_j=\binom{m}{j}\binom{m}{K-j},
+ \quad \max(0,K-m)\le j\le\min(m,K).
+\]
+Its mode is $j_0=\lfloor K/2\rfloor$, possibly one of two tied
+modes.  Set the mode weight to one and generate weights outwards.
+The forward ratio is
+\[
+ \frac{w_{j+1}}{w_j}
+ =\frac{(m-j)(K-j)}{(j+1)(m-K+j+1)};
+\]
+on the upper side it is at most one, and the reverse ratio is at
+most one on the lower side.  Every ratio has $O(\log(m+2))$ bits.
+Using fixed-point intervals at $r$ fractional bits, each outward
+path accumulates at most $O(m2^{-r})$ error.  The total mass error
+is $O(m^2 2^{-r})$.  The exact total is at least one because the
+mode weight is one, so division is stable.  Taking
+$r=p+2\lceil\log_2(m+2)\rceil+O(1)$ therefore gives the weighted
+average to error $O(2^{-p})$.  Evaluate the $O(m)$ required
+$g_m(j/m)$ values by the preceding routine with
+$p+\lceil\log_2(m+2)\rceil+O(1)$ precision bits.
+Thus a correction
+coefficient has a precision-$p$ enclosure in
+\[
+ O(mT(B+\log(m+2)+p)^4)
+\]
+bit operations.  Normalizing by $c_\ell=A/(4m^2)$ adds only
+$O(B+\log(m+2))$ precision bits.  No binomial integer
+with $\Theta(m)$ bits is ever formed.
+
+\paragraph{The prefilled table.}
+Let $M$ be the smallest level $m_\ell$ at least $Tm_0$; then
+$Tm_0\le M<2Tm_0$.  During prefill, store certified enclosures for
+all base and correction coefficient coin probabilities through
+level $M$.  For degree $2m$ use width at most $2^{-P_m}$, where
+\[
+ P_m=8+\lceil\log_2(Tm+2)\rceil.
+\]
+These dyadic interval data are used for exact comparisons with the
+desired probabilities.  The sum of the table sizes is
+$O(MB)$.  Evaluating all entries costs
+$O(TM^2B^4)$, giving the stated bounds.
+
+\paragraph{Online sampling.}
+Online, sample the exact mixture of Lemma~\ref{lem:correctedbernstein}
+and draw its required source bits.  Lemma~\ref{lem:newexactification}
+decides each stored coefficient coin exactly.  Its fast enclosure is
+the stored interval, of width $2^{-P_m}$, and its fallback is the
+certified routine above, of cost $O(mT(B+\log(m+2)+t)^4)$ at
+precision $t$.  Since $2^{P_m}\ge2^8(Tm+2)$ and $\log m=O(B)$ for
+stored levels, the lemma bounds the expected work by $O(B^4)$.
+
+\paragraph{Levels above the table.}
+For a level $m>M$, compute the coefficient directly.  Its expected
+cost is $O(mT(B+\log m)^4)$, and its mixture
+probability is $A/(4m^2)$.  Summing over dyadic levels gives
+\[
+ \sum_{m>M}\frac{A}{4m^2}\,
+    mT(B+\log m)^4
+ =O\left(\frac{AT}{M}(B+\log M)^4\right)
+ =O\left(\frac{A}{m_0}B^4\right).
+\]
+Source counting, source addresses, and mixture selection have the
+same bound after logarithmic factors: the weighted level tail is
+geometric.  Together with the base work and the displayed source
+count, this proves the online bound.  Uniform comparisons stop
+almost surely, and the infinite mixture assigns probability one
+to finite levels.  The coefficient intervals only decide exact
+coins, so the uniform Bernstein limit proves exactness for every
+source bias, including zero and one.
+\end{proof}
+
+For a rank-one cache $k_j=c+t_j u$, choose a known $R$ with
+$|\langle q,u\rangle|\le R$ on the allowed query domain, and
+suppose fresh signs of mean $z=\langle q,u\rangle/R$ are available.
+Writing $p=(1+z)/2$, the common cache offset cancels and the scores
+have slopes $a_j=2\beta R t_j/n$ and offsets $c_j=-\beta R t_j/n$.
+The theorem therefore applies with
+$\Lambda\ge2\beta R\max_j|t_j|/n$.
+For instance, if $k_j=c+t_j u$ with $|t_j|\le1$ and
+$\|q\|_\infty,\|u\|_\infty\le1$, take $R=n$ and
+any rational $\Lambda\ge2\beta$.  For $\beta\ge1$ one may choose
+$\Lambda\le4\beta$.  One source sign of mean $z$ uses at most one
+query-coordinate sign by a signed mixture.  At standard scaling
+$\beta=\sqrt n$, the expected source and auxiliary costs are
+$O(nB^4)$, independently of $T$ after the stated
+polynomial prefill.  As after Theorem~\ref{thm:newrankone}, a unit
+tanh row and a bounded two-logit head consume the radius-two output
+through constant-cost scalar factories, so the exact final token has
+the same asymptotic bound.  Tables can also be built for every cached
+value coordinate; this multiplies the prefill and storage by the value
+dimension.  The two-key lower bound of
+Theorem~\ref{thm:rankonequerylaw} has order $\beta^2$ before the
+finite-input cap.  It is a worst-case statement over caches.

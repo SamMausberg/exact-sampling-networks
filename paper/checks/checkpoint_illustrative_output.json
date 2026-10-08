@@ -1,0 +1,99 @@
+{
+  "input_scope": "Illustrative rational inputs for checking the worksheet. No trained checkpoint was measured.",
+  "interpretation": "Construction sizes and an asymptotic growth proxy only. No checkpoint certificate has been verified and no timing is predicted.",
+  "precision_horizon": 1024,
+  "routine_categorical_precision": 41,
+  "stage_guard_bits": 26,
+  "working_precision_P": 67,
+  "heads": [
+    {
+      "name": "Illustrative block 1 head",
+      "certificate_status": "Illustrative assumption, not verified",
+      "H_upper": 6,
+      "attention_precision": 71,
+      "degree_m": 768,
+      "features_N_m": {
+        "bit_length": 10,
+        "log10_display_approx": 2.8859263398014314,
+        "exact": "769"
+      },
+      "integer_counters_per_precision_index": {
+        "bit_length": 13,
+        "log10_display_approx": 3.840168849240756,
+        "exact": "6921"
+      },
+      "counter_numerator_bits_proxy": 76144,
+      "cell_count_upper": 202,
+      "query_size_proxy_without_B4_or_rank_constant": 221,
+      "finite_cache_B": 59,
+      "finite_cache_query_proxy_without_rank_constant": {
+        "bit_length": 32,
+        "log10_display_approx": 9.427800320253688,
+        "exact": "2677936781"
+      },
+      "finite_cache_vector_append_proxy_without_rank_constant": {
+        "bit_length": 23,
+        "log10_display_approx": 6.743919799085421,
+        "exact": "5545233"
+      }
+    },
+    {
+      "name": "Illustrative block 2 head",
+      "certificate_status": "Illustrative assumption, not verified",
+      "H_upper": 6,
+      "attention_precision": 71,
+      "degree_m": 768,
+      "features_N_m": {
+        "bit_length": 10,
+        "log10_display_approx": 2.8859263398014314,
+        "exact": "769"
+      },
+      "integer_counters_per_precision_index": {
+        "bit_length": 13,
+        "log10_display_approx": 3.840168849240756,
+        "exact": "6921"
+      },
+      "counter_numerator_bits_proxy": 76144,
+      "cell_count_upper": 202,
+      "query_size_proxy_without_B4_or_rank_constant": 221,
+      "finite_cache_B": 59,
+      "finite_cache_query_proxy_without_rank_constant": {
+        "bit_length": 32,
+        "log10_display_approx": 9.427800320253688,
+        "exact": "2677936781"
+      },
+      "finite_cache_vector_append_proxy_without_rank_constant": {
+        "bit_length": 23,
+        "log10_display_approx": 6.743919799085421,
+        "exact": "5545233"
+      }
+    }
+  ],
+  "total_counters_per_precision_index": {
+    "bit_length": 14,
+    "log10_display_approx": 4.141198844904737,
+    "exact": "13842"
+  },
+  "coarse_tanh_work_proxy": {
+    "bit_length": 141,
+    "log10_display_approx": 42.253929124499486,
+    "exact": "1794440755818894325765415805147307500000000"
+  },
+  "omitted_proof_factor": "The rank-dependent constants C_r in the token and integer-length bounds; routine and rare-replay factors still need the implementation's actual cost.",
+  "fixed_tanh_precision_polynomial_degree": 14,
+  "routine_token_passes_per_step_upper": 3,
+  "normalization": {
+    "certificate_status": "Illustrative assumption, not verified",
+    "kappa": "16",
+    "relative_floor_gamma": "1/16",
+    "floor_factory_source_bound": "58369",
+    "floor_factory_radius_power_two_upper": "8",
+    "rms_error_factor_power_two_upper": "32"
+  },
+  "additive": {
+    "radius_R": "2",
+    "product_Pi": "25/6",
+    "source_leaf_bound": "25/12",
+    "bit_work_factor_before_C0_B4_and_head": "23/3"
+  }
+}

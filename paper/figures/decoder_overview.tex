@@ -1,0 +1,31 @@
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+ >=Stealth,font=\small,
+ box/.style={draw=blue!55!black,fill=blue!4,rounded corners=2pt,
+             minimum height=10mm,align=center,text width=3.55cm,
+             inner sep=4pt},
+ edge/.style={->,semithick}]
+ \node[box] (token) at (0,0) {new token};
+ \node[box] (current) at (4.9,0) {update the current\\moment index};
+ \node[box] (sample) at (9.8,0) {certify the next\\random choice};
+ \node[box,fill=green!5,draw=green!40!black] (future) at (4.9,-1.9)
+   {future index:\\replay two old tokens};
+ \node[box,fill=orange!7,draw=orange!65!black] (refine) at (9.8,-1.9)
+   {temporary replay\\at finer precision};
+ \draw[edge] (token)--(current);
+ \draw[edge] (current)--(sample);
+ \draw[edge] (token.south) |- (future.west);
+ \draw[edge,green!40!black,dashed] (future.north)--
+   node[left,inner sep=3pt] {swap}(current.south);
+ \draw[edge,orange!70!black] (sample.south)--
+   node[left,inner sep=3pt] {rare}(refine.north);
+ \draw[edge,orange!70!black] (refine.east) -- ++(.55,0) |- (sample.east);
+\end{tikzpicture}
+\caption{Maintaining an exact decoder. A routine step evaluates the new
+ token in the current index and replays at most two old tokens in a future index.
+ The future index takes over when it catches up. If the random choice is
+ too close to a probability boundary, a temporary finer replay resolves
+ it. All three computations use the same discrete token history.}
+\label{fig:decoder-overview}
+\end{figure}

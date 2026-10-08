@@ -1,0 +1,283 @@
+\subsection{A sharp normalization obstruction}
+\label{sec:rms-obstruction}
+
+Theorem~\ref{thm:main-rms} assumes a certified denominator floor.
+This subsection shows that the floor matters: after uniform attention,
+an unstabilized normalization can force a linear number of context
+probes, and a stabilizer $\epsilon$ caps the cost at order
+$\epsilon^{-1}$. Corollary~\ref{cor:rmsfixedgrid} keeps every weight
+on one fixed grid.
+
+\begin{theorem}[A sharp normalization family]
+\label{thm:rmscontextlaw}
+For every $T\ge2$ and rational $0\le\epsilon\le1$, there is a
+width-two causal block consisting of uniform attention, RMSNorm,
+and a tanh map, each replacing its input stream, with row norms at
+most one and two logits
+in $[-1,1]$, on the two-token embedding alphabet
+$\{(-1,1),(1,1)\}$, such that its exact-sampling query optimum satisfies
+\begin{equation}
+ \frac1{384}\min\{T,\epsilon^{-1}\}
+ \ \le\ Q^*\ \le\
+ 64\min\{T,\epsilon^{-1}\}.
+ \label{eq:rmscontextlaw}
+\end{equation}
+Here $\epsilon^{-1}=+\infty$ at zero. The lower bound applies to all
+exact samplers, with arbitrary weight-only preprocessing. The upper
+bound has an implementation using
+$O(B_N^4\min\{T,\epsilon^{-1}\})$ expected bit operations.
+All nonzero network coefficients are dyadic with
+$O(\log T)$ bits. The denominator is nonzero on every context,
+including when $\epsilon=0$.
+\end{theorem}
+
+The score matrices in this construction are zero. Consequently the
+lower bound holds at every inverse temperature, including $\beta=0$.
+
+The matching sampler uses the following identity.
+
+\begin{lemma}[A geometric majority identity]
+\label{lem:rmsgeommajority}
+Let $\theta>0$. Draw $K\ge0$ with
+\[
+ \Pr(K=k)=\frac\theta{1+\theta}(1+\theta)^{-k}.
+\]
+The majority of $2K+1$ independent signs of mean $z$ has mean
+\begin{equation}
+ G_\theta(z)=\frac{z\sqrt{1+\theta}}{\sqrt{\theta+z^2}}.
+ \label{eq:rmsgeommajority}
+\end{equation}
+Its expected number of source signs is $1+2/\theta$.
+\end{lemma}
+\paragraph{Proof idea.}
+Differentiate the majority polynomials before summing the geometric
+mixture. Their derivatives form a binomial series with exponent $-3/2$,
+which is also the derivative of the required normalized mean.
+
+\begin{proof}
+Write $M_k(z)$ for the mean of majority of $2k+1$ signs. The proof
+of Lemma~\ref{lem:comptanharity} gives $M_k'(z)=C_k(1-z^2)^k$ with
+$C_k=(2k+1)\binom{2k}{k}4^{-k}$, and $C_k=(3/2)_k/k!$.
+The geometric mixture can be differentiated term by term
+uniformly on $[-1,1]$. The binomial series gives its derivative
+as
+\[
+ \frac\theta{1+\theta}
+ \left(1-\frac{1-z^2}{1+\theta}\right)^{-3/2}
+ =\frac{\theta\sqrt{1+\theta}}{(\theta+z^2)^{3/2}}
+ =G_\theta'(z).
+\]
+Both functions vanish at zero, proving the identity. The
+arity expectation follows from $\mathbb E K=1/\theta$.
+\end{proof}
+
+\paragraph{Proof idea for Theorem~\ref{thm:rmscontextlaw}.}
+Uniform attention writes the context mean $M$ next to a small dyadic
+sentinel, and normalization makes the output a steep function of $M$
+near zero. The transcript score turns this steepness into order
+$\min\{T,\epsilon^{-1}\}$ probes. A geometric mixture of majorities
+realizes the same function at that cost, and a full scan is cheaper
+when $\epsilon<1/T$.
+
+\begin{proof}[Proof of Theorem~\ref{thm:rmscontextlaw}]
+Take width two and contexts
+\[
+ h_{0,j}=(x_j,1),\qquad x_j\in\{-1,+1\}.
+\]
+Let $c=2^{-\lceil\log_2T\rceil}$, so $0<c\le1/T$. The
+query and key maps are zero, and the value map is
+$\operatorname{diag}(1,c)$. At the final position, uniform
+causal attention gives
+\[
+ a=(M,c),\qquad M=T^{-1}\sum_{j=1}^T x_j.
+\]
+Apply \eqref{eq:rmsdefinition}, then a tanh row with coefficient
+$1/2$ on the first coordinate. Give the two output categories
+opposite logits. If the category is encoded by $Y\in\{-1,+1\}$,
+its target mean is
+\begin{equation}
+ f_\epsilon(M)
+ =\tanh\!\left(\tanh\!\left(
+   \frac{M}{\sqrt2\sqrt{2\epsilon+c^2+M^2}}
+ \right)\right).
+ \label{eq:rmsfamilymean}
+\end{equation}
+Every parameter except $\epsilon$ is dyadic. The value and
+tanh row norms are at most one, and the logits lie in $[-1,1]$.
+The sentinel $c$ prevents a zero denominator.
+
+\paragraph{The lower bound.}
+Lemma~\ref{lem:transcript} gives $H'(0)^2\le\mathbb E_0Q$ by
+Cauchy--Schwarz. This is the finite-input form of the sequential
+information bound; the first-score Bernoulli-factory lower bound
+is standard \cite{mendo2019}.
+
+For $0\le u\le1$, $\tanh u\ge u/2$. The argument of the
+inner tanh in \eqref{eq:rmsfamilymean} has absolute value
+at most $1/\sqrt2$. Oddness consequently gives
+\[
+ M f_\epsilon(M)
+ \ge\frac{M^2}{8\sqrt{2\epsilon+c^2+M^2}}.
+\]
+For independent fair signs,
+\[
+ \mathbb E M^2=\frac1T,
+ \qquad \mathbb E M^4=\frac{3T-2}{T^3}\le\frac3{T^2}.
+\]
+For any nonnegative $Z$ with positive mean and any $a>0$,
+weighted Jensen gives
+\begin{equation}
+ \mathbb E\frac{Z}{\sqrt{a+Z}}
+ \ge\frac{\mathbb E Z}
+ {\sqrt{a+\mathbb E Z^2/\mathbb E Z}}.
+ \label{eq:rmsweightedjensen}
+\end{equation}
+To see this, tilt the probability law by $Z/\mathbb E Z$
+and apply convexity of $u\mapsto(a+u)^{-1/2}$.
+Taking $Z=M^2$ yields
+\[
+ H'(0)=T\mathbb E[Mf_\epsilon(M)]
+ \ge\frac1{8\sqrt{2\epsilon+c^2+3/T}}.
+\]
+Lemma~\ref{lem:transcript} now implies
+\begin{equation}
+ \mathbb E_0Q
+ \ge\frac1{64(2\epsilon+c^2+3/T)}
+ \ge\frac1{384}\min\{T,\epsilon^{-1}\}.
+ \label{eq:rmsscorelower}
+\end{equation}
+The last inequality uses $c^2\le1/T^2\le1/T$ and considers
+$\epsilon\le1/T$ and $\epsilon\ge1/T$ separately.
+An average-case lower bound is also a worst-context lower
+bound. This proves the lower part of
+Theorem~\ref{thm:rmscontextlaw}.
+
+\paragraph{A matching sampler.}
+For \eqref{eq:rmsfamilymean}, take $\theta=2\epsilon+c^2$.
+A known gate of probability
+$[2(1+\theta)]^{-1/2}$ turns the majority sign into a sign of
+mean $M/[\sqrt2\sqrt{\theta+M^2}]$, using a fair sign on the
+other branch. A source sign of mean $M$ is obtained by querying
+one uniform context position.
+
+Lemma~\ref{lem:unittanhfour} supplies a sign of mean $\tanh z$
+from signs of mean $z\in[-1,1]$. Its expected source count is at
+most two, which is in particular at most $2e$, and its local bit
+work is $O(B_N^4)$.
+
+Applying this tanh factory twice realizes
+\eqref{eq:rmsfamilymean}. Its expected number of context
+requests is at most
+\[
+ 4e^2(1+2/\theta)
+ \le32(1+\epsilon^{-1})
+ \le64\epsilon^{-1},\qquad 0<\epsilon\le1.
+\]
+Alternatively, read all $T$ inputs, form the exact rational
+$M$, and use certified square roots and exponentials to
+sample the two-category probability. Choose this alternative
+when $\epsilon<1/T$. The first construction is used when
+$\epsilon\ge1/T$. Every geometric parameter then has inverse
+at most $1+T$, and its arity and arithmetic tails give
+$O(B_N^4/\epsilon)$ expected bit work. In the scan case,
+the sentinel is at least $1/(2T)$, so the additional precision
+needed by the square root is $O(\log T)$ and the total work
+is $O(TB_N^4)$. This proves both upper bounds in
+Theorem~\ref{thm:rmscontextlaw}.
+\end{proof}
+
+\subsubsection{A fixed coefficient grid}
+
+The width-two construction uses a weight with $O(\log T)$ bits.
+That precision is permitted by the finite-encoding model above,
+but a fixed grid such as $b=20\lceil\log_2n\rceil$
+would not allow this weight at fixed width and unbounded $T$.
+The next construction generates its sentinel through averaging.
+Its weights are independent of the context length.
+
+\begin{corollary}[A fixed-grid normalization law]
+\label{cor:rmsfixedgrid}
+There is a width-four block consisting of uniform attention, RMSNorm,
+and tanh, each replacing its input stream, with row norms at most
+one and nonzero matrix
+coefficients belong to $\{1/2,1\}$, such that
+\begin{equation}
+ \frac1{128}\min\{T,\epsilon^{-1}\}
+ \le Q^*\le32\min\{T,\epsilon^{-1}\},
+ \qquad 0\le\epsilon\le1.
+ \label{eq:rmsfixedgridlaw}
+\end{equation}
+The upper bound has
+$O(B_N^4\min\{T,\epsilon^{-1}\})$ expected bit work. The
+input has one unknown sign per position and a public
+first-position feature. Every normalization denominator is
+positive at every causal position on every allowed context.
+In particular the unstabilized linear lower bound holds with
+one fixed coefficient grid as $T$ tends to infinity.
+\end{corollary}
+\paragraph{Proof idea.}
+A public first-position feature produces the sentinel $1/t$ through
+uniform averaging, so no context-dependent matrix coefficient is needed.
+The score lower bound and geometric-majority sampler then apply to the
+resulting scalar normalization, with a full scan available at small
+stabilization.
+
+\begin{proof}
+Use
+\[
+ h_{0,j}=(x_j,1,\eta_j,1),\qquad
+ \eta_1=1,\quad \eta_j=-1\ (j>1).
+\]
+The first-position feature $\eta_j$ is public and requires no
+probe of $x_j$. Both query and key maps vanish. The first
+value row selects $x_j$, the second takes the average of
+coordinates two and three, and the other rows vanish.
+Consequently, at every causal position $t$,
+\[
+ y_t=(M_t,1/t,0,0),\qquad
+ M_t=t^{-1}\sum_{j\le t}x_j.
+\]
+The sentinel is strictly positive for every $t$. The tanh
+output row is one half of the first normalized coordinate.
+Opposite output logits give target sign mean
+\[
+ \widetilde f_\epsilon(M)
+ =\tanh\!\left(\tanh\!\left(
+ \frac{M}{\sqrt{4\epsilon+T^{-2}+M^2}}
+ \right)\right).
+\]
+All matrix rows have norm at most one and all biases are zero.
+The inner argument belongs to $[-1,1]$. The same two tanh
+bounds give
+\[
+ M\widetilde f_\epsilon(M)
+ \ge\frac{M^2}{4\sqrt{4\epsilon+T^{-2}+M^2}}.
+\]
+Weighted Jensen and the finite-input score lemma imply
+\[
+ \mathbb E_0Q
+ \ge\frac1{16(4\epsilon+T^{-2}+3/T)}
+ \ge\frac1{128}\min\{T,\epsilon^{-1}\}.
+\]
+For the last step, use $T^{-2}\le1/T$ and
+$\epsilon+1/T\le2\max\{\epsilon,1/T\}$.
+
+For the upper bound, put $\theta=4\epsilon+T^{-2}$ in
+Lemma~\ref{lem:rmsgeommajority}. A known gate of probability
+$(1+\theta)^{-1/2}$ gives the inner argument. Applying the
+unit-interval tanh factory from Lemma~\ref{lem:unittanhfour}
+twice costs fewer than sixteen requests of that source sign.
+Thus for $0<\epsilon\le1$ the expected number of context
+requests is at most
+\[
+ 16(1+2/\theta)
+ \le16(1+(2\epsilon)^{-1})
+ \le24\epsilon^{-1}.
+\]
+When $\epsilon<1/T$, scan the context instead. This gives
+the constant 32 in \eqref{eq:rmsfixedgridlaw} with slack.
+The bit implementation and its precision bound are identical
+to those in Theorem~\ref{thm:rmscontextlaw}; now the rational
+sentinel $1/T$ is computed from the position index, without
+being a network coefficient.
+\end{proof}

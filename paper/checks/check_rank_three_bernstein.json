@@ -1,0 +1,8 @@
+{
+  "status": "all exact-rational checks passed; not a formal verification",
+  "rank_three_operator_identity_cases": 32,
+  "rank_three_coefficient_bound_cases": 14336,
+  "seven_product_identity_cases": 6561,
+  "largest_coefficient_bound_ratio": "1/2",
+  "uses_floating_point": false
+}

@@ -1,0 +1,225 @@
+\subsection{The sharp law at every fixed first-layer rank}
+\label{sec:fixed-rank-batching}
+
+Rectangular multiplication removes the rank-three restriction in the
+preceding preprocessing argument. The analytic construction already works
+at every fixed rank. Its Taylor tables have a number of columns that is
+polynomial in the logarithm of the width. A sufficiently unbalanced exact
+matrix multiplication computes all those columns within the original
+preprocessing budget.
+
+\begin{theorem}[Critical sampling at every fixed first-layer rank]
+\label{thm:fixed-rank-critical}
+Fix an integer $r\ge1$. Consider a zero-bias width-$n$, depth-$D\ge1$
+tanh network whose absolute row sums are at most one and whose first
+weight matrix has rank at most $r$. Its weights are dyadic with at most
+$b$ bits. Put $B=16+b+\lceil\log_2(nD+2)\rceil$.
+One uniform algorithm, with constants depending on $r$, samples the
+exact output using
+\[
+ O_r(\sqrt{D+1})\quad\hbox{expected input probes},\qquad
+ O_r\!\left(\sqrt{D+1}\,B^{\max\{4,r+2\}}\right)
+ \quad\hbox{expected bit operations}.
+\]
+At $D=\lceil\log_2n\rceil$ and $b=O(\log n)$, its weight-only
+preprocessing and storage are $O_r(Dn^2\log^6n)$.
+The worst-case query order is $\Theta_r(\sqrt D)$ when
+$n\ge D+1$ and $b\ge\lceil\log_2(D+1)\rceil$.
+\end{theorem}
+
+The rank is fixed before taking the asymptotic bound. Both the constants
+and the degree of the online precision polynomial depend on it. The
+theorem supplies no uniform polynomial bound when $r$ grows with $n$.
+In particular, rank four is not a hardness threshold.
+
+\begin{lemma}[Exact batching of a thin coefficient matrix]
+\label{lem:fixed-rank-rectangular-batching}
+For every fixed integer $r\ge1$, an $n$ by $n$ integer matrix can be
+multiplied by an $n$ by $C$ integer matrix, $C\ge1$, using
+\[
+ O_r\!\left(\log(C+2)
+ \left[n^2C^{1/(2r)}+C^{8+1/(2r)}\right]\right)
+ \tag{*}\label{eq:fixed-rank-rectangular-work}
+\]
+scalar arithmetic operations. If the input entries have at most $m$
+bits, the computation can use only integers with
+$O_r(m+\log n+\log(C+2))$ bits. It is a uniform exact algorithm;
+no oracle for real arithmetic or for matrix multiplication constants
+is required.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Choose one rational bilinear formula with a square side $q$ and a
+short side $w\ge q^{1/4}$. Its tensor powers supply a block large
+enough to hold all $C$ coefficient columns. Tiling the large square
+matrix with these blocks yields the first term in
+\eqref{eq:fixed-rank-rectangular-work}; padding yields the second.
+
+\begin{proof}
+Set $\epsilon=1/(8r)$. Le Gall's rectangular multiplication bound
+gives exponent two at every aspect exponent below $0.3029805$
+\cite{legall2012rect}. We use the strictly smaller exponent $0.30$.
+The theorem and the definition of the exponent by exact tensor rank
+apply over the rational field. Permuting the three tensor indices
+gives multiplication of a $q$ by $q$ matrix by a $q$ by $w$ matrix.
+Consequently there are integers $q\ge2$, $2\le w\le q$, and a finite
+exact rational bilinear formula with $R$ products such that
+\[
+ w^4\ge q,\qquad q^2\le R\le q^{2+\epsilon}.
+ \tag{**}\label{eq:fixed-rank-base-parameters}
+\]
+To see that the inequalities can hold simultaneously, apply the
+exponent bound with excess $\epsilon/2$, then take a sufficiently
+large base size and $w=\lfloor q^{0.30}\rfloor$.
+The constant in the rank bound is absorbed by $q^{\epsilon/2}$.
+The tensor flattening along the $q^2$ entries of the first input
+has rank $q^2$, which gives $R\ge q^2$.
+
+There is also a direct uniform way to choose this finite formula.
+Enumerate integer triples and rational coefficient arrays by increasing
+encoding length. For each candidate, check
+$w^4\ge q$ and $R^{8r}\le q^{16r+1}$, and verify every coefficient
+in its bilinear tensor identity by rational arithmetic. This search
+terminates by the preceding existence theorem. It is performed once
+for a given $r$; its finite time and stored certificate are constants
+in $O_r$. Thus this use of the exponent theorem does not hide
+nonuniform advice or a real coefficient test.
+
+Fix the resulting formula. A tensor power of depth $j$ multiplies
+a $u$ by $u$ matrix by a $u$ by $c$ matrix, where
+$u=q^j$ and $c=w^j$. Its operation count $T_j$ satisfies
+\[
+ T_j\le R T_{j-1}+O_r(q^{2j}+q^jw^j)
+       \le R T_{j-1}+O_r(q^{2j}).
+\]
+Since $q^2\le R\le q^{2+\epsilon}$, this implies
+\[
+ T_j=O_r\bigl((j+1)u^{2+\epsilon}\bigr).
+\]
+The factor $j+1$ includes the possible equality $R=q^2$.
+
+Choose the least $j\ge0$ such that $w^j\ge C$.
+Then $c\le wC$, $j+1=O_r(\log(C+2))$, and
+\[
+ u\le q C^{\log q/\log w}\le qC^4.
+\]
+Pad the row dimension to a multiple of $u$ and the column dimension
+to $c$. With $h=\lceil n/u\rceil$, there are $h^2$ block
+products. Their output sums and the creation of zero padding fit the
+same operation count. Using $h\le n/u+1$ gives
+\[
+ O_r\bigl((j+1)[n^2u^\epsilon+u^{2+\epsilon}]\bigr)
+ =
+ O_r\!\left(\log(C+2)
+ [n^2C^{4\epsilon}+C^{8+4\epsilon}]\right).
+\]
+This argument also covers $C>n$. Substitution of
+$4\epsilon=1/(2r)$ proves
+\eqref{eq:fixed-rank-rectangular-work}.
+
+It remains to justify the bit lengths. Let $\Delta$ be a positive
+common denominator of the finitely many rational coefficients in the
+chosen base formula. Every input transformation through $j$ levels
+has denominator dividing $\Delta^j$. Leaf products therefore have
+denominator dividing $\Delta^{2j}$, and the $j$ output
+recombination levels raise this exponent by at most $j$.
+All intermediate quantities can be represented over predetermined
+powers of $\Delta$ of exponent at most $3j$.
+No reduction by a greatest common divisor is necessary.
+
+The base formula contains only a fixed number of fixed coefficients.
+Their absolute linear-form sums give a fixed bound on magnitude
+growth at one level. After input transformation, multiplication,
+and output recombination, the logarithm of the magnitude has grown
+by $O_r(j)$, in addition to the input bit lengths. Summation over
+the $h$ inner blocks adds at most $O(\log n)$ bits. Hence integer
+numerators, fixed-denominator rescalings, and completed output
+entries all have $O_r(m+j+\log n)$ bits. Applying schoolbook
+arithmetic to these integers proves the stated finite-bit
+implementation. The identities hold exactly before any later
+rounding of the completed matrix product.
+\end{proof}
+
+\paragraph{Proof idea.}
+The proof of Theorem~\ref{thm:rank-three-critical} builds its factory
+and analytic table for every fixed number of scalar source streams;
+only its matrix multiplication estimate uses rank three. Keep the
+factory, its amplitude gate, and its precision stopping rule. Apply
+the batching lemma at each dense linear layer, then count the
+remaining coefficient arithmetic directly. For fixed rank, the extra
+powers of $\log n$ in the latter work are absorbed by its smaller
+factor of $n$.
+
+\begin{proof}[Proof of Theorem~\ref{thm:fixed-rank-critical}]
+If the first matrix has rank zero, the output has mean zero and a
+fair bit suffices. Otherwise use its actual rank, padding the scalar
+source description to $r$ if desired. The construction before the
+matrix multiplication step in the proof of
+Theorem~\ref{thm:rank-three-critical} applies to every fixed $r$.
+It gives an amplitude gate of probability $O(D^{-1/2})$, a
+conditional factory using $O_r(D+1)$ expected probes, and a Taylor
+oracle whose conditional expected bit work is
+$O_r((D+1)B^{\max\{4,r+2\}})$.
+That proof includes the unconditional probability bounds for all
+arbitrary precision refinements. These facts yield the claimed
+online bounds. Depth one uses the direct scalar factory.
+
+The table of that proof has $J=O_r(D^{r/2})$ grid centers, Taylor
+degree $K=O_r(B)$, $N_K=\binom{K+r}{r}=O_r(K^r)$ coefficients per
+center, $C=JN_K=O_r(D^{r/2}K^r)$ coefficient columns, and working
+precision $M=O_r(B+D)$. Increasing $M$ by
+$O_r(b+\log n+\log(C+2))$ preserves this order.
+
+At each linear layer, clear denominators as in that proof and apply
+Lemma~\ref{lem:fixed-rank-rectangular-batching} to the resulting
+integer matrices. All intermediate integers have $O_r(M)$ bits,
+so each scalar arithmetic operation costs $O_r(M^2)$ bit
+operations. The product is exact before its completed entries are
+rounded, so the analytic error induction applies without change.
+The basis computation and the nonlinear recurrences have the costs
+given in that proof. A general-depth preprocessing bound is thus
+\[
+ O_r\!\left(
+ n^2B^3+
+ D\left[
+ \log(C+2)\bigl(n^2C^{1/(2r)}+C^{8+1/(2r)}\bigr)
+ +nD^{r/2}K^{2r}+nD^{r/2}M
+ \right]M^2\right).
+ \tag{***}\label{eq:fixed-rank-general-preprocessing}
+\]
+This bound includes the first affine layer, all working storage,
+and the stored Taylor table.
+
+Let $v=\log_2 n\ge1$. When $D=\lceil\log_2n\rceil$ and
+$b=O(\log n)$, the chosen parameters satisfy
+$D,K,M=O_r(v)$ and $C=O_r(v^{3r/2})$.
+The dense term in
+\eqref{eq:fixed-rank-general-preprocessing} is at most
+\[
+ O_r\!\left(n^2v^{3+(3r/2)/(2r)+1}\right)
+ =O_r(n^2v^{19/4}),
+\]
+where the final factor $v$ bounds $\log(C+2)$.
+The nonlinear term is $O_r(nv^{3+5r/2})$, the constant
+exponentials cost $O_r(nv^{4+r/2})$, and the padding term is
+$O_r(v^{12r+19/4})$. For each fixed $r$, each of the last three
+terms is $O_r(n^2v^7)$, because a fixed power of $\log n$ is
+bounded by any fixed positive power of $n$. The basis term also
+fits this bound. Consequently preprocessing and storage are
+$O_r(n^2\log^7n)=O_r(Dn^2\log^6n)$.
+
+Finally, the rank-one mean-chain family lies in every class with
+rank bound $r\ge1$. Its lower bound from
+Theorem~\ref{thm:finitecritical} is
+$\Omega(\sqrt D)$ under the displayed width and dyadic-grid
+conditions. This proves the worst-case claim.
+\end{proof}
+
+The rare full-input branch in
+Corollary~\ref{cor:rank-three-finite-input} uses the same Taylor
+oracle and hence also extends to every fixed $r$. Under
+\eqref{eq:fixed-rank-general-preprocessing}, its expected probe
+bound is $O_r(\min\{\sqrt D,n/\sqrt D\})$, with the same
+finite-input lower bound and with expected bit work
+$O_r((1+\min\{\sqrt D,n/\sqrt D\})B^{\max\{4,r+2\}})$.
+The unrestricted-rank critical exponent remains open.

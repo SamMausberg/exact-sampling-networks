@@ -1,0 +1,205 @@
+\subsection{A cache on one affine line: every temperature}
+\label{sec:newrankone}
+
+A cache on one affine line permits exact sampling whose cost
+depends only on the encoding length of the temperature, even when
+the numerical temperature is very large.
+The proof uses the geometric rejection envelope for decreasing
+weights studied by Chewi, Gerber, Lu, Le Gouic, and
+Rigollet~\cite{chewi2022}. We include the short envelope argument
+and account separately for finite arithmetic.
+
+\begin{lemma}[A geometric partition of decreasing weights]
+\label{lem:newmonotoneenvelope}
+Let $w_1\ge\cdots\ge w_T>0$ and $Z=\sum_jw_j$.
+Partition $[T]$ into $G_0=\{1\}$ and the nonempty blocks
+\[
+ G_\ell=\{2^{\ell-1}+1,\ldots,\min(2^\ell,T)\},\qquad\ell\ge1.
+\]
+Write $m_\ell=\min G_\ell$, $N_\ell=|G_\ell|$, and
+$W=\sum_\ell N_\ell w_{m_\ell}$. Then
+\[
+ Z\le W\le2Z.
+\]
+Thus sampling a block proportionally to $N_\ell w_{m_\ell}$,
+sampling a uniform member $j$, and accepting it with probability
+$w_j/w_{m_\ell}$ gives an exact sample from $w_j/Z$ with at most
+two proposals in expectation.
+\end{lemma}
+\paragraph{Proof idea.}
+Each geometric block borrows its envelope mass from the preceding block.  Every true weight is charged at most twice, giving a constant proposal count for any decreasing sequence.
+
+\begin{proof}
+The lower bound follows from monotonicity within each block. If
+$T\le2$ the envelope is exact. Otherwise, for every $\ell\ge2$
+with a nonempty block, its preceding block is full, has size
+$2^{\ell-2}$, and all its weights are at least $w_{m_\ell}$.
+Consequently
+\[
+ N_\ell w_{m_\ell}
+ \le2\sum_{j\in G_{\ell-1}}w_j.
+\]
+If $L$ is the last block, summation gives
+\[
+ W\le w_1+w_2+2\sum_{\ell=1}^{L-1}\sum_{j\in G_\ell}w_j
+ =2Z-w_1+w_2-2\sum_{j\in G_L}w_j\le2Z.
+\]
+The accepted mass in a trial is $w_j/W$, and the success
+probability is $Z/W$. Summing the geometric series proves both
+exactness and the expected proposal count.
+\end{proof}
+
+\begin{lemma}[Exponential evaluation on the negative half-line]
+\label{lem:newnegativeexp}
+Suppose $x\le0$ is either a rational with encoding length $b$, or
+a rational plus a rational divided by $\sqrt n$, with total
+encoding length $b$.
+For every integer $p\ge1$, a deterministic finite algorithm returns
+a dyadic interval containing $e^x$ of length at most $2^{-p}$ in
+$O((b+p+\log(n+2))^4)$ bit operations. The bound has no dependence
+on the numerical magnitude $|x|$ beyond its encoding length.
+\end{lemma}
+\paragraph{Proof idea.}
+An exponential that is already smaller than the requested error can be enclosed immediately.  Every remaining argument lies in a precision-dependent bounded interval, where a finite Taylor calculation and outward rounding suffice.
+
+\begin{proof}
+First obtain an interval of length at most $1/4$ for $x$.
+Rational arithmetic, and rational bisection for $\sqrt n$ when
+needed, have the asserted polynomial cost. If the upper endpoint
+is at most $-(p+2)$, return $[0,2^{-(p+2)}]$; this is valid because
+$e>2$. Otherwise the upper endpoint is greater than $-(p+2)$ and
+the interval has width at most $1/4$, so the known sign gives
+$|x|\le p+3$. Refine $x$ to absolute error
+$2^{-(p+3)}$ and evaluate its exponential on $[-p-3,0]$.
+One explicit procedure divides the argument by
+$m=p+4$, uses the alternating exponential series on $[-1,0]$,
+and raises the resulting enclosure to the power $m$.
+Take $K=4(p+\lceil\log_2(m+1)\rceil+10)$ terms. The alternating
+remainder is at most $1/(K+1)!\le2^{-K}$.
+Perform interval arithmetic with outward rounding to
+$P=p+2\lceil\log_2(K+1)\rceil+\lceil\log_2(m+1)\rceil+20$
+fractional bits. In the term recurrence, multiplication by a
+number of absolute value at most one and division by a positive
+integer do not increase the preceding absolute error. Summing
+the $K$ terms therefore adds at most $4(K+1)^2 2^{-P}$ of
+rounding error. Clip the resulting exponential enclosure to
+$[0,1]$ and multiply it by itself $m$ times, again clipping to
+$[0,1]$. These products increase interval width by at most the
+sum of their input widths plus $2^{1-P}$ per product.
+The chosen $K,P$ make the final error at most $2^{-(p+2)}$.
+Monotonicity and $|\exp'(x)|\le1$ on the negative half-line
+control the input enclosure error. There are $O(p+\log(p+2))$
+fixed-point operations on $O(b+p+\log n)$ bits; schoolbook
+arithmetic is bounded by the fourth power displayed above.
+In the algebraic case, an absolute interval
+for the rational numerator divided by $\sqrt n$ needs only a
+linear number of extra precision bits in the numerator's encoding
+length, even if the numerator has large magnitude.
+\end{proof}
+
+\begin{theorem}[Exact indexed attention in affine dimension one]
+\label{thm:newrankone}
+Let $T\ge2$. Let cached keys $k_j\in\mathbb Q^n$ lie on one
+affine line, with arbitrary cached scalar values $v_j\in[-1,1]$.
+All keys, values, and the fresh query $q\in\mathbb Q^n$ have dyadic
+coordinates with at most $b$ bits per coordinate. Let $\beta\ge0$
+be dyadic, also with at most $b$ bits, or let $\beta=\sqrt n$.
+There is a uniform algorithm with the following bounds:
+\[
+ \begin{split}
+ \text{prefill work}&=O\bigl((Tn+T\log T)(b+\log(T+n))^2\bigr),\\
+ \text{stored bits}&=O\bigl(Tn b+T\log T\bigr),\\
+ \text{expected online work}&=
+ O\bigl((n+\log T)(b+\log(T+n))^4\bigr).
+ \end{split}
+\]
+It samples an exact attention index for scores
+$\beta\langle q,k_j\rangle/n$, and hence an exact sign of mean
+$\sum_j e^{a_j}v_j/\sum_j e^{a_j}$.
+Its expected number of proposed cache members is at most $17/8$.
+These bounds hold at every numerical temperature covered by the
+stated finite encoding. No upper bound on the scores is required.
+\end{theorem}
+\paragraph{Proof idea.}
+Project the query onto the cache line once.  The projection chooses one of two stored orders; a geometric envelope then samples from that order.  A small dyadic floor makes every acceptance comparison efficient even at very large temperature.
+
+\begin{proof}
+If all keys coincide, attention is uniform and the claim follows
+immediately. Otherwise choose two distinct keys, set $c=k_1$, and
+let $u$ be their nonzero difference. Choose a pivot coordinate $r$
+with $u_r\ne0$. Prefill can verify the affine-line promise by
+checking
+\[
+ u_r(k_{j,i}-c_i)=u_i(k_{j,r}-c_r)
+ \quad\text{for every }i,j.
+\]
+Sort the keys by their pivot coordinate, and store that permutation.
+Also store the rational affine coordinates
+$\xi_j=(k_{j,r}-c_r)/u_r$, so $k_j=c+\xi_ju$.
+All these tests and comparisons use exact rational arithmetic.
+
+At query time, compute $v=\langle q,u\rangle$ once and the sign of $v/u_r$.
+It determines the order of all projected keys; use the stored
+permutation in the appropriate direction. If the sign is zero,
+all scores coincide. Otherwise relabel the keys in descending
+score order and shift by the first score. Set
+\[
+ w_j=\exp(a_j-a_1),\qquad 1=w_1\ge\cdots\ge w_T>0.
+\]
+Each shift is computed as $\beta v(\xi_j-\xi_1)/n$.
+It is rational, or a rational multiple of $1/\sqrt n$ at standard
+scaling. Its encoding has $O(b+\log n)$ bits. Thus one initial
+projection suffices for every subsequent score evaluation, and no
+subtraction of numerically approximated scores is required.
+Use the blocks of Lemma~\ref{lem:newmonotoneenvelope}; their number
+is at most $1+\lceil\log_2T\rceil$.
+
+Put $P=\lceil\log_2(16T)\rceil$. For each first member of a block,
+Lemma~\ref{lem:newnegativeexp} gives a dyadic interval of length at
+most $2^{-P}$ for $w_{m_\ell}$. Add $2^{-P}$ to its upper endpoint,
+and call the result $u_\ell$. Then
+\[
+ 2^{-P}\le u_\ell,
+ \qquad w_{m_\ell}\le u_\ell\le w_{m_\ell}+2^{1-P}.
+\]
+The actual dyadic envelope satisfies
+\[
+ Z\le W':=\sum_\ell N_\ell u_\ell
+ \le2Z+T2^{1-P}\le2Z+\tfrac18\le\tfrac{17}{8}Z,
+\]
+where $Z\ge w_1=1$. Its weights have $O(P)$ bits after a common
+dyadic scaling, and exact integer prefix sums sample a block in
+$O((P+\log T)^2)$ expected bit operations. Select a uniform member
+$j$ of that block and accept it with probability $w_j/u_\ell$.
+This lies in $[0,1]$, and the trial's accepted mass is $w_j/W'$.
+Thus the index law is exact and the mean number of trials is
+$W'/Z\le17/8$.
+
+To implement the last coin to precision $t$, it suffices to enclose
+$w_j$ to precision $P+t+3$, since $u_\ell\ge2^{-P}$.
+The negative-exponential lemma does this in
+$O((b+P+t+\log(n+2))^4)$ bit work, regardless of the temperature's
+numerical size. Lemma~\ref{lem:newprecisionstop} therefore makes the
+coin exact with expected work $O((b+P+\log(n+2))^4)$. There is one
+$n$-coordinate projection, followed by $O(\log T)$ representative
+score evaluations and a constant expected number of proposed-member
+score evaluations. A fresh known
+coin of mean $v_j$ completes the attention sign.
+
+The preprocessing bounds follow from the collinearity tests and
+sorting. Rational bit lengths remain $O(b+\log n)$ up to constant
+factors for each comparison and inner product. The stored
+permutation, block positions, and exact dyadic coordinates have
+the stated total size.
+\end{proof}
+
+\paragraph{What is being sampled.}
+The theorem gives a sample from the attention distribution and a
+sign with the exact attention-coordinate mean. A nonlinearity applied
+to one sampled value vector does not in general give the required
+law. An additional nonlinear layer instead requests fresh
+independent attention signs through its Bernoulli factory. For
+example, a tanh update followed by a two-logit head $(z,-z)$ with
+$z=\tanh Y$ needs only a constant expected number of these signs,
+using the bounded scalar backend. Thus the same asymptotic query
+bound applies to that exact final token.

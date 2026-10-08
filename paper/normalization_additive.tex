@@ -1,0 +1,328 @@
+\subsection{Pre-normalization with additive residuals}
+\label{sec:prenorm-additive}
+
+The placement of a normalization changes the residual calculation. Consider
+\begin{align}
+ a_{\ell,t}
+ &=h_{\ell-1,t}
+   +\operatorname{Att}_{\ell,t}
+      (\mathcal N_{\epsilon_{\ell,A}}(h_{\ell-1})),
+ \label{eq:pn-att}\\
+ h_{\ell,t}
+ &=a_{\ell,t}
+   +\tanh\!\left(b_\ell+
+       W_\ell\mathcal N_{\epsilon_{\ell,F}}(a_{\ell,t})\right).
+ \label{eq:pn-ff}
+\end{align}
+Normalization is performed separately at each position, with the stabilizer
+inside the square root. All stabilizers are nonnegative rationals. Attention is causal. Its query, key, and value rows
+and the rows of $W_\ell$ have $\ell_1$ norm at most $s$; the tanh biases
+have magnitude at most one. Initially $|h_{0,t,i}|\le1$, and an input
+coordinate can be read at unit query cost. Sign inputs are a special case.
+An exactly represented bounded input coordinate can instead be converted
+into a sign of that mean. All quantities used by the implementation have
+finite rational encodings. A gain applied after RMSNorm can be absorbed
+into the subsequent linear maps by using their resulting row norms.
+
+A denominator certificate is part of the hypothesis. The requirement
+below is a uniform statement over every allowed context and every
+position at which the corresponding normalization can be requested.
+
+\subsubsection{An additive composition lemma}
+
+We first separate the residual bookkeeping from the normalized updates.
+Index the sublayers by $j=1,\ldots,J$ and write
+\[
+ H_j=H_{j-1}+F_j(H_{j-1}),\qquad
+ R_0=1,\quad R_j=1+\sum_{k=1}^j U_k.
+\]
+The coordinate and position sets can be arbitrary finite sets. Each $U_j$
+is a nonnegative rational number, and $|F_j(H)_{t,i}|\le U_j$ on every
+admissible predecessor stream. Zero-radius updates are omitted. Suppose
+one exact sign of mean $F_j(H)_{t,i}/U_j$ uses at most $m_j$ expected
+predecessor signs of means $H_{t',i'}/R_{j-1}$ and at most
+$C_0 B^4 L_j$ expected auxiliary bit operations. These are uniform
+conditional bounds for every requested address and fixed predecessor
+stream. The fresh predecessor calls may have costs correlated with their
+returned signs. Assume $L_j\ge0$ and enlarge the common absolute constant
+$C_0$ to cover a source probe and one prefix-table draw. Put
+\[
+ P_j=\prod_{k=1}^j\left(1+\frac{U_km_k}{R_{k-1}}\right),
+ \qquad P_0=1.
+\]
+Here $B$ includes the bit lengths of the radius prefixes and all addresses.
+
+\begin{theorem}[Exact additive composition]
+\label{thm:pn-abstract}
+There is an almost surely terminating exact sign sampler for
+$H_{J,t,i}/R_J$. Its expected number of input leaves is at most
+\begin{equation}
+ \frac1{R_J}\prod_{j=1}^J
+       \left(1+\frac{U_jm_j}{R_{j-1}}\right).
+ \label{eq:pn-leaf-product}
+\end{equation}
+Its expected bit work is at most
+\begin{equation}
+ C_0B^4\frac{P_J}{R_J}
+ \left[2+\sum_{j=1}^J\frac{U_j(1+L_j)}{P_j}\right].
+ \label{eq:pn-bit-product}
+\end{equation}
+No factor $J$ is hidden in the cost of following identity branches.
+If $m_j\le m$ for $m\ge1$, the leaf bound is at most $R_J^{m-1}$.
+If also $L_j\le\mathcal L$, the sharper bit bound is
+\begin{equation}
+ C_0B^4(2+\mathcal L)(1+\log R_J)R_J^{m-1}.
+ \label{eq:pn-sharp-bit-bound}
+\end{equation}
+Thus the uniform source and bit bounds have the same polynomial
+exponent in the cumulative residual radius.
+\end{theorem}
+\paragraph{Proof idea.}
+Normalize each additive update by its contribution to the total
+radius. The resulting mixture selects either an earlier state or an update.
+Sampling the first selected update directly skips all intermediate identity
+choices, and the remaining expected-cost recurrence telescopes to a product.
+
+\begin{proof}
+At a normalized request at level $j$, take the identity branch with
+probability $R_{j-1}/R_j$ and the update branch with probability $U_j/R_j$.
+The corresponding means sum to $H_j/R_j$. The mean input-leaf recurrence
+is bounded by
+\[
+ C_j\le
+ \frac{R_{j-1}+U_jm_j}{R_j}C_{j-1},\qquad C_0=1,
+\]
+which proves \eqref{eq:pn-leaf-product} by telescoping.
+
+The implementation does not perform those identity trials individually.
+Starting at level $j$, the first selected update is $k\le j$ with
+probability
+\[
+ \left(\prod_{r=k+1}^j\frac{R_{r-1}}{R_r}\right)
+       \frac{U_k}{R_k}=\frac{U_k}{R_j}.
+\]
+The probability of reaching the input without an update is $1/R_j$.
+Choose directly from these $j+1$ alternatives using the preprocessed
+prefix weights $1,U_1,\ldots,U_j$. At an update $k$, invoke its factory,
+whose predecessor requests start at level $k-1$. This constructs exactly
+the same probability law and the same recursive calls as the uncompressed
+mixture. For dyadic weights, an exact uniform integer draw on the common
+integer denominator followed by binary search implements this choice.
+General rational prefixes can also be used, with their full common
+representation length included in $B$. Rejection for the uniform integer
+has expected fewer than two attempts. The draw and search cost $O(B^3)$,
+which is included in $C_0B^4$.
+
+For completeness, let $T_j$ be the maximum expected bit work of a
+compressed request at level $j$. Conditional charging at
+the start of each fresh update call gives
+\[
+ R_jT_j\le C_0B^4(R_j+1)
+    +\sum_{k=1}^jU_k
+       \left(C_0B^4L_k+m_kT_{k-1}\right).
+\]
+This includes one prefix draw and the terminal probe. Set $S_j=R_jT_j$,
+and take the equality majorant $W_j$ of the displayed recurrence,
+starting at $W_0=2C_0B^4$. Subtracting successive equalities gives
+\[
+ W_j=\left(1+\frac{U_jm_j}{R_{j-1}}\right)W_{j-1}
+       +C_0B^4U_j(1+L_j).
+\]
+Division by $P_j$ and summation give
+$W_j/P_j=C_0B^4[2+\sum_{k\le j}U_k(1+L_k)/P_k]$.
+The majorant is finite and bounds $S_j$ by induction, proving
+\eqref{eq:pn-bit-product}. This calculation does not require $m_j\ge1$.
+Tonelli's theorem applies to the
+nonnegative charges, so the recurrence itself proves that the expected
+work is finite. Each component makes finitely many requests
+almost surely, and every recursive call lowers the level, so finite-depth
+induction proves termination and exactness.
+
+For uniform bounds, replace each source budget by $m$ and each
+local budget by $\mathcal L$ in the established estimates. Put
+$\widehat P_j=\prod_{k\le j}(1+mU_k/R_{k-1})$. Bernoulli's inequality
+$1+mx\le(1+x)^m$ for $m\ge1$ gives
+$\widehat P_j/R_j\le R_j^{m-1}$, proving the leaf bound.
+Also $\widehat P_j\ge R_j$ and
+\[
+ \sum_{k=1}^j\frac{U_k}{\widehat P_k}
+ \le\sum_{k=1}^j\frac{U_k}{R_k}
+ \le\log R_j.
+\]
+The last inequality integrates $1/r$ over each interval
+$[R_{k-1},R_k]$. Substitution in \eqref{eq:pn-bit-product} gives
+\[
+ T_j\le C_0B^4 R_j^{m-1}[2+(1+\mathcal L)\log R_j]
+ \le C_0B^4(2+\mathcal L)(1+\log R_j)R_j^{m-1}.
+\]
+This proves \eqref{eq:pn-sharp-bit-bound}. Local arithmetic enters
+its prefactor without increasing the polynomial depth exponent.
+\end{proof}
+
+\subsubsection{A relative energy floor gives polynomial depth}
+
+Fix a rational $\gamma>0$. Let $G$ be the least power of two with
+$G\ge2/\sqrt\gamma$; rational comparisons determine it, and
+\[
+ 2/\sqrt\gamma\le G<4/\sqrt\gamma.
+\]
+Define the radii
+\[
+ R_{2\ell-2}=1+(\ell-1)(sG+1),\quad
+ R_{2\ell-1}=R_{2\ell-2}+sG,\quad
+ R_{2\ell}=R_{2\ell-1}+1.
+\]
+The $j$th normalization is assumed to satisfy, at every admissible
+position and context,
+\begin{equation}
+ \epsilon_j+\frac1n\sum_i H_{j-1,t,i}^2
+       \ge\gamma R_{j-1}^2.
+ \label{eq:pn-relative-floor}
+\end{equation}
+Let
+\begin{gather*}
+ k=\max\{1,\gamma^{-1}\},\qquad K=1+228k^2,\qquad \rho=sG,\\
+ E=\exp(2|\beta|s^2G^2),\\
+ m_A=(2E-1)K,\qquad L_A=4E(1+k^2),\\
+ m_F=2\rho(1+\rho)K,\qquad L_F=4(1+\rho)^2(1+k^2),\\
+ m=\max\{1,m_A,m_F\},\qquad
+ \mathcal L=\max\{L_A,L_F\}.
+\end{gather*}
+Write $\Psi(R)=(2+\mathcal L)(1+\log R)$. These numbers are analysis bounds. The implementation never needs to
+compute the exponential or the product defining the work bound.
+
+\begin{theorem}[Pre-norm additive sampling under an energy certificate]
+\label{thm:pn-relative}
+Under \eqref{eq:pn-relative-floor}, every coordinate of the architecture
+\eqref{eq:pn-att}--\eqref{eq:pn-ff}, normalized by
+$R_{2D}=1+D(sG+1)$, has an exact sampler with at most
+$R_{2D}^{m-1}$ expected input leaves and
+\begin{equation}
+ O\!\left(B^4\Psi(R_{2D})R_{2D}^{m-1}\right)
+ \label{eq:pn-polydepth}
+\end{equation}
+expected bit work. The implicit constant is absolute. Weight preparation
+takes $O(Dn^2B^6)$ time and $O(Dn^2B)$ stored bits. Neither bound has a
+linear factor in $T$.
+
+If the promised bounded logits are signed coordinates of the final
+unnormalized stream, the complete softmax sample costs
+$O(B^4\Psi(R_{2D})R_{2D}^{m+1})$. If the model instead applies a final RMSNorm with the
+same relative energy certificate and an affine readout of row norm at
+most $u$ and bias magnitude at most $b$, put
+$H=\max\{1,b+uG\}$. For promised logits in $[-1,1]$, the complete token
+sample costs
+\begin{equation}
+ O\!\left(B^4H^2(K+1+k^2)\Psi(R_{2D})R_{2D}^{m-1}\right).
+ \label{eq:pn-finalnorm}
+\end{equation}
+For fixed $\gamma,s,\beta,u,b$, these are polynomial bounds in depth.
+In particular, logarithmic depth gives polylogarithmic work, including
+position-address costs when $T$ is polynomially bounded in $n$.
+\end{theorem}
+\paragraph{Proof idea.}
+The relative energy certificate makes every normalization factory
+have the same bounded output radius and source budget. Composing one such
+factory with attention or a tanh row supplies the local costs in the
+additive product. The final readout is charged through its own interface.
+
+\begin{proof}
+At level $j$, supply the floor $\lambda_j=\gamma R_{j-1}^2$ to the
+normalization factory, replacing it by $\max\{\lambda_j,\epsilon_j\}$
+when appropriate. Its condition number is at most $k$. Its natural
+output radius is at most $2/\sqrt\gamma\le G$. An algebraic thinning
+coin makes an exact sign of mean $\mathcal N_{\epsilon_j}(H)_i/G$.
+By Theorem~\ref{thm:rmsfloor}, this uses at most $K$ predecessor requests and $O(k^2B^4)$ auxiliary
+work, including the known thinning coin.
+
+Theorem~\ref{thm:attentionprimitive} gives an attention update of radius
+$sG$. Its sampler makes at most $2E-1$ requests for signs from the
+normalized stream. Its own auxiliary work is $O(EB^4)$.
+Composing these requests gives $m_A$ and a local bound
+$C_0B^4L_A$ after enlarging the common absolute scalar constant.
+The raw tanh update has radius one. Corollary~\ref{cor:comptanhrow} makes at
+most $2\rho(1+\rho)$ normalized requests, with auxiliary work
+$O((1+\rho)^2B^4)$. This gives $m_F,L_F$. Uniformity of these bounds
+permits charging each normalization call before its fresh randomness.
+
+The specified radii bound the true streams by induction. Apply
+Theorem~\ref{thm:pn-abstract} with alternating update radii $sG$ and one.
+All radii are rational, so the exact origin tables have the claimed
+representation and preparation costs. A uniform causal-position draw
+uses $O(\log(T+2))$ expected random bits, included in $B$.
+
+For an unnormalized coordinate head, use Theorem~\ref{thm:quadraticscaledhead} with radius $R_{2D}$. It makes at most $4096R_{2D}^2$ expected
+stream requests. Its auxiliary work is absorbed since $m\ge1$ and $\Psi(R)\ge1$.
+For the final-normalization head, a normalized logit sign at radius $H$
+uses at most one sign at radius $G$, hence at most $K$ stream requests
+and $O((1+k^2)B^4)$ local work. The bounded-logit interface makes at most
+$4096H^2$ such calls. Conditional charging proves
+\eqref{eq:pn-finalnorm} and almost-sure termination.
+\end{proof}
+
+\begin{corollary}[Step sizes and cumulative residual scale]
+\label{cor:pn-stepsizes}
+Give sublayer $j$ any known nonnegative rational step size $a_j$, so that
+its update is $H_j=H_{j-1}+a_jF_j(H_{j-1})$. Under the relative floor
+$\epsilon_j+n^{-1}\sum_iH_{j-1,t,i}^2\ge\gamma R_{j-1}^2$, replace
+$U_j$ by $a_jU_j$ and use
+\[
+ R_j=1+\sum_{k\le j}a_kU_k.
+\]
+The exact product, the direct origin draw, and the bounds
+$O(B^4\Psi(R_J)R_J^{m-1})$ for a normalized stream and
+\eqref{eq:pn-finalnorm} for a final-normalization head remain valid,
+with the same local constants $m_j,L_j$. A zero step is omitted.
+For a common step $\alpha\in[0,1]$ on both sublayers of each block,
+\[
+ R_{2D}=1+\alpha D(sG+1).
+\]
+At fixed local geometry $\gamma,s,\beta$ and fixed readout bounds, the
+cost is polynomial in $1+\alpha D$. Consequently every
+$\alpha D=\log^{O(1)}n$ gives polylogarithmic work when the address and
+encoding factor $B$ is polylogarithmic. This conclusion treats those
+local parameters as constants; standard scaling $\beta=\sqrt n$
+requires retaining their displayed dependence or supplying a better
+indexed-attention budget.
+\end{corollary}
+\paragraph{Proof idea.}
+Scaling an update also scales its radius, leaving its normalized
+sign law unchanged. Only the update-selection probabilities and radius
+prefixes change, so the same product formula handles the entire schedule.
+
+\begin{proof}
+For $a_j>0$, a sign of mean $a_jF_j/(a_jU_j)$ is exactly a sign of
+mean $F_j/U_j$, so neither its predecessor count nor its auxiliary
+cost changes. Only the probability of choosing that update and the
+radius prefix change. Apply Theorem~\ref{thm:pn-abstract}. The direct
+origin distribution has masses $a_kU_k/R_j$ and $1/R_j$, and can be
+prepared on the same rational prefix grid.
+\end{proof}
+
+\paragraph{What the certificate supplies.}
+The relative floor is a quantitative restriction on the residual stream.
+A fixed positive stabilizer alone supplies the weaker floor
+$\lambda_j=\epsilon_j$. It does not imply
+\eqref{eq:pn-relative-floor} with a constant $\gamma$, since the radius
+$R_j$ can grow with depth while a particular stream remains near zero.
+For a general certified floor sequence, choose a rational power of two
+$G_j\ge2R_{j-1}/\sqrt{\lambda_j}$ and use the exact product in
+Theorem~\ref{thm:pn-abstract}, with
+\[
+ \kappa_j=\max\{1,R_{j-1}^2/\lambda_j\},\qquad
+ K_j=1+228\kappa_j^2.
+\]
+Attention then has radius $sG_j$, score bound $|\beta|s^2G_j^2$, and the
+corresponding local normalization charge $O(\kappa_j^2B^4)$. This remains
+a finite exact algorithm, but the resulting product need not be
+polynomial in depth.
+
+An indexed attention sampler can be substituted in the abstract theorem.
+It must supply uniform conditional bounds for the normalized update's
+predecessor requests and auxiliary bit work, including all searches,
+retries, and precision refinement. Its prefill construction and stored
+cache are charged separately. The proof uses only those two bounds and
+exactness, so it does not require a Poisson race or forbid an index.
+This substitution is especially relevant under standard scaling, where
+$|\beta|=\sqrt n$ makes the unindexed constant $E$ large.
+

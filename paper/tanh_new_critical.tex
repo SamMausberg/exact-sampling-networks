@@ -1,0 +1,292 @@
+\subsection{Finite expected work suffices for the first score identity}
+\label{sec:new-finite-score}
+
+The usual first-order score argument needs no exponential tail for a
+Bernoulli factory with bounded output.  This observation removes the
+extra regularity hypothesis from the independent-recursion obstruction.
+It is a statement about sequential experiments, and we make no novelty
+claim for the information principle.  We give a proof because the
+finite-mean hypothesis is the one used by the sampling problem.
+
+\begin{lemma}[A first derivative under a finite-mean stopping rule]
+\label{lem:new-finite-score}
+Let $I\subset(-1,1)$ be an open interval containing zero.  For $z\in I$, let
+$X_1,X_2,\ldots$ be independent signs of mean $z$.  A fixed randomized
+algorithm uses an auxiliary random tape whose law does not depend on
+$z$, requests these signs sequentially, and terminates almost surely
+for every $z\in I$.  Let $T$ be its number of source requests and let
+$Y\in[-1,1]$ be its output.  If $\mathbb E_0T<\infty$, then
+$f(z)=\mathbb E_zY$ is differentiable at zero, and
+\[
+ f'(0)=\mathbb E_0[YS_T],\qquad
+ S_T=\sum_{j=1}^T X_j,\qquad
+ \mathbb E_0 S_T^2=\mathbb E_0T.
+\]
+No bound on $\mathbb E_zT$ away from zero is assumed.
+\end{lemma}
+\paragraph{Proof idea.}
+Truncate the stopped transcript at a finite time, where likelihood
+differentiation is elementary. A relative-entropy tail bound and the stopped
+score isometry let the truncation tend to infinity under only a finite mean
+stopping time at the bias of interest.
+
+\begin{proof}
+All random tapes may be taken in a standard Borel space, for example
+a countable sequence of fair bits.  Include the complete auxiliary
+tape in the initial sigma-field.  Conditional on this tape, $T$ is a
+stopping time for the source signs.  For an integer $N\ge0$, let
+$\mathcal F_N$ be the stopped prefix sigma-field at $T\wedge N$, and
+put $g_N=\mathbb E_0[Y\mid\mathcal F_N]$.  The finite-prefix likelihood
+ratio under mean $z$, relative to mean zero, is
+\[
+ L_{z,N}=\prod_{j=1}^{T\wedge N}(1+zX_j)
+       \le(1+|z|)^N.
+\]
+Consequently $f_N(z)=\mathbb E_z g_N$ is a polynomial of degree at
+most $N$, with
+\[
+ f_N(0)=f(0),\qquad
+ f_N'(0)=\mathbb E_0[g_NS_{T\wedge N}]
+        =\mathbb E_0[YS_{T\wedge N}].
+\]
+The integration over the auxiliary tape preserves this finite-degree
+polynomial identity.
+
+Write $d(z)=-\tfrac12\log(1-z^2)$, the relative entropy of a fair
+sign with respect to a sign of mean $z$.  Conditional on a reached
+prefix, the relative entropy of the remaining stopped transcript
+under mean zero with respect to mean $z$ is
+\[
+ d(z)\,\mathbb E_0[(T-N)_+\mid\mathcal F_N].
+\]
+To justify this formula directly, the log likelihood ratio is a sum
+of source increments.  Their absolute values are bounded for each
+fixed $z\in(-1,1)$, and the remaining expected number of increments
+is finite almost surely under mean zero.  Conditional Wald summation
+therefore applies.  The auxiliary tape contributes zero relative
+entropy.  Almost-sure termination under both parameters makes these
+stopped-transcript laws probability measures.
+
+Pinsker's inequality and $|Y|\le1$ bound the conditional change of
+its mean by the square root of twice that relative entropy.  Averaging
+under the mean-$z$ prefix law and using the displayed bound on
+$L_{z,N}$ gives
+\begin{align*}
+ |f(z)-f_N(z)|
+ &\le (1+|z|)^N
+      \sqrt{2d(z)}\,
+      \mathbb E_0\!\left[
+       \sqrt{\mathbb E_0[(T-N)_+\mid\mathcal F_N]}\right]\\
+ &\le (1+|z|)^N\sqrt{2d(z)}
+           \sqrt{\mathbb E_0(T-N)_+}.
+\end{align*}
+The second line is Jensen's inequality.  Since
+$\sqrt{2d(z)}/|z|\longrightarrow1$, it follows that
+\[
+ \limsup_{z\to0}
+ \left|\frac{f(z)-f(0)}z-f_N'(0)\right|
+ \le\sqrt{\mathbb E_0(T-N)_+}.
+\]
+
+The fair-sign martingale isometry gives
+$\mathbb E_0 S_{T\wedge N}^2=\mathbb E_0(T\wedge N)$.
+For $M>N$ it also gives
+\[
+ \mathbb E_0|S_{T\wedge M}-S_{T\wedge N}|^2
+   =\mathbb E_0[(T\wedge M)-(T\wedge N)]
+   \le\mathbb E_0(T-N)_+.
+\]
+Thus the stopped sums converge to $S_T$ in $L^2$, proving the stated
+isometry and $f_N'(0)\to\mathbb E_0[YS_T]$.  Letting $N\to\infty$
+in the previous limsup bound proves differentiability and the score
+identity.
+\end{proof}
+
+\begin{corollary}[The integer obstruction requires only finite mean]
+\label{cor:new-integer-score}
+Under Lemma~\ref{lem:new-finite-score}, retain the assumption $Y\in[-1,1]$.
+For every integer $k\ge0$,
+\[
+ \mathbb E_0T\ge(2k+1)|f'(0)|-k(k+1).
+\]
+In particular, every finite-mean factory for
+$G_r(z)=\tanh(rz)/\tanh r$ obeys
+\[
+ \mathbb E_0T\ge3r\coth r-2
+              =1+r^2+O(r^4).
+\]
+\end{corollary}
+\paragraph{Proof idea.}
+The stopped score is integer-valued. The gap between two consecutive integer
+magnitudes gives a stronger pointwise inequality than Cauchy--Schwarz;
+expectation and the score identity turn it into a source-cost bound.
+
+\begin{proof}
+For every integer $v$, the consecutive integers $k$ and $k+1$ give
+$(|v|-k)(|v|-k-1)\ge0$.  Hence
+\[
+ (2k+1)|v|\le v^2+k(k+1).
+\]
+Apply this to $v=S_T$, use the score identity, and use the stopped
+isometry.  The last assertion takes $k=1$ and
+$G_r'(0)=r\coth r$.
+\end{proof}
+
+For $a=|f'(0)|$ and $k=\lfloor a\rfloor$, the strongest line in
+this family is
+\[
+ (2k+1)a-k(k+1)
+ =a^2+(a-k)(k+1-a)\in[a^2,a^2+1/4].
+\]
+The proof uses only $|Y|\le1$, so postponing the final Bernoulli
+rounding of a bounded real estimator does not avoid this local obstruction.
+The small amplification $a=1+u$ therefore costs at least $1+3u$,
+whereas a single large amplification of size $a$ has the lower bound
+$a^2+O(1)$. This distinction explains the loss under repeated fresh
+composition; it supplies no upper bound for a composite factory.
+
+\begin{proposition}[A finite-mean independent-recursion obstruction]
+\label{prop:new-local-obstruction}
+Put $R_0=1$ and $R_{j+1}=\tanh R_j$.  Consider the scalar critical
+mean chain, represented by independently invoking a scalar factory
+for $G_{R_{j-1}}$ at each layer.  Every source request initiates a
+fresh recursive call, and the top normalized factory is entered
+with probability $R_D$.  If all local factories terminate almost
+surely for all source means and have finite expected work at mean
+zero, their expected number of bottom source requests at mean zero
+is at least
+\[
+ e^{-3/4}R_D^{-2}
+ \ge e^{-3/4}(1+2D/3)>D/4.
+\]
+\end{proposition}
+\paragraph{Proof idea.}
+At mean zero, every local invocation faces the same derivative constraint.
+Predictable charging multiplies the resulting local lower bounds through the
+chain, preventing a purely local improvement of the critical exponent.
+
+\begin{proof}
+Write $a_j=R_{j-1}/R_j$.  Corollary~\ref{cor:new-integer-score}
+gives local mean offspring at least $3a_j-2$.  Each conditional
+source mean is zero in the mean-zero chain.  Since every source is
+fresh, predictable charging and Tonelli's theorem give the bottom
+request bound
+\[
+ R_D\prod_{j=1}^D(3a_j-2).
+\]
+For $b\ge0$,
+\[
+ 3\log(1+b)-\log(1+3b)
+ =\int_0^b\frac{6u}{(1+u)(1+3u)}\,du\le3b^2.
+\]
+Inequality \eqref{eq:xcothx} gives
+$a_j-1\le R_{j-1}^2/3$, and Lemma~\ref{lem:radius} at gain one gives
+\[
+ R_j^2\le\frac3{2j+3},\qquad R_D^{-2}\ge1+2D/3.
+\]
+Convexity and midpoint integration give
+\[
+ \sum_{j\ge0}\frac9{(2j+3)^2}
+ \le\int_{-1/2}^{\infty}\frac9{(2t+3)^2}\,dt=\frac94.
+\]
+It follows that
+\begin{align*}
+ \prod_{j=1}^D(3a_j-2)
+ &\ge\left(\prod_{j=1}^D a_j\right)^3
+     \exp\left(-3\sum_{j=1}^D(a_j-1)^2\right)\\
+ &\ge R_D^{-3}e^{-3/4}.
+\end{align*}
+Multiplication by the root gate proves the result.  Finally
+$e^{-3/4}(2/3)>1/4$, for example from $e^{3/4}<8/3$.
+\end{proof}
+
+The obstruction counts fresh recursive source calls.  It permits every
+finite-mean scalar factory, but it does not restrict methods that sample
+a composite function directly, share information across layers, or use a
+different probabilistic representation.  The global scalar mean-chain
+factory already attains order $\sqrt D$.  The general zero-bias
+norm-one network exponent remains between $1/2$ and $1$.
+
+\subsection{A dimension-free smoothness certificate}
+\label{sec:new-critical-smoothness}
+
+A second-order approach to a composite factory has a useful analytic
+bound.  The following proposition concerns derivatives of the real
+network extension.  It is not an exact-sampling algorithm.
+For a derivative tensor, write $\|\cdot\|_{1,\mathrm{ent}}$ for the
+sum of the absolute values of all its entries.
+
+\begin{proposition}[Derivatives of zero-bias contractive tanh networks]
+\label{prop:new-critical-derivatives}
+Let $h_0(x)=x\in[-1,1]^n$, let
+$h_\ell(x)=\tanh(W_\ell h_{\ell-1}(x))$ coordinatewise, and suppose
+all rows of every $W_\ell$ have $\ell_1$ norm at most one.
+For every output coordinate $f=h_{D,i}$, every $x\in[-1,1]^n$, and
+$D\ge1$,
+\[
+ \|Df\|_{1,\mathrm{ent}}\le1,\quad
+ \|D^2f\|_{1,\mathrm{ent}}\le2\sqrt6\sqrt D,\quad
+ \|D^3f\|_{1,\mathrm{ent}}\le38D,\quad
+ \|D^4f\|_{1,\mathrm{ent}}\le624D^{3/2}.
+\]
+The derivatives at boundary points are those of the analytic real
+extension of the network.
+\end{proposition}
+\paragraph{Proof idea.}
+Differentiate the network through fourth order while retaining the shrinking
+activation radius. Even derivatives of tanh carry an extra radius factor,
+which improves the usual chain-rule growth estimates.
+
+\begin{proof}
+Let $R_0=1$, $R_\ell=\tanh R_{\ell-1}$.  Then
+$|h_{\ell,i}|\le R_\ell$ and
+$R_\ell\le\sqrt{3/(2\ell+3)}$.
+Let $A_\ell,B_\ell,C_\ell,E_\ell$ bound, respectively, the largest
+entrywise $\ell_1$ norms of the first through fourth derivative tensors
+of a coordinate at depth $\ell$, uniformly over $x$.
+At depth zero these bounds are $1,0,0,0$.  Linear row contraction
+preserves each bound.  Tensor products multiply entrywise $\ell_1$
+norms, and the scalar chain rule therefore applies without a dimension
+factor.
+
+Writing $t=\tanh u$, direct differentiation gives
+\[
+ |\tanh' u|\le1,\quad
+ |\tanh''u|\le2|t|,\quad
+ |\tanh'''u|\le2,\quad
+ |\tanh''''u|\le16|t|.
+\]
+For the last bound,
+$\tanh''''u=t(16-40t^2+24t^4)$, whose bracket has absolute value
+at most $16$ on $[-1,1]$.  The chain rule gives $A_\ell\le1$ and
+\begin{align*}
+ B_\ell&\le B_{\ell-1}+2R_\ell,\\
+ C_\ell&\le C_{\ell-1}+6R_\ell B_{\ell-1}+2,\\
+ E_\ell&\le E_{\ell-1}+8R_\ell C_{\ell-1}
+      +6R_\ell B_{\ell-1}^2+12B_{\ell-1}+16R_\ell.
+\end{align*}
+The decreasing-function integral bound gives
+$\sum_{j=1}^{\ell}R_j\le\sqrt6\sqrt\ell$, and hence
+$B_\ell\le2\sqrt6\sqrt\ell$.
+Since $R_\ell\sqrt{\ell-1}\le\sqrt{3/2}$, the increment of
+$C_\ell$ is at most $36+2=38$.
+Using these two bounds, the increment of $E_\ell$ is at most
+\[
+ \left(448\sqrt{3/2}+24\sqrt6+16\right)\sqrt\ell
+ <624\sqrt\ell.
+\]
+The strict numerical inequality follows from
+$\sqrt{3/2}<49/40$ and $\sqrt6<49/20$.
+Summing $\sqrt\ell\le\sqrt D$ for $1\le\ell\le D$ completes
+the proof.
+\end{proof}
+
+A generic factory whose expected work were controlled by the total
+second-derivative mass, with access costs charged through the network's
+rows, could plausibly use this proposition to reach order $\sqrt D$.
+The known tensor Bernstein construction does not supply that interface:
+it requests coordinate vectors or evaluates the composite function at
+empirical inputs.  Both operations can contain a dimension factor or a
+dense network evaluation.  No such factory is proved here.  The
+derivative proposition must therefore be kept separate from the
+sampling upper bounds.

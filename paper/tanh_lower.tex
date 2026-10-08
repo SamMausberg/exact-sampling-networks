@@ -1,0 +1,230 @@
+\subsection{Universal lower bounds}\label{sec:lower}
+
+\subsubsection{Adaptive transcripts}
+
+Let \(X_1,\dots,X_m\) be independent signs under \(\PP_t\), with
+\(\PP_t(X_i=1)=(1+t)/2\), \(-1<t<1\).
+Fix the weights and unused input coordinates. Include all randomness
+used in preprocessing in the same independent random tape as the
+online randomness; it is averaged throughout this proof.
+An arbitrary exact sampler returns \(Y\in\{-1,1\}\) with
+\(\E[Y\mid X=x]=f(x)\).
+Put \(H(t)=\E_tf(X)=\E_tY\).
+Queries to fixed or previously read coordinates may be answered
+without cost in the lower-bound argument; this only strengthens
+the algorithm.
+
+\begin{lemma}[Transcript derivatives]\label{lem:transcript}
+If \(Q\) counts distinct relevant probes, then
+\begin{equation}\label{eq:transcript}
+\E_tQ\ge(1-t^2)H'(t)^2,\qquad
+\E_tQ\ge\frac{1-t^2}{2}|H''(t)|.
+\end{equation}
+If \(|H(t)|<1\), the first bound improves to
+\begin{equation}\label{eq:transcript-variance}
+\E_tQ\ge\frac{(1-t^2)H'(t)^2}{1-H(t)^2}.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+Under a product distribution on contexts, each newly revealed sign
+contributes a centered score increment. The stopped score records how
+sensitively the output law changes with the common input bias; its variance
+is the expected number of distinct probes.
+
+\begin{proof}
+Fix a random tape and collapse computation between distinct probes
+into a decision tree. There are finitely many contexts, so almost
+sure termination on each supplies one common set of tapes of
+probability one on which the tree has depth at most \(m\).
+This reduction imposes no bound on the original arithmetic time.
+
+A leaf with queried values \(x_1,\dots,x_q\) has likelihood
+\(2^{-q}\prod_{j=1}^q(1+tx_j)\).
+Define
+\[
+Z=\sum_{j=1}^Q\frac{X_{I_j}}{1+tX_{I_j}},\qquad
+A=\sum_{j=1}^Q\frac1{(1+tX_{I_j})^2}.
+\]
+Leaf differentiation gives
+\[
+H'(t)=\E_t[YZ],\qquad H''(t)=\E_t[Y(Z^2-A)].
+\]
+Differentiation commutes with the random-tape average: on compact
+subintervals of \((-1,1)\), all relevant derivatives are bounded
+by constants depending only on \(m\).
+
+Conditional on the past, a new sign retains law \(\PP_t\).
+Its score has mean zero and second moment \((1-t^2)^{-1}\).
+The corresponding summand of \(A\) has the same expectation.
+Finite stopped-martingale identities give
+\[
+\E_tZ=0,\qquad \E_tZ^2=\E_tA=\frac{\E_tQ}{1-t^2}.
+\]
+Cauchy--Schwarz proves the first bound. Since \(\E_tZ=0\), also
+\(H'(t)=\E_t[(Y-H(t))Z]\), and \(\E_t(Y-H(t))^2=1-H(t)^2\)
+because \(Y^2=1\). Cauchy--Schwarz now gives
+\eqref{eq:transcript-variance}. For the second bound in
+\eqref{eq:transcript},
+\[
+|H''(t)|\le\E_t(Z^2+A)=\frac{2\E_tQ}{1-t^2}.
+\]
+\end{proof}
+
+The finite set of inputs makes the proof valid without a tail
+assumption on the original runtime. Section~\ref{sec:lower-main}
+recalls the classical precedents of the first bound.
+
+A coupling gives a second elementary bound. Run the algorithm on two
+contexts with the same random tape. The two transcripts agree until
+a coordinate on which the contexts differ is probed. The proof of
+Lemma~\ref{lem:attentioncoupling} therefore shows that such a probe
+has probability at least the total variation distance between the
+two exact output laws. We call the case of the all-positive and
+all-negative contexts \emph{endpoint coupling}. It applies in the
+same way to all-plus and all-minus source signs.
+
+\subsubsection{Amplification above unit norm}
+
+Write \(F_D=F_{a,D}\) and \(T_m=\sum_{i=1}^mX_i\).
+For \(u\ge0\),
+\begin{equation}\label{eq:tanhlower}
+\tanh u\ge\frac{u}{\sqrt{1+u^2}},
+\end{equation}
+since \(\sinh u\ge u\).
+Induction in the reciprocal square gives, for \(z>0\),
+\begin{equation}\label{eq:chainlower}
+F_D(z)\ge\frac{a^Dz}{\sqrt{1+a^{2D}H_Dz^2}},
+\qquad H_D=\sum_{j=0}^{D-1}a^{-2j}.
+\end{equation}
+Oddness handles negative \(z\).
+Under \(\PP_0\),
+\(\E T_m^2=m\) and \(\E T_m^4=3m^2-2m\).
+The derivative of the input likelihood at zero is \(T_m\), so
+\[
+H'(0)=\E_0[F_D(T_m/m)T_m].
+\]
+Put \(c=a^{2D}H_D/m^2\).
+Equation \eqref{eq:chainlower} and Jensen's inequality yield
+\begin{align}
+H'(0)&\ge\frac{a^D}{m}
+\E_0\frac{T_m^2}{\sqrt{1+cT_m^2}}
+\notag\\
+&\ge\frac{a^D}{\sqrt{1+c(3m-2)}}.
+\label{eq:derivativelower}
+\end{align}
+For the last step, weight the original measure by \(T_m^2/m\).
+Its mean value of \(T_m^2\) is \(3m-2\), and
+\(v\mapsto(1+cv)^{-1/2}\) is convex.
+Lemma~\ref{lem:transcript} proves \eqref{eq:lowerexact}.
+For \(a>1\), use \(H_D\le a^2/(a^2-1)\) and
+\[
+\frac{A}{1+cA/m}\ge\frac1{1+c}\min\{A,m\},\qquad A,c,m>0,
+\]
+to obtain \eqref{eq:lowersuper}.
+
+\subsubsection{Curvature at unit norm}
+
+We use the following bending argument several times. Let \(f\) be
+twice continuously differentiable on \([0,1)\), with \(f(0)=0\),
+\(f'(0)=h>0\), and \(f\le R\), and suppose that
+\(T=2R/h\le1/2\). Taylor's theorem gives
+\[
+f(T)=hT+\int_0^T(T-t)f''(t)\,dt.
+\]
+Since \(f(T)\le R\) and \(hT=2R\), some \(t\in[0,T]\)
+satisfies \(|f''(t)|\ge h^2/(2R)\). If a cost \(M\) obeys
+\(M\ge(1-t^2)|f''(t)|/2\) for every \(t\in[0,T]\), then
+\begin{equation}\label{eq:bending}
+M\ge\frac{3h^2}{16R}.
+\end{equation}
+
+Take \(a=1\) and \(D\le m\).
+The function \(H\) is odd, \(|H(t)|\le R_D\), and
+\eqref{eq:derivativelower} gives
+\[
+h:=H'(0)\ge(1+3D/m)^{-1/2}\ge\frac12.
+\]
+Use the weaker radius estimate
+\(R_D\le\sqrt{6/(D+6)}\) for convenient constants.
+If \(D\ge384\), then \(R_D\le1/8\) and \(T=2R_D/h\le1/2\).
+An average over contexts is at most their maximum, so
+\(M=\sup_x\E[Q\mid x]\) satisfies the second transcript bound at
+every \(t\). Equation \eqref{eq:bending} yields
+\[
+\sup_x\E[Q\mid x]\ge\frac{3h^2}{16R_D}
+\ge\frac{3\sqrt D}{64\sqrt6}.
+\]
+For \(D<384\), the first bound at zero gives
+\(\E_0Q\ge1/4\ge\sqrt D/(32\sqrt6)\).
+This proves \eqref{eq:lowercritical} and
+Theorem~\ref{thm:lower}.
+
+\subsubsection{Dyadic parameters and the transition window}
+
+Let \(L=\lceil\log_2n\rceil\), \(k=\lfloor\log_2n\rfloor\),
+and \(\eta=2^{-(20L-k)}\le2^{-19L}\).
+Choose
+\begin{equation}\label{eq:dyadicgain}
+a=\eta\lfloor s/\eta\rfloor.
+\end{equation}
+Then \(a\le s\), \(a/m\) is on the required grid, and
+\(0\le s-a<\eta\).
+For fixed \(s>1\), \(a^{2L}=s^{2L}(1+o(1))\);
+\eqref{eq:lowersuper} proves the lower side of
+\eqref{eq:explicitexponents}.
+
+If \(s=1+\delta\le2\) and \(\delta\ge2\eta\), then
+\[
+a-1\ge\frac\delta2,\qquad
+\frac{a^2-1}{4a^2-1}\ge\frac{\delta}{15},\qquad
+\log a\ge\frac{\delta}{3}.
+\]
+For the last inequality use
+\(\log(1+u)\ge u/(1+u)\).
+Since \(m\ge2^{L-1}\ge\frac12e^{\delta L/2}\),
+\begin{equation}\label{eq:windowexplicit}
+\sup_x\E[Q\mid x]\ge\frac{\delta}{30}e^{\delta L/2}.
+\end{equation}
+Put \(w=\delta L\).
+The logarithm of the last expression is at least
+\(w/2-\log(30L)+\log w\).
+For \(w\ge4\log(30L)\) this is at least \(w/4\), and the grid
+condition holds for sufficiently large \(L\).
+Theorem~\ref{thm:upper} gives the other direction of
+Corollary~\ref{cor:window}.
+
+\subsubsection{Numerical evaluation needs the inputs}
+
+\paragraph{Proof idea.}
+An unread input coordinate can be changed without changing the algorithm's
+transcript. A row for which every coordinate affects the required numerical
+value therefore forces the stated evaluation cost.
+
+\begin{proof}[Proof of Proposition~\ref{prop:evaluation}]
+For \(-1\le z\le1\),
+\[
+F_{1,L}'(z)=\prod_{j=0}^{L-1}\sech^2(F_{1,j}(z))
+\ge4^{-L},
+\]
+because \(\cosh1<2\).
+A single input flip changes the mean by \(2/m\), hence changes the
+activation by at least \(2/(m4^L)>2\cdot2^{-20L}\), since
+\(m4^L\le2^{3L}<2^{20L}\).
+Stopping with an unqueried relevant coordinate leaves two contexts
+with the same transcript and disjoint allowed output intervals.
+An always-correct evaluator therefore reads all \(m\) coordinates.
+The argument holds on a common set of random tapes of probability
+one for randomized evaluators.
+
+For the bounded-error statement use uniform inputs.
+Distinct sums have disjoint valid-output intervals, so a successful
+approximation identifies the sum.
+Conditional on a transcript with \(Q<m\), the unqueried signs are
+still independent and fair. Their sum has maximum point mass at
+most \(1/2\): convolution does not increase the maximum point mass
+of the first fair sign.
+Thus success is at most
+\(\PP(Q=m)+\frac12\PP(Q<m)\).
+Success at least \(2/3\) forces \(\PP(Q=m)\ge1/3\) and
+\(\E Q\ge m/3\).
+\end{proof}

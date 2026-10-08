@@ -1,0 +1,38 @@
+\section{Instance complexity}\label{app:instance}
+
+This appendix studies the optimal query cost of one fixed network and proves
+the obstruction quoted in Section~\ref{sec:status}.
+Section~\ref{sec:instance} shows that absolute weights and
+one-parameter profiles do not determine this cost, and gives a
+multivariate information certificate.
+Section~\ref{sec:instance-hardness} shows that, at every fixed
+row-norm bound above one, a polynomial-time approximation of the
+optimum within a polylogarithmic factor would imply
+\(\mathrm P=\mathrm{NP}\).
+Section~\ref{sec:query-flow-lp} characterizes the optimum exactly by a
+flow program of exponential size.
+
+For a network \(W\), let \(Q^*(W)\) denote the infimum of the
+worst-input expected number of distinct probes among all almost surely
+terminating exact samplers for \(W\).  This definition permits
+unlimited weight-only preprocessing and ignores internal arithmetic.
+In particular, a network with output identically zero has
+\(Q^*(W)=0\).
+
+None of these results gives an efficiently computable instance bound.
+The examples of Section~\ref{sec:instance} exclude bounds computed
+from absolute weights or from a single profile; a bound computed from
+the complete signed weights remains possible.  The certificate and the
+flow program are defined from the complete output table, which has
+\(2^m\) entries for \(m\) inputs.  We give no efficient way to evaluate
+either, and no matching upper bound in terms of either.  The
+hardness results concern approximation of \(Q^*(W)\) for each
+individual network and are conditional on \(\mathrm P\ne\mathrm{NP}\),
+or on \(\mathrm{NP}\not\subseteq\mathrm{BPP}\) for randomized algorithms.
+These results leave open a useful efficiently
+computed upper bound, the sharp critical depth exponent, and sharper
+instance bounds within the unit-norm class.
+
+\input{instance_information.tex}
+\input{instance_hardness.tex}
+\input{instance_flow.tex}

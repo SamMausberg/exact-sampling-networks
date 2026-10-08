@@ -1,0 +1,357 @@
+\subsection{Two scalar inputs suffice for the sharp critical law}
+\label{sec:rank-two-critical}
+
+The scalar bottleneck argument extends to a first layer of rank two.
+The extra coordinate requires care. A direct tensor Bernstein
+coefficient averages over a two-dimensional hypergeometric grid.
+Computing that average at every selected level would have infinite
+expected work. The construction below changes one coordinate operator
+at a time, so every correction contains one scalar average.
+
+\begin{theorem}[Critical sampling after a rank-two first layer]
+\label{thm:rank-two-critical}
+Consider a zero-bias width-$n$, depth-$D\ge1$ tanh network with
+absolute row sums at most one and a first weight matrix of rank at
+most two. Its weights are dyadic with at most $b$ bits. Put
+$B=16+b+\lceil\log_2(nD+2)\rceil$.
+There is a weight-only data structure that samples the exact output
+using $O(\sqrt{D+1})$ expected input probes and
+$O(\sqrt{D+1}\,B^4)$ expected bit operations. At
+$D=\lceil\log_2n\rceil$ and $b=O(\log n)$, preprocessing and
+storage are $O(Dn^2\log^6n)$.
+For arbitrary $D,b$, preprocessing is bounded by
+\[
+ O\!\left(n^2B^3+D^2[n^2K^2+nK^4+nM]M^2\right),
+ \qquad K=O(B),\quad M=O(B+D).
+\]
+The constants are absolute. The worst-case query order is
+$\Theta(\sqrt D)$ when $n\ge D+1$ and
+$b\ge\lceil\log_2(D+1)\rceil$.
+\end{theorem}
+
+We first give the two-coordinate factory, with the norms of
+Section~\ref{sec:fixed-rank-bernstein}.
+
+\begin{lemma}[A coordinatewise Bernstein correction]
+\label{lem:rank-two-bernstein}
+Let $f\in C^6([0,1]^2)$ satisfy $\|f\|_\infty\le4/5$.
+For $2\le k\le6$, let nonnegative rational $M_k$ bound
+$\|D^kf\|_{1,\mathrm{ent}}$. Suppose certified intervals for
+$f,f_{11},f_{22},f_{1122}$ are available at rational arguments.
+Put
+\[
+ S=M_2+M_3+M_4,\qquad U=M_4+M_5+M_6,
+\]
+and choose the least power of two
+\[
+ m_0\ge\max\{2,2M_2,\sqrt{32S},(4U)^{1/3}\}.
+\]
+There is an exact sign factory of mean $f(p_1,p_2)$, from two
+independent Bernoulli sources, using at most $2m_0$ source bits
+in expectation. Every known correction coin requires one scalar
+hypergeometric average with $O(m)$ summands at level $m$.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Specialize the coordinatewise product telescope to two source biases. The
+unchanged coordinate contributes only a second derivative, so each
+correction needs four known derivatives and one scalar average.
+
+\begin{proof}
+Apply Lemma~\ref{lem:fixed-rank-bernstein} with $r=2$. Its
+starting conditions are $m_0^2\ge32S$ and $m_0^3\ge4U$,
+which are precisely the displayed conditions. The common correction
+envelope is $\overline A=S+U/(8m_0)\le m_0^2/16$.
+The product $(I-A_1/m)(I-A_2/m)$ uses only
+$f,f_{11},f_{22},f_{1122}$. The same is true of each coordinate
+correction, with its scalar hypergeometric average. The general
+source bound becomes $2m_0$. Integer-power comparisons select the
+starting level without testing equality of real roots.
+\end{proof}
+
+The finite-bit implementation uses a complex strip. Suppose the
+first preactivations are $a_iz$, with $|a_i|\le1$, and every later
+row has absolute sum at most one. Write $F(z)$ for the final
+activation. A rank-one first layer has this form: choose a row of
+largest absolute sum as the scalar source row. The strip estimate
+also applies to several scalar inputs after bounding the imaginary
+part of their first linear combination.
+
+\begin{lemma}[A uniform complex strip]
+\label{lem:signedstrip}\label{sec:signed-bottleneck}
+Every scalar neuron, and in particular $F$, is holomorphic on
+$|\Im z|<1/(4\sqrt D)$. Throughout this strip every neuron output
+has modulus at most two.
+\end{lemma}
+\paragraph{Proof idea.}
+The imaginary part of tanh is bounded by a scalar tangent recurrence. Its
+reciprocal-square bound keeps every preactivation away from the poles
+throughout the depth.
+
+\begin{proof}
+For real $u,v$ with $|v|<\pi/4$,
+\[
+ |\Im\tanh(u+iv)|
+ \le\frac{|\sin(2v)|}{1+\cos(2v)}=\tan|v|,
+ \qquad |\Re\tanh(u+iv)|\le1.
+\]
+The denominator is positive, so there is no pole.
+Also $\tan t\le t/\sqrt{1-t^2}$ for $0\le t<1$, by
+$\sin^2t\le t^2$. Absolute row sums at most one show inductively
+that, at input imaginary magnitude $y$, every layer-$\ell$
+imaginary magnitude is at most
+\[
+ \frac{|y|}{\sqrt{1-\ell y^2}}.
+\]
+For $|y|\le1/(4\sqrt D)$ this is at most $1/\sqrt{15D}<1/2$.
+Consequently all intermediate complex preactivations avoid the
+poles of tanh, establishing holomorphy by composition. Their real
+outputs have absolute value at most one and their imaginary outputs
+have absolute value below $1/2$, proving the modulus bound two.
+The argument uses absolute weights and does not assume positivity.
+\end{proof}
+
+\paragraph{Proof idea for Theorem~\ref{thm:rank-two-critical}.}
+Two basis rows turn the first layer into two unknown scalar means. The
+composite network is a known function on their enlarged square. Its output
+radius decays as $D^{-1/2}$, while its normalized second, fourth, and sixth
+derivative bounds grow as $D,D^2,D^3$. The lemma therefore costs $O(D)$
+conditionally on a gate of probability $O(D^{-1/2})$. A two-dimensional
+Taylor table supplies every known coefficient request within the
+preprocessing budget.
+
+\begin{proof}
+A zero first matrix gives a fair output. A single layer is handled
+by the existing unit-row factory. We henceforth assume $D\ge2$ and
+first-layer rank $r\in\{1,2\}$.
+Find $r$ independent rows and $r$ columns on which their minor is
+nonsingular. If a row's representation in the current row basis
+has a coefficient of absolute value greater than two, replace that
+basis row by this row. The fixed-column determinant grows by a
+factor greater than two. Every nonzero such determinant is at least
+$2^{-br}$ and at most $r!$ in absolute value. Thus at most
+$br+\lceil\log_2(r!)\rceil+1$ replacements occur. Exact elimination
+and row checks cost $O(n^2B^3)$ bits for $r\le2$.
+
+The resulting basis rows $v_a$ have absolute sums at most one, and
+every first-layer row is $\sum_a a_{ia}v_a$ with $|a_{ia}|\le2$.
+Their coefficients are ratios of fixed-order dyadic minors and have
+$O(b)$ bits. Fresh weighted-coordinate draws supply independent
+signs of means $z_a=v_a\cdot x$, each with at most one input probe.
+The network output is now a known function $F(z_1,z_2)$; a missing
+second coordinate is ignored. On the enlarged square, first-layer
+preactivations have magnitude at most $c=4$. First-layer outputs have
+magnitude at most one, and subsequent rows remain contractive.
+Consequently
+\[
+ |F|\le\tanh^{\circ(D-1)}(1)
+       \le\rho_D:=\sqrt{3/(2D+1)}.
+\]
+If $2\rho_D\ge1$, set $q=1$. Otherwise let $q$ be the smallest
+number of the form $2^{-j}$, $j\ge0$, with $q\ge2\rho_D$.
+Comparisons of squares determine this dyadic number exactly.
+Then
+\[
+ q\le6/\sqrt{D+1},\qquad q^{-1}\le\sqrt D,
+ \qquad \|F/q\|_\infty\le4/5.
+\]
+The range bound for $q=1$ uses $D\ge2$ and $\tanh1<4/5$.
+
+Here are explicit derivative constants. Put $T_k=2^kk!$ and
+$C_1=1$, and define
+\[
+ C_k=T_k+4\sum_{\nu=2}^kT_\nu
+       \mathsf B_{k,\nu}(C_1,\ldots,C_{k-\nu+1}),
+ \qquad k\ge2,
+\]
+where $\mathsf B_{k,\nu}$ is the partial exponential Bell
+polynomial, with coefficient
+$k!/\prod_j(m_j!(j!)^{m_j})$ for
+$\sum_jm_j=\nu$ and $\sum_jjm_j=k$.
+The derivative polynomial of tanh has coefficient sum at most $T_k$.
+For even $k$ it is odd, giving the bound
+$T_k|\tanh u|$; for odd $k$ the bound is $T_k$.
+Use $|\tanh'|\le1$ for the first derivative.
+
+Let $E_{k,\ell}$ be the largest uniform total derivative norm at
+layer $\ell$ on the enlarged square. The first layer has
+$E_{k,1}\le T_kc^k$. Later scalar chain rules and row contraction
+give
+\[
+ E_{k,D}\le C_kc^kD^{(k-1)/2}.
+\]
+To check this induction, the radius at layer $\ell$ is at most
+$2/\sqrt\ell$. A nonlinear Bell term with $\nu\ge2$ factors
+is bounded by
+$2T_\nu\mathsf B_{k,\nu}(C)c^k\ell^{(k-3)/2}$.
+Even $\nu$ uses the radius factor; odd $\nu\ge3$ supplies the
+same power from its number of factors. Finally,
+$\sum_{\ell=2}^D\ell^{(k-3)/2}\le2D^{(k-1)/2}$.
+This proves the displayed recurrence, including its first-layer term.
+The induction uses only the bound $c$ on the first preactivations and
+holds at every order $k$.
+
+For $f(p)=F(2p-1)/q$, we may therefore take
+\[
+ M_k=2^kC_kc^k(D+1)^{\lceil k/2\rceil},\qquad 2\le k\le6.
+\]
+In Lemma~\ref{lem:rank-two-bernstein}, these give
+$m_0=O(D+1)$ and $\overline A=O((D+1)^2)$. Open the gate $q$
+and run that factory on its open branch, returning a fair sign
+otherwise. Its expected input count is $O(\sqrt{D+1})$.
+
+We provide the finite-bit implementation. The complex-strip argument
+of Lemma~\ref{lem:signedstrip} applies when
+$\max_a|\Im z_a|<1/(16\sqrt D)$, since the first affine row has
+absolute sum at most four. Choose dyadic
+$1/(256\sqrt D)<a\le1/(128\sqrt D)$ and grid centers on the
+square at spacing $a$. There are $O(D)$ centers. In scaled variables
+$z_a=c_a+2au_a$, the polydisk $|u_a|\le2$ lies strictly inside
+the tube. Every neuron has modulus at most two, so its coefficient
+of $u^\nu$ is bounded by $2^{1-|\nu|}$.
+
+Let $H=n^2D$, choose a dyadic $\varepsilon=2^{-P}\le H^{-2}$
+with $P=O(B)$, and put
+\[
+ S_0=P+3\lceil\log_2(D+1)\rceil+64,\qquad
+ K=16(P+\lceil\log_2(D+1)\rceil+64).
+\]
+Store the total-degree-$K$ expansions with coefficient uncertainty
+at most $2^{-S_0}$. On the half-radius polydisk, coefficient errors
+in the mixed fourth derivative sum to at most $256\,2^{-S_0}$.
+Its scale conversion is at most
+$1/(qa^4)\le2^{32}D^{5/2}$. The geometric tail before conversion
+is at most $2^{12}(K+2)^5 4^{-K}$. These choices provide certified
+width-$\varepsilon$ intervals for $f,f_{11},f_{22},f_{1122}$.
+There are $O(K^2)$ coefficients. Rounded Horner evaluation, with
+$O(\log(K+D+2))$ guard bits, costs
+$O((B+\operatorname{bits}(p))^4)$.
+
+We now bound the finite precision of the two-variable scaled-series
+computation. In the total-degree quotient
+algebra, the coefficient norm is submultiplicative. Exponentials
+satisfy the Euler recurrence
+\[
+ |\nu|e_\nu=\sum_{0<\mu\le\nu}|\mu|a_\mu e_{\nu-\mu}.
+\]
+Write $\mathcal E=\sum_i u_i\partial_i$. If a computed exponential
+$\widetilde E$ has residual
+$R=\mathcal E\widetilde E-(\mathcal EA)\widetilde E$, then
+$\mathcal E(e^{-A}\widetilde E)=e^{-A}R$ in the truncated algebra.
+The inverse of $\mathcal E$ on series with zero constant term
+divides a coefficient by its total degree and has norm at most one.
+Multiplication by $e^{-A}$, this integration, and multiplication by
+$e^A$ therefore bound the error, including the separately enclosed
+constant coefficient. There is no additional degree factor in this
+inverse operation. Each complex preactivation has imaginary part
+below one half, so $\Re e^{2s}>0$ and $|1+e^{2s}|\ge1$.
+Cauchy's bound consequently gives coefficient norms eight
+for neurons, $4e^{10}$ for exponentials, and four for reciprocals.
+The first preactivation is affine with coefficient norm below five;
+later preactivations have norm at most eight. A perturbed exponential
+input therefore has norm at most seventeen. The exponential and
+inverse identities bound layer amplification by $2^{40}$ and local
+error by $2^{90}n(K+2)^8 2^{-M}$. One sufficient choice is
+\[
+ M=S_0+128D+\lceil\log_2(256nD(K+2)^{12})\rceil+4b+256.
+\]
+It verifies all perturbation margins and leaves error below
+$2^{-S_0-16}$. Bounded rounded intermediates follow by applying the
+same residual identity in every further quotient that discards
+terms above a specified total degree. Induction over that degree
+keeps the computed coefficient norm within one of the exact bound;
+all numerator partial sums are then polynomially bounded in $K$.
+This closes the intermediate-size assumption in the rounding count.
+Dense rows cost $O(n^2K^2)$ coefficient operations,
+nonlinear recurrences $O(nK^4)$, and constant exponentials
+$O(nM^3)$ bit operations per layer and center. This proves the
+preprocessing bound in the theorem and the stated storage budget.
+
+Each selected correction requires one mode-normalized
+hypergeometric average of $O(m)$ oracle values. The recurrence in
+Theorem~\ref{thm:implicitrankone} evaluates it with
+$O(\log(m+2))$ guard bits. Its cheap cost is
+$O(m(B+\log(m+2))^4)$, and its absolute uncertainty before dividing
+by its branch mass is $O(\varepsilon)$. The base uses the same
+oracle without an average.
+
+An augmented forward pass for derivatives through any fixed order
+supplies arbitrary further precision in
+$O(H(B+\operatorname{bits}(p)+t)^4)$ bit operations, with a constant
+depending on that order. Here is an explicit guard-bit argument.
+If each completed derivative update has rounding error at most $\zeta$,
+write $e_{k,j}$ for the largest error of order $k$ at layer $j$.
+The coefficient of the highest derivative is $\tanh'$ at the
+approximate real preactivation and has magnitude at most one.
+Every remaining chain-rule term is a polynomial in lower derivatives.
+The derivative bounds already proved, with a one-unit perturbation
+margin, therefore give for every fixed $k$
+\[
+ e_{0,j+1}\le e_{0,j}+\zeta,\qquad
+ e_{k,j+1}\le e_{k,j}
+   +A_k(D+1)^k\sum_{a<k}e_{a,j}+\zeta.
+\]
+Induction on $k$ and summation over $j\le D$ give
+$e_{k,j}\le A'_k\zeta(D+1)^{(k+1)^2}$.
+Choosing $\zeta$ below the target accuracy divided by this polynomial
+also verifies the perturbation margin. Scale conversion by $q$ and
+the dyadic cell radius costs only further powers of $D$.
+Assigning each row operation its share of $\zeta$ adds $O(\log n)$
+guard bits. Thus all guard lengths are logarithmic in $D,n$.
+On a branch of mass $c_m$, the unresolved uniform interval has measure
+$O(\min\{1,\varepsilon/c_m\})$. For $c_m=O(\varepsilon)$,
+start direct evaluation at absolute precision proportional to $c_m$.
+For a cached miss, start at absolute precision proportional to
+$\varepsilon$. After $t$ extra accuracy bits, the unresolved set of
+uniform values has measure $O((\varepsilon/c_m)2^{-t})$.
+Multiplying by the branch mass before summing refinement stages
+therefore charges $O(Hm\min\{c_m,\varepsilon\}
+(B+\log(m+2)+P)^4)$ to that branch. This uses unconditional interval
+measures and imposes no independence between work and the miss event.
+The total expensive refinement work is consequently bounded by
+\[
+ O\!\left(
+ H\sum_{m=2^\ell m_0}
+    \min\{\overline A/m^2,\varepsilon\}
+       m(B+\log(m+2)+P)^4\right)
+ =O\!\left(H\sqrt{\overline A\varepsilon}\,B^4\right)
+ =O((D+1)B^4).
+\]
+The cheap averages cost
+$O((\overline A/m_0)B^4)=O((D+1)B^4)$, including their
+geometric logarithmic moments. Source choices and counters fit this
+bound. Multiplication by the gate proves the online bit estimate.
+All comparisons terminate almost surely, all selected levels are
+finite, and the exact telescope proves the target law.
+
+At logarithmic depth and parameter precision, the dense preprocessing
+term is $O(n^2\log^6n)$ and the nonlinear term is
+$O(n\log^8n)$; both fit $O(Dn^2\log^6n)$. The rank-one critical
+mean-chain lower bound is contained in this class, proving the final
+claim under the stated width and grid conditions.
+\end{proof}
+
+Rank one is a special case of rank two with a simpler basis.
+
+\begin{corollary}[A sharp critical law with a rank-one first layer]
+\label{thm:signed-bottleneck}
+For a zero-bias width-$n$, depth-$D$ tanh network with row norms
+at most one and first-layer rank at most one, exact sampling uses
+$O(\sqrt{D+1})$ expected input probes and
+$O(\sqrt{D+1}\,B^4)$ expected online bit operations, with $B$ as in
+Theorem~\ref{thm:rank-two-critical}. At $D=\lceil\log_2n\rceil$
+and $b=O(\log n)$, preprocessing and storage are $O(Dn^2\log^6n)$.
+Hidden weights may have either sign. The query order is sharp when
+$n\ge D+1$ and $b\ge\lceil\log_2(D+1)\rceil$.
+\end{corollary}
+\paragraph{Proof idea.}
+One scalar source describes the first layer, and a mean chain supplies
+the matching lower bound.
+
+\begin{proof}
+Apply Theorem~\ref{thm:rank-two-critical} with first-layer rank one.
+Its basis construction reduces here to choosing a nonzero row of
+largest absolute sum. The mean-chain lower bound in
+Theorem~\ref{thm:finitecritical} has a rank-one first matrix and
+fits the stated grid.
+\end{proof}

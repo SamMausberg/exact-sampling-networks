@@ -1,0 +1,7 @@
+# Recorded high-precision checks.
+mpmath==1.3.0
+# PDF structure check (paper/checks/document_structure.py).
+PyMuPDF==1.26.6
+# Formatting, linting and citation metadata validation.
+ruff==0.15.1
+cffconvert==2.0.0

@@ -1,0 +1,339 @@
+\subsection{An append-only index at fixed affine rank}
+\label{sec:dynamicfixedrank}
+
+This subsection proves the fixed-rank index of
+Theorem~\ref{thm:main-fixed-rank}.  A grid gives the index when the
+temperature and coordinate bounds are polynomial in the width.
+The grid controls variation of scores inside a cell.  It need not
+recover their complete order.  A new key changes one cell, while
+a query combines the cell envelopes into one exact rejection
+sampler.  Keeping an earlier coordinate chart when the affine
+span grows avoids any migration of stored records.
+
+\begin{theorem}[Dynamic fixed-rank attention]
+\label{thm:dynamicfixedrank}
+Fix $r\ge1$ and positive dyadic coordinate bounds $K,Q$.
+Let $\beta\ge0$ be dyadic, or $\beta=\sqrt n$, and choose a
+fixed dyadic bound $\beta\le\bar\beta\le2\beta$ when
+$\beta>0$, and set $\bar\beta=0$ when $\beta=0$.
+A stream appends dyadic key--value records
+$(k_j,v_j)$ with $k_j\in[-K,K]^n$ and $v_j\in[-1,1]$.
+Every prefix of keys has affine dimension at most $r$.
+Queries $q\in[-Q,Q]^n$ are explicitly supplied dyadic vectors
+and are made only at nonempty prefixes $T\ge1$.
+All scalar encodings and fixed parameters have at most $b$ bits,
+with dyadics represented by binary integer numerators and
+denominators.
+Put $B=16+b+\lceil\log_2(T+n+r+2)\rceil$ at cache length $T$.
+
+There is a uniform exact attention-index sampler with
+\[
+ \begin{split}
+ \text{worst-case append work}
+     &=O_r((n+\log(T+2))B^3),\\
+ \text{stored bits}&=O_r((T+1)nB),\\
+ \text{expected query work}
+     &=O_r((n+M_T+\log(T+2))B^4),
+ \end{split}
+\]
+where
+\[
+ M_T\le\min\left\{T,
+        (r+1)(5+32r\bar\beta QK)^r\right\}.
+\]
+The expected number of proposed members is at most $17/8$.
+The output index has probabilities proportional to
+$\exp(\beta\langle q,k_j\rangle/n)$.  A fresh value sign then
+has the exact attention-coordinate mean.  The claim holds
+conditionally on every adaptive history of legal records and
+queries.  At $\beta=0$, uniform index sampling suffices.
+
+For fixed $r,K,Q$ and $\beta=\sqrt n$, expected query work is
+\[
+ O_{r,K,Q}\bigl((n+n^{r/2}+\log(T+2))B^4\bigr).
+\]
+The construction never scans earlier records after an append,
+including an append that enlarges the span of a large degenerate
+prefill.
+\end{theorem}
+
+The theorem charges operations on the supplied finite records.
+Section~\ref{sec:momentdecoder} also charges the construction of
+neural keys and values.
+
+\begin{lemma}[A bounded rational coordinate chart]
+\label{lem:dynamicchart}
+Let $U$ be an $n$ by $d$ dyadic matrix of full column rank,
+$1\le d\le r$, with entries of encoding length $O(b)$.
+In $O_r(nB^3)$ bit operations one can find $d$ distinct row
+indices $I$ such that
+\[
+ A=U(U_I)^{-1},\qquad A_I=I_d,\qquad |A_{ij}|\le2.
+\]
+The coefficients have $O_r(B)$ bits and a common determinant
+denominator.
+\end{lemma}
+
+\paragraph{Proof idea.}
+A large reconstruction coefficient identifies a row replacement
+that more than doubles the determinant.  Integer determinant
+bounds limit the number of such replacements.  This is the
+classical maximum-volume argument; the coefficient and
+row-replacement identities appear, for example, in
+Mikhalev and Oseledets~\cite{mikhalev2018maxvol}, Section~3.
+
+\begin{proof}
+Find any nonsingular row minor by Gaussian elimination.  Clear
+the common dyadic denominator of $U$, obtaining an integer
+matrix $E$.  Suppose $C=E(E_I)^{-1}$ has an entry $|C_{ij}|>2$.
+Replace selected row $j$ by row $i$.  This is a distinct row,
+because the coefficients of selected rows form the identity.
+Multilinearity of the determinant gives
+\[
+ |\det(E_{I,\mathrm{new}})|
+       =|C_{ij}|\,|\det(E_I)|>2|\det(E_I)|.
+\]
+Every nonzero integer determinant has magnitude at least one.
+If entries of $E$ have magnitude at most $H_E$, every minor is
+at most $d!H_E^d$.  Its logarithm is $O_r(B)$.  Therefore only
+$O_r(B)$ replacements occur.  At each stage Cramer's rule or
+fixed-dimensional elimination computes all $nd$ coefficients
+in $O_r(nB^2)$ bits.  Every intermediate determinant and
+coefficient has $O_r(B)$ bits.  When no offending entry remains,
+return the current indices.  The adjugate formula gives the
+common denominator, and multiplication by the selected minor
+gives $A_I=I_d$.
+\end{proof}
+
+\begin{lemma}[A finite cell envelope]
+\label{lem:dynamiccellenvelope}
+Partition $T$ members into nonempty cells.  Suppose cell $C$ has
+a proxy score $a_C$ and each actual score satisfies
+$|a_j-a_C|\le1/4$ for $j\in C$.  Suppose proxy comparisons
+are exact and shifted negative exponentials admit the finite
+enclosures of Lemma~\ref{lem:newnegativeexp}.  Then all cell
+weights can be prepared using one exponential enclosure per
+cell, and exact sampling needs at most $17/8$ proposed members
+in expectation.  Final acceptance comparisons have a geometric
+precision tail.
+\end{lemma}
+
+\paragraph{Proof idea.}
+One score represents a cell to constant multiplicative accuracy.
+A dyadic floor prevents a very small envelope weight from
+requiring unbounded initial precision in the acceptance coin.
+Adding an approximation allowance to construct a rejection
+envelope, then refining only ambiguous comparisons, is an
+established exact-sampling technique; see Brassard, Devroye,
+and Gravel~\cite{brassard2019remote}, Sections~2 and~4.
+
+\begin{proof}
+Let $a_0=\max_C a_C$, and write
+\[
+ w_j=e^{a_j-a_0-1/4},\quad Z=\sum_jw_j,\qquad
+ e_C=e^{a_C-a_0},\quad W_0=\sum_C|C|e_C.
+\]
+Every defining exponent is nonpositive.  For $j\in C$,
+$w_j\le e_C\le e^{1/2}w_j<2w_j$, so $Z\le W_0<2Z$.
+A member of a cell whose proxy equals $a_0$ has
+$w_j\ge e^{-1/2}>1/2$, giving $Z>1/2$.
+
+Set $p=\lceil\log_2(64T)\rceil$.  Enclose each $e_C$ in a
+dyadic interval of width $2^{-p-2}$, round the upper endpoint
+up to the grid $2^{-p}$, and add $2^{-p}$.  The resulting
+dyadic $u_C$ satisfies
+\[
+ u_C\ge2^{-p},\qquad e_C\le u_C\le e_C+3\,2^{-p}.
+\]
+Thus the actual envelope obeys
+\[
+ Z\le W:=\sum_C|C|u_C
+ <2Z+\frac3{64}
+ \le\frac{67}{32}Z<\frac{17}{8}Z.
+\]
+Draw a cell proportionally to $|C|u_C$, then a uniform member
+$j$ in it, and accept with probability $w_j/u_C$.  Its accepted
+mass is
+\[
+ \frac{|C|u_C}{W}\frac1{|C|}\frac{w_j}{u_C}
+ =\frac{w_j}{W}.
+\]
+The success probability is $Z/W$.  Independent trials therefore
+return $w_j/Z$ and use $W/Z<17/8$ proposals in expectation.
+
+The dyadic cell weights have a common denominator and $O(B)$
+bits; integer cumulative weights sample a cell exactly.  Since
+$u_C\ge2^{-p}$, an enclosure of width $2^{-p-t-3}$ for $w_j$
+suffices at acceptance precision $t$.  Such an enclosure costs
+$O((B+t)^4)$, so
+Lemma~\ref{lem:newprecisionstop} decides the acceptance coin exactly
+in expected $O(B^4)$ bit work per proposal, with a geometric
+precision tail.  This stopping argument charges the
+actual work of every reached precision stage.
+\end{proof}
+
+\paragraph{Proof idea for Theorem~\ref{thm:dynamicfixedrank}.}
+Selected ambient coordinates describe every key in a bounded
+chart.  Their grid controls the score variation for every legal
+query.  When the span grows, a new chart receives only future
+records.  There are at most $r+1$ charts, so querying all of them
+has a bounded rank-dependent overhead.
+
+\begin{proof}[Proof of Theorem~\ref{thm:dynamicfixedrank}]
+Fix the first key $c$.  Maintain a basis $U$ of all differences
+$k_j-c$ encountered so far.  An epoch starts at rank zero and
+whenever this rank increases.  An epoch of dimension $d>0$
+uses the chart of Lemma~\ref{lem:dynamicchart}, with
+\[
+ c_0=c-Ac_I,\qquad k=c_0+Ak_I.
+\]
+The selected coordinates $y=k_I$ lie in $[-K,K]^d$.
+For a query let $v=q^TA$.  Since $|A_{ij}|\le2$,
+$|v_i|\le2nQ$.  Choose
+\[
+ m=\left\lceil\log_2\max\{1,8r\bar\beta QK\}\right\rceil,
+ \qquad \Delta=K2^{-m}.
+\]
+The integer cell tuple is $\lfloor y_i/\Delta\rfloor$.
+Two members in one cell have coordinate differences less than
+$\Delta$, so their scores differ by at most
+\[
+ \frac\beta n\sum_{i=1}^d|v_i|\Delta
+ \le2\beta rQ\Delta\le\frac14.
+\]
+In one coordinate there are at most $2^{m+1}+1$ possible cell
+indices.  This is at most $5+32r\bar\beta QK$.
+The rank-zero epoch has one cell.
+
+\paragraph{Appends.}
+At an insertion test membership in the current affine span by
+the exact equality $k-c=A(k_I-c_I)$.  This costs $O_r(nB^2)$.
+If it holds, insert in the current epoch.  If it fails, append
+$k-c$ to $U$, build its new bounded chart, and create a new
+epoch containing only the new record.  Earlier epochs and their
+records remain untouched.  At most $r$ increases are possible,
+but even an individual increase costs only $O_r(nB^3)$.
+
+Each epoch stores its occupied cells in a balanced search tree
+keyed by their integer tuples.  A cell stores one representative
+identifier and an appendable array of member identifiers.
+For completeness, the latter can be a binary tree whose leaves
+have local indices $0,\ldots,N-1$.  At a power-of-two capacity
+boundary attach a new root and insert along the binary path
+for the new local index.  There are $O(N)$ stored nodes and
+$O(\log(N+2))$ pointer operations per append or random access.
+All pointers, counters, and cell coordinates have $O_r(B)$
+bits.  Drawing a uniform integer in $[N]$ by rejection from
+binary bits takes expected $O(B^2)$ bit work.  These structures
+give the stated worst-case append cost.
+
+\paragraph{Queries.}
+At a query compute $\langle q,c_0\rangle$ and $q^TA$ for each
+epoch.  The number of epochs is at most $r+1$.  The entries of
+$A$ have one common determinant denominator.  Combining that
+denominator with the common dyadic query denominator shows that
+an $n$-term projection adds only $O(\log n)$ numerator bits.
+Each projection therefore has $O_r(B)$ encoding length and
+costs $O_r(nB^2)$ bit work.  Evaluate each cell representative's
+score from its $d$ selected coordinates, including the affine
+offset so that scores in different epochs are comparable.
+
+Apply Lemma~\ref{lem:dynamiccellenvelope} to the union of these
+cells.  Their total number is at most
+\[
+ \min\left\{T,\sum_{d=0}^r(5+32r\bar\beta QK)^d\right\},
+\]
+which gives the displayed $M_T$.  At positive temperature,
+comparisons of representative scores reduce to rational
+comparisons before multiplication by $\beta/n$.  At standard
+scaling, all shifted exponents are a rational plus a rational
+multiple of $1/\sqrt n$, within
+Lemma~\ref{lem:newnegativeexp}.  Thus one length-$n$ projection
+per epoch, one enclosure per occupied cell, and a constant
+expected number of member enclosures give the query bit bound.
+Full records occupy $O(Tnb)$ bits, cell structures $O_r(TB)$,
+and the bounded number of charts $O_r(nB)$.
+
+\paragraph{Adaptive histories.}
+Finally condition on any realized history of preceding legal
+records and queries.  The current partition and its score
+formulas are fixed.  Fresh random bits give exactly the law
+proved by the envelope lemma.  Induction gives the claim for
+adaptive histories.  At $\beta=\sqrt n$, a power-of-two upper
+bound $\bar\beta<2\sqrt n$ gives $M_T=O_{r,K,Q}(n^{r/2})$.
+\end{proof}
+
+\begin{corollary}[Dynamic rank one at every temperature]
+\label{cor:dynamicrankone}
+For an append-only cache of affine rank at most one, numerical
+temperature can be removed from the preceding complexity bound.
+Worst-case append work is $O((n+\log(T+2))B^3)$ and expected
+query work is $O((n+\log(T+2))B^4)$ at every allowed temperature.
+The expected proposal count is at most $17/8$.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Maintain the scalar coordinate order with subtree member counts.
+Rank selection replaces access to a stored permutation in the
+static monotone envelope.
+
+\begin{proof}
+When the first nonconstant key arrives, choose a nonzero pivot
+coordinate on its line.  Every preceding record has the same
+key, so its existing member array becomes a single duplicate
+group without scanning that array.  The rank promise prevents
+any later change of line.  Maintain the ordered distinct pivot
+coordinates in a balanced tree with subtree member counts.
+Verify line membership and insert each new member exactly.
+
+A query's one length-$n$ projection chooses the forward or
+reverse order.  Retrieve the geometric-block endpoints of
+Lemma~\ref{lem:newmonotoneenvelope} by rank selection and apply
+the dyadic envelope of Theorem~\ref{thm:newrankone}.  One rank
+selection costs $O(\log(T+2)B^2)=O(B^3)$ bits.  It is absorbed
+by that endpoint's $O(B^4)$ exponential enclosure.  There are
+$O(\log(T+2))$ endpoints and a constant expected number of
+proposed ranks.  Hence the static query bound is retained,
+including all exact arithmetic and precision refinement.
+\end{proof}
+
+\begin{corollary}[A certified neighborhood of a known key space]
+\label{cor:dynamicapproximatespace}
+Suppose a fixed rational chart $c_0+Ay$ is known,
+$A_I=I_r$, $(c_0)_I=0$, and $|A_{ij}|\le2$.
+The actual keys may have arbitrary rank, provided each satisfies
+\[
+ \|k-c_0-Ak_I\|_\infty\le\eta,
+ \qquad \bar\beta Q\eta\le\frac18.
+\]
+The same append and query bounds hold with
+$M_T\le\min\{T,(5+64r\bar\beta QK)^r\}$.
+Only a constant expected number of proposed members require
+length-$n$ actual-score evaluations.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Split the cell's score allowance between variation inside the
+projected grid and the certified residual outside the key space.
+The acceptance coin evaluates the actual score.
+
+\begin{proof}
+Use $m=\lceil\log_2\max\{1,16r\bar\beta QK\}\rceil$.
+Projected scores in a cell vary by at most $1/8$.  The score
+error from a residual of norm at most $\eta$ is at most
+$\beta Q\eta\le1/8$.  Use the projected score of a stored
+representative as the proxy.  Every actual member lies within
+$1/4$ of it, so Lemma~\ref{lem:dynamiccellenvelope} applies.
+Proxies use the fixed low-dimensional projection.  Actual
+candidate scores use all $n$ coordinates, but there are fewer
+than $17/8$ candidates in expectation.  The residual certificate
+is checked by rational arithmetic at insertion.
+
+If the promise is instead ordinary $\ell_\infty$ distance at
+most $\eta_0$ from a known affine space, its bounded coordinate
+chart has projection $P=AR_I$ with
+$\|P\|_{\infty\to\infty}\le2r$.  Applying $I-P$ to an
+approximating point gives residual at most $(1+2r)\eta_0$.
+Thus $\bar\beta Q(1+2r)\eta_0\le1/8$ suffices.
+\end{proof}
+

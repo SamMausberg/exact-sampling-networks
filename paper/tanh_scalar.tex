@@ -1,0 +1,306 @@
+\subsection{Intervals and the recursive sampler}\label{sec:algorithm}
+\subsubsection{Dyadic centers and radii}
+
+Choose
+\begin{equation}\label{eq:precision}
+P=b+4\lceil\log_2(D+1)\rceil+8,\qquad
+\varepsilon=2^{-P}.
+\end{equation}
+Use the reference gain \(g=\max\{1,S\}\), computed exactly from the weights.
+Set \(r_0=1\) and \(c_{0,j}=0\). Obtain a dyadic \(q^\ast\) with
+\(|q^\ast-\tanh(gr_{\ell-1})|\le\varepsilon/16\), and set
+\(r_\ell=q^\ast+5\varepsilon/2\). Then
+\begin{equation}\label{eq:rounded}
+\tanh(gr_{\ell-1})+2\varepsilon
+\le r_\ell\le\tanh(gr_{\ell-1})+3\varepsilon.
+\end{equation}
+A certified approximation followed by rational rounding supplies
+this choice without finding the exact floor of a transcendental
+number.
+
+For each row store
+\begin{equation}\label{eq:rowdata}
+\sigma=\sum_j|w_{\ell,ij}|,\qquad
+a=b_{\ell,i}+\sum_jw_{\ell,ij}c_{\ell-1,j},\qquad
+\rho=\sigma r_{\ell-1},
+\end{equation}
+together with prefix sums of the absolute integer weight numerators.
+Define the mathematical endpoints, midpoint, and image radius by
+\[
+y_\pm=\tanh(a\pm\rho),\qquad
+m=\frac{y_++y_-}{2},\qquad R=\frac{y_+-y_-}{2}.
+\]
+Choose a dyadic \(c_{\ell,i}\in[-1,1]\) with
+\(|c_{\ell,i}-m|\le\varepsilon\). Clamping a rounded center to
+\([-1,1]\) preserves its error bound.
+The exact \(m,R\) are scalar functions of stored rationals.
+Online refinement does not recompute the row sum.
+
+\begin{lemma}[Interval invariant]\label{lem:interval}
+For every context, \(|h_{\ell,i}-c_{\ell,i}|\le r_\ell\).
+With \(t=\tanh a\), \(q=\tanh\rho\),
+\begin{equation}\label{eq:midrad}
+m=\frac{t(1-q^2)}{1-t^2q^2},\qquad
+R=\frac{q(1-t^2)}{1-t^2q^2}\le q.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+Propagate the endpoints of each row interval through monotone tanh. The row
+norm controls its width, while a small rounding allowance keeps the stored
+center and radius valid at the next layer.
+
+\begin{proof}
+The preactivation differs from \(a\) by at most
+\(\sum_j|w_{\ell,ij}|r_{\ell-1}=\rho\), so monotonicity puts the
+output in \([y_-,y_+]\). The tanh addition formula proves
+\eqref{eq:midrad}. Its denominator is positive, and
+\(1-t^2\le1-t^2q^2\). Hence
+\[
+R+|m-c_{\ell,i}|
+\le\tanh(\sigma r_{\ell-1})+\varepsilon\le r_\ell.
+\]
+Induction starts with \(|x_j|=1\).
+\end{proof}
+
+\subsubsection{Normalized signs and the top output}
+
+The internal sampler \(S_{\ell,i}\) returns a sign of mean
+\(v_{\ell,i}=(h_{\ell,i}-c_{\ell,i})/r_\ell\).
+At layer zero it returns \(x_i\).
+For a nonzero row, choose \(j\) with probability
+\(|w_{\ell,ij}|/\sigma\), request a fresh \(S_{\ell-1,j}\), and
+multiply by \(\sgn(w_{\ell,ij})\).
+This source has mean
+\[
+z=\sum_j\frac{w_{\ell,ij}}{\sigma}v_{\ell-1,j},\qquad
+b_{\ell,i}+\sum_jw_{\ell,ij}h_{\ell-1,j}=a+\rho z.
+\]
+The next two sections construct a centered factory of mean
+\begin{equation}\label{eq:centered}
+G=\frac{\tanh(a+\rho z)-m}{R}.
+\end{equation}
+
+Put \(\alpha=R/r_\ell\), \(\kappa=(m-c_{\ell,i})/r_\ell\).
+The internal sampler chooses the centered factory with probability
+\(\alpha\), and constant signs with probabilities
+\begin{equation}\label{eq:internalmixture}
+\PP(+1\hbox{ constant})=\frac{1-\alpha+\kappa}{2},\qquad
+\PP(-1\hbox{ constant})=\frac{1-\alpha-\kappa}{2}.
+\end{equation}
+The interval invariant gives \(\alpha+|\kappa|\le1\).
+The resulting mean is \(\alpha G+\kappa=v_{\ell,i}\).
+
+At the top use the actual midpoint and image radius:
+\begin{equation}\label{eq:topmixture}
+\PP(\hbox{centered factory})=R,\quad
+\PP(+1\hbox{ constant})=\frac{1-R+m}{2},\quad
+\PP(-1\hbox{ constant})=\frac{1-R-m}{2}.
+\end{equation}
+These probabilities are valid since \(|m|+R\le1\).
+The sign has mean \(h_{D,1}\); return \((1+Y)/2\).
+A zero row uses its known scalar probability directly.
+
+\subsection{A positive majority factory}\label{sec:majority}
+
+For \(\rho>0\), let
+\(G_\rho(z)=\tanh(\rho z)/\tanh\rho\).
+The unit-norm construction only needs \(\rho\le2\), but the
+representation also supports the large-norm extension.
+If \(M_k(z)\) is the mean of majority on \(2k+1\) independent signs
+of mean \(z\), differentiating its binomial sum gives
+\begin{equation}\label{eq:majderivative}
+M_k'(z)=C_k(1-z^2)^k,\quad
+C_k=\frac{(2k+1)\binom{2k}{k}}{4^k}\ge1,\quad
+M_k(0)=0,\quad M_k(1)=1.
+\end{equation}
+
+\begin{lemma}[Majority expansion]\label{lem:majority}
+Write
+\begin{equation}\label{eq:generating}
+F_\rho(v)=\sech^2\!\bigl(\rho\sqrt{1-v}\bigr)
+=\sum_{k\ge0}d_kv^k.
+\end{equation}
+The coefficients are nonnegative and sum to one. Moreover
+\[
+\pi_k=\frac{\rho}{\tanh\rho}\frac{d_k}{C_k}
+\]
+is a probability distribution and
+\begin{equation}\label{eq:majorityexpansion}
+G_\rho(z)=\sum_{k\ge0}\pi_kM_k(z),\qquad -1\le z\le1.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+The cosine product gives nonnegative coefficients for a generating function.
+Integrating the derivatives of odd-majority polynomials recovers tanh;
+evaluation at the endpoint proves that the mixture weights sum to one.
+
+\begin{proof}
+The cosh product \cite{dlmf} gives
+\[
+F_\rho(v)=\prod_{j\ge0}
+ \left(\frac{1-\eta_j}{1-\eta_jv}\right)^2,\qquad
+\eta_j=\frac{\lambda_j}{1+\lambda_j},\quad
+\lambda_j=\frac{4\rho^2}{\pi^2(2j+1)^2}.
+\]
+Each factor has nonnegative coefficients. The product converges
+locally uniformly before its first pole, and
+\(\sum_j\eta_j/(1-\eta_j)=\sum_j\lambda_j<\infty\).
+It is a probability generating function with \(F_\rho(1)=1\).
+For \(z\in[0,1]\), Tonelli's theorem and
+\eqref{eq:majderivative} give
+\[
+\sum_k\pi_kM_k(z)
+=\int_0^z\frac{\rho}{\tanh\rho}F_\rho(1-u^2)\,du
+=G_\rho(z).
+\]
+At \(z=1\), this proves \(\sum_k\pi_k=1\).
+Oddness gives negative \(z\).
+\end{proof}
+
+Sample \(K\) from \(\pi\), then request signs until one sign has
+occurred \(K+1\) times. This gives the full majority's output while
+sometimes using fewer than \(2K+1\) signs.
+
+\begin{lemma}[Sequential majority cost]\label{lem:arity}
+Its expected source count satisfies
+\begin{equation}\label{eq:sequentialarity}
+A_{\rm seq}(\rho,z)\le
+1+\left(1-\frac{z^2}{3}\right)\rho^2+\rho^4.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+For each odd majority, sum the probabilities that a further vote is needed.
+An integral identity expresses this cost in the same nonnegative
+coefficients used by the factory and gives a uniform radius bound.
+
+\begin{proof}
+The identity \(C_k^{-1}=\int_0^1(1-v^2)^k\,dv\) follows by
+integration by parts. The expected full-majority cost is therefore
+\[
+A(\rho)=\frac{\rho}{q}\int_0^1
+\left[F_\rho(1-v^2)+2(1-v^2)F_\rho'(1-v^2)\right]\,dv.
+\]
+Put \(g(v)=\sech^2(\rho v)\).
+Integration by parts applied to \(g(v)-1=O(v^2)\) gives
+\begin{equation}\label{eq:arityintegral}
+A(\rho)=\frac{\rho}{q}\left(1+
+\int_0^1\frac{\tanh^2(\rho v)}{v^2}\,dv\right)
+\le\frac{\rho}{q}(1+\rho^2).
+\end{equation}
+The singularity at zero is removable.
+For \(K=1\), sequential majority costs \(5/2-z^2/2\), saving
+\((1+z^2)/2\) source requests. Also
+\(\pi_1=(2/3)\rho^2\sech^2\rho\).
+Saving only this contribution gives
+\[
+A_{\rm seq}\le\frac{\rho}{q}(1+\rho^2)
+-\frac{1+z^2}{3}\rho^2\sech^2\rho.
+\]
+Use \(\sech^2\rho\ge1-\rho^2\) and
+\begin{equation}\label{eq:xcothx}
+u\coth u\le1+\frac{u^2}3,\qquad u>0.
+\end{equation}
+For the latter, \((3+u^2)\sinh u-3u\cosh u\) vanishes at zero
+and has derivative \(u(u\cosh u-\sinh u)\ge0\).
+Substitution proves
+\[
+A_{\rm seq}\le
+1+\left(1-\frac{z^2}{3}\right)\rho^2
++\frac{2+z^2}{3}\rho^4,
+\]
+which implies the claim.
+\end{proof}
+
+\subsection{Biases and exact stopping}\label{sec:bias}
+
+Define \(T_\theta(u)=(u+\theta)/(1+\theta u)\).
+The addition formula implies
+\begin{equation}\label{eq:biasidentity}
+\tanh(a+\rho z)=m+R\,T_{tq}(G_\rho(z)).
+\end{equation}
+For \(\theta\ge0\), put
+\(\lambda=(1-\theta)/(1+\theta)\).
+Request a source sign. Return on \(+1\); on \(-1\), return that
+sign with probability \(\lambda\), otherwise repeat.
+If the source's plus probability is \(p\), a trial succeeds with
+\(\sigma=p+(1-p)\lambda\).
+The accepted plus probability is \(p/\sigma\), with signed mean
+\(T_\theta(2p-1)\).
+For negative \(\theta\), complement the source and the output.
+Its sign is the sign of the stored rational \(a\).
+
+\begin{lemma}[Work of reached trials]\label{lem:stopping}
+Suppose reaching trial \(j\) is determined before its fresh
+randomness. If its conditional expected nonnegative cost is at
+most \(B\), then
+\begin{equation}\label{eq:stoppedcost}
+\E\sum_{j=1}^T C_j\le B\sum_{j\ge1}\PP(T\ge j)=B\,\E T.
+\end{equation}
+For independent trials of success probability \(\sigma>0\),
+\(\E T=1/\sigma\).
+\end{lemma}
+\paragraph{Proof idea.}
+A trial is reached before its own randomness is exposed. Its expected work
+can therefore be charged using the probability of reaching it, even when its
+duration and its returned value are correlated.
+
+\begin{proof}
+Condition on the history before each trial, sum over finite
+prefixes, and use monotone convergence. In the independent case
+\(\PP(T\ge j)=(1-\sigma)^{j-1}\).
+A trial's cost may be correlated with its outcome.
+\end{proof}
+
+\begin{lemma}[Joint majority and race cost]\label{lem:offspring}
+A normalized call has expected children at most
+\begin{equation}\label{eq:offspring}
+\frac{\tanh\rho}{r_\ell}
+\exp\!\left(\frac53\rho^2+\rho^4\right).
+\end{equation}
+A uniform layer bound is
+\(B_\ell=\exp(\frac53(gr_{\ell-1})^2+(gr_{\ell-1})^4)\).
+The root's expected children are at most \(r_DB_D\).
+\end{lemma}
+\paragraph{Proof idea.}
+Multiply the mean cost of one reached majority by the mean number of race
+trials. The acceptance probability cancels the bias denominator, leaving a
+bound that depends on the row radius.
+
+\begin{proof}
+Assume \(t\ge0\), put \(u=\tanh(\rho z)\), and combine the gate,
+the exact race mean, and Lemma~\ref{lem:stopping}:
+\begin{equation}\label{eq:jointcost}
+\E[\hbox{children}]
+=\frac q{r_\ell} A_{\rm seq}(\rho,z)
+\frac{1-t^2}{(1-tq)(1+tu)}.
+\end{equation}
+The last factor is
+\[
+K=\frac{\cosh\rho\,\cosh(\rho z)}
+{\cosh(a-\rho)\cosh(a+\rho z)}
+\le\frac{\cosh\rho\,\cosh(\rho z)}
+{\cosh^2(\rho(1+z)/2)}.
+\]
+The denominator is minimized at \(a=\rho(1-z)/2\), by the
+product-to-sum formula.
+Since \((\log\cosh)''=\sech^2\le1\), its midpoint
+second-difference bound yields
+\(\log K\le\rho^2(1-z)^2/4\).
+For negative \(t\), replace \(z\) by \(-z\). The arity is even
+in \(z\), hence
+\[
+\log(A_{\rm seq}K)\le
+\left(1-\frac{z^2}{3}+\frac{(1+|z|)^2}{4}\right)\rho^2+\rho^4
+\le\frac53\rho^2+\rho^4.
+\]
+The prefactor in \eqref{eq:offspring} is at most one by
+\eqref{eq:rounded}.
+At the root the gate is \(R\), retaining the factor \(r_D\).
+\end{proof}
+
+Almost sure termination follows by induction on the layer.
+The majority index is finite almost surely, lower-layer requests
+terminate almost surely, and the race has positive success
+probability. Known scalar coins terminate almost surely by
+Section~\ref{sec:bits}. This reasoning precedes the expected-work
+bound, so finiteness of the expectation is not assumed.

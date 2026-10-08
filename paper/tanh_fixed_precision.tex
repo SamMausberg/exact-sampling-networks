@@ -1,0 +1,169 @@
+\subsubsection{A fourth-power bound for scalar bit work}
+\label{sec:fixedprecision}
+
+The scalar probabilities can be refined without carrying a growing
+common rational denominator.  We give the details because this reduces
+the bit overhead in the network theorem.
+
+\begin{lemma}[Fixed-precision coefficient evaluation]
+\label{lem:coefficient-four}
+Let \(0<\rho\le2\) be a dyadic rational whose description has at
+most \(B\) bits.  For integers \(K\ge0\) and \(m\ge1\), the
+coefficient \(d_K\) of
+\[
+  \sech^2(\rho\sqrt{1-z})=\sum_{j\ge0}d_jz^j
+\]
+has a certified dyadic enclosure of width \(2^{-m}\), computable
+in \(O((B+K+m+1)^4)\) bit operations.  The constant is absolute,
+and schoolbook multiplication and division suffice.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Compute the coefficients of the reciprocal denominator first, then invert
+its triangular coefficient system. Explicit error bounds allow rounding
+after every operation, so the rational denominators never grow with the
+number of operations.
+
+\begin{proof}
+It suffices to construct an approximation with error \(2^{-m-2}\).
+In the following calculation replace the requested precision \(m\)
+by \(m+2\) for this purpose.  Write
+\[
+ A(z)=\cosh^2(\rho\sqrt{1-z})=\sum_{j\ge0}a_jz^j.
+\]
+The coefficients have alternating signs before the constant term,
+so the power series for cosh gives
+\begin{equation}\label{eq:coefficient-norm}
+ a_0\ge1,\qquad
+ \sum_{j\ge0}|a_j|=\cosh^2(\rho\sqrt2)<1024.
+\end{equation}
+Indeed, \(\rho\sqrt2<3\), \(e<3\), and
+\(\cosh^2 3<e^6<729\).  To bound the reciprocal, write
+\(\sqrt{1-z}=u+iv\).  On \(|z|\le1\),
+\[
+ |z|^2=(u^2+v^2-1)^2+4v^2,
+ \qquad |v|\le1/2.
+\]
+Consequently
+\[
+ |A(z)|=\sinh^2(\rho u)+\cos^2(\rho v)
+ \ge\cos^2 1\ge1/4,
+\]
+and hence
+\begin{equation}\label{eq:reciprocal-coefficient-bound}
+ |d_j|\le4\qquad(j\ge0)
+\end{equation}
+by Cauchy's coefficient estimate.
+
+Define integer precision parameters
+\begin{align*}
+ T&=m+12(K+1)+\lceil\log_2(K+1)\rceil+20,\\
+ M&=T+32,\\
+ P&=T+8M+10\lceil\log_2(M+1)\rceil+64.
+\end{align*}
+All operations below round to \(P\) binary fractional places, with
+absolute error at most \(2^{-P}\) per rounding.  Their integer
+parts have \(O(M)\) bits.  The input \(\rho\) is retained exactly.
+
+For \(0\le j\le M\), compute
+\[
+ c_j=\frac{(2\rho)^{2j}}{(2j)!},\qquad
+ c_0=1,\qquad
+ c_{j+1}=c_j\frac{4\rho^2}{(2j+1)(2j+2)}.
+\]
+Use these values to form the coefficients through degree \(K\) of
+\[
+ A_M(z)=\frac12\left(1+\sum_{j=0}^M c_j(1-z)^j\right).
+\]
+The binomial coefficients are exact integers, obtained by Pascal's
+recurrence; each has at most \(M+1\) bits.  Terms of degree above
+\(K\) may be discarded, but this is unnecessary for the stated
+complexity.
+
+The multipliers in the recurrence for \(c_j\) are at most 16.
+Its accumulated rounding error is at most
+\(16^{M+1}2^{-P}\) at every index.  Expanding the binomials adds
+at most a factor \((M+1)2^M\).  The remaining additions and
+roundings add at most \((M+1)^2 2^{-P}\) to a coefficient error.
+The specified value of \(P\) bounds their sum by
+\(2^{-T-4}\).
+
+The truncation error on \(|z|\le1\) is at most
+\[
+ E_M=\frac12\sum_{j>M}\frac{32^j}{(2j)!}
+ \le2^{32-4M}\le2^{-T-4}.
+\]
+For the middle inequality, \(M\ge16\); successive terms have
+ratio below \(1/16\), and
+\(34!\ge2^{118}\) follows from
+\(16!\ge2^{44}\), \(\prod_{j=17}^{32}j\ge2^{64}\), and
+\(33\cdot34\ge2^{10}\).
+Cauchy's estimate applies to each coefficient error.
+Thus the computed coefficients satisfy
+\begin{equation}\label{eq:coefficient-input-error}
+ |\widehat a_j-a_j|\le\Delta:=2^{-T},\qquad 0\le j\le K,
+ \qquad \widehat a_0\ge1/2.
+\end{equation}
+
+Now use the reciprocal recurrence with the same precision:
+\[
+ \widehat d_0=\operatorname{round}_P(1/\widehat a_0),\qquad
+ \widehat d_k=\operatorname{round}_P\left(
+ -\frac{\sum_{j=1}^k\widehat a_j\widehat d_{k-j}}
+        {\widehat a_0}\right).
+\]
+Each product is rounded before summation.  Put
+\(E_k=\max_{0\le j\le k}|\widehat d_j-d_j|\).
+Provided \(E_{k-1}\le1\), equations
+\eqref{eq:coefficient-norm}--\eqref{eq:coefficient-input-error}
+give
+\[
+ E_0\le3\Delta,\qquad
+ E_k\le2048E_{k-1}+(12K+8193)\Delta\quad(1\le k\le K).
+\]
+To see the second estimate, the error in the numerator is at most
+\(1024E_{k-1}+5k\Delta+k2^{-P}\).  Division by
+\(\widehat a_0\) multiplies this by at most two.  Changing
+\(1/a_0\) to \(1/\widehat a_0\) contributes at most
+\(8192\Delta\), since the exact numerator is bounded by 4096.
+The final rounding contributes at most \(2^{-P}\).
+
+Iterating the affine recurrence gives
+\[
+ E_k\le\left(3+\frac{12K+8193}{2047}\right)2^{11k}\Delta
+ \le2^{11k+14}(K+1)\Delta\quad(0\le k\le K).
+\]
+The choice of \(T\) makes this less than one at every index and
+gives \(E_K<2^{-m}\), validating the assumed bound throughout.
+The known error bounds supply a certified interval about
+\(\widehat d_K\).
+
+There are \(O(M^2+K^2)\) arithmetic operations.  Every operand
+has \(O(B+P+M)=O(B+K+m+1)\) bits, including exact binomial
+coefficients, products with the input dyadic rational, and rounded
+quotients.  Schoolbook arithmetic therefore costs
+\(O((B+K+m+1)^4)\) bit operations in total.
+\end{proof}
+
+The elementary exponential series on bounded real arguments can
+be evaluated by the same fixed-precision method in cubic bit work:
+use linearly many terms, linearly many guard bits, and round after
+each multiplication or division.  Their total amplification is
+bounded by a constant on the argument range used here.  A fourth-power
+bound therefore covers tanh, the bias probabilities, and their
+rational combinations.  Nonzero denominators require \(O(\bits)\)
+guard bits as established above.  The exact integers defining
+\(C_K\), and the factor \((5/4)^K\) in the arity acceptance
+probability, require \(O(K)\) additional bits.
+
+It follows from Lemma~\ref{lem:coefficient-four} that the accepted
+arity can be drawn with \(O(\bits^4)\) expected scalar bit work.
+Both the proposal arity and the precision stage have geometric
+tails, uniformly in the row and the context.  The mean number of
+proposals is 60.  All other scalar work at a reached call obeys the
+same bound.  Lemma~\ref{lem:stopping} then gives
+\begin{equation}\label{eq:fourth-power-overhead}
+ \text{expected online bit work}
+ =O\!\left(\bits^4\E N_{\rm calls}\right).
+\end{equation}
+The preprocessing and storage bounds are unchanged.

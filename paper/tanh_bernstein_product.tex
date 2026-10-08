@@ -1,0 +1,135 @@
+\subsection{Corrected factories in a fixed number of variables}
+\label{sec:fixed-rank-bernstein}
+
+This subsection and the next three prove
+Theorem~\ref{thm:main-bottleneck}. Lemma~\ref{lem:fixed-rank-bernstein}
+below is the analytic factory. Sections~\ref{sec:rank-two-critical}
+and~\ref{sec:rank-three-critical} apply it at ranks two and three.
+Section~\ref{sec:fixed-rank-batching} adds rectangular batching and
+reaches every fixed rank. The finite-width law for rank at most three
+is Corollary~\ref{cor:rank-three-finite-input}.
+
+Here and in Section~\ref{sec:rank-two-critical} we use two results
+from Section~\ref{sec:implicitrankone}: the scalar corrected factory of
+Lemma~\ref{lem:correctedbernstein}, and the hypergeometric recurrence
+of Theorem~\ref{thm:implicitrankone}.
+
+Let $B_{i,m}$ be the degree-$m$ Bernstein operator in coordinate
+$i$. For a derivative tensor, $\|\cdot\|_{1,\mathrm{ent}}$ means
+the sum of the absolute values of all its entries. The bounds below
+are uniform on the unit cube. Changing one coordinate operator at
+a time keeps each correction one-dimensional, even when the known
+function depends on several source biases.
+
+\begin{lemma}[A fixed-dimensional corrected factory]
+\label{lem:fixed-rank-bernstein}
+Fix $r\ge1$. Let $f\in C^{2r+2}([0,1]^r)$ with
+$\|f\|_\infty\le4/5$, and let nonnegative rational $M_k$ bound
+the uniform total derivative norm $\|D^kf\|_{1,\mathrm{ent}}$,
+$2\le k\le2r+2$. Suppose certified evaluations of its mixed
+derivatives through order $2r$ are available at rational arguments.
+For $0\le\ell<r$, put
+\[
+ S_\ell=M_{2+2\ell}+M_{3+2\ell}+M_{4+2\ell}.
+\]
+Choose the least power of two $m_0\ge\max\{2,2M_2\}$ satisfying
+\[
+ m_0^{\ell+2}\ge8^{1-\ell}r^2S_\ell,
+ \qquad0\le\ell<r.
+\]
+There is an exact factory for a sign of mean $f(p_1,\ldots,p_r)$
+using at most $rm_0$ independent source bits in expectation.
+At level $m$, each known correction coin requires one scalar
+hypergeometric average with $O_r(m)$ derivative evaluations.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Correct the scalar Bernstein operator in every coordinate and telescope
+their product one factor at a time. Binomial draws handle the unchanged
+coordinates. Only the changed coordinate requires degree elevation and a
+hypergeometric average. Total derivative norms absorb the sum over subsets
+of unchanged coordinates.
+
+\begin{proof}
+Put $v_i=p_i(1-p_i)$,
+$A_i=\frac12v_i\partial_{ii}$, and
+$T_{i,m}=B_{i,m}(I-A_i/m)$. Operators in distinct coordinates
+commute. For
+\[
+ P_m=\left(\prod_{i=1}^rT_{i,m}\right)f,
+ \qquad
+ G_m=\left(\prod_{i=1}^r(I-A_i/m)\right)f,
+\]
+the base coefficients are the grid values of $G_m$.
+Since a product of $k$ distinct $A_i$ has coefficient at most
+$8^{-k}$,
+\[
+ \|G_{m_0}-f\|_\infty
+ \le\sum_{k=1}^r\frac{M_{2k}}{(8m_0)^k}
+ \le\frac1{16}+\frac{r-1}{512r^2}<\frac3{40}.
+\]
+For $k\ge2$, use $M_{2k}\le S_{k-2}$ and the corresponding
+starting-level inequality. The sum of mixed derivatives indexed by
+subsets is a sub-sum of the full derivative tensor norm, so no
+additional binomial coefficient is needed. Thus
+$\|G_{m_0}\|_\infty<7/8$.
+
+The exact product identity is
+\begin{equation}
+ P_{2m}-P_m=
+ \sum_{j=1}^r
+ \left(\prod_{i<j}T_{i,m}\right)
+ (T_{j,2m}-T_{j,m})
+ \left(\prod_{i>j}T_{i,2m}\right)f.
+ \label{eq:fixed-rank-coordinate-telescope}
+\end{equation}
+For term $j$, draw a binomial total using $m$ trials in coordinates
+$i<j$ and $2m$ trials in coordinates $i\ge j$. Hold the other
+coordinates at their empirical values and apply the scalar
+coefficient construction of Lemma~\ref{lem:correctedbernstein} to
+\[
+ h=\left(\prod_{i\ne j}(I-A_i/t_i)\right)f,
+ \qquad t_i=m\ (i<j),\quad t_i=2m\ (i>j).
+\]
+The weights in this product do not depend on coordinate $j$.
+For $k=2,3,4$,
+\[
+ \|\partial_j^kh\|_\infty
+ \le\sum_{\ell=0}^{r-1}\frac{M_{k+2\ell}}{(8m)^\ell}.
+\]
+Consequently the absolute coefficient is at most
+$\overline A/(4m^2)$, where
+\[
+ \overline A=
+ \sum_{\ell=0}^{r-1}\frac{S_\ell}{(8m_0)^\ell}
+ \le\frac{m_0^2}{8r}.
+\]
+Evaluation uses mixed derivatives of order at most $2r$ and one
+hypergeometric average; its magnitude bound uses order $2r+2$.
+
+Give the base probability $7/8$ and give each of the $r$ correction
+types at each level $m=2^a m_0$ probability
+$c_m=\overline A/(4m^2)$. Their total probability is
+$r\overline A/(3m_0^2)\le1/24$. Return a fair sign on the
+remaining mass. Every coefficient normalized by its branch mass
+belongs to $[-1,1]$. Tensor Bernstein convergence and
+$G_m\to f$ show $P_m\to f$ uniformly, so the absolutely
+convergent identity~\eqref{eq:fixed-rank-coordinate-telescope}
+proves exactness. The level law is geometric and all known
+coefficient comparisons terminate almost surely.
+If $\overline A=0$, omit all correction branches; no normalization
+by a zero branch mass is performed.
+
+The base uses $rm_0$ source bits. Each correction uses at most
+$2rm$, and there are $r$ types. Hence
+\[
+ \mathbb E N
+ \le\frac{7r}{8}m_0+
+      2r^2\sum_{a\ge0}(2^am_0)c_{2^am_0}
+ =\frac{7r}{8}m_0+\frac{r^2\overline A}{m_0}
+ \le rm_0.
+\]
+All mixture parameters are rational. Integer-power comparisons
+compute $m_0$ without real root oracles.
+\end{proof}
+

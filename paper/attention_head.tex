@@ -1,0 +1,65 @@
+\subsection{A quadratic interface for bounded logits}
+\label{sec:quadratichead}
+
+The direct scaled Poisson race is sufficient for context independence.
+The bounded-logit promise also permits a polynomial dependence on the
+normalization radius of a logit source. This bounds the cost of passing from a normalized stream sign to the
+final categorical token.
+
+\begin{theorem}[Bounded logits from attenuated signs]
+\label{thm:quadraticscaledhead}
+Let $R\ge1$ be rational. Suppose a request for category $i$ returns
+an independent sign of mean $z_i/R$, where the promised logits obey
+$|z_i|\le1$. There is an exact softmax sampler using
+$O(R^2)$ expected source-sign requests and $O(R^2B^4)$ expected
+auxiliary bit work. The constants are absolute and do not depend on
+the number of categories, whose address length is included in $B$.
+\end{theorem}
+\paragraph{Proof idea.}
+A bounded tanh factory first produces a logistic coin with fixed slack.  Linear amplification and a geometric product turn it into an exponential acceptance coin, whose common scale cancels in the final categorical race.
+
+\begin{proof}
+From a sign of mean $z_i/R$, the biased row sampler in
+Corollary~\ref{cor:comptanhrow}, with bias $-1$ and coefficient
+$R/2$, produces the coin
+\[
+ q_i=\frac{1+\tanh(z_i/2-1)}2
+     =\frac{e^{z_i-2}}{1+e^{z_i-2}}.
+\]
+Its expected source count is at most
+$R(1+R/2)\le3R^2/2$, and its expected auxiliary work is $O(R^2B^4)$.
+Since $z_i\le1$ and $e>2$, one has $q_i\le1/(1+e)<1/3$.
+Huber's linear factory with multiplier two and slack $1/3$ therefore
+returns a $2q_i$-coin using at most $57$ $q_i$-coins in expectation.
+Lemma~\ref{lem:rmslinearbits} supplies a constant expected auxiliary
+bit bound for this fixed multiplier and slack.
+
+Draw $K\ge1$ with $\Pr(K=k)=2^{-k}$ and test $K$ independent
+$2q_i$-coins, stopping at the first failure. The probability of
+success is
+\[
+ \sum_{k=1}^{\infty}2^{-k}(2q_i)^k
+ =\frac{q_i}{1-q_i}=e^{z_i-2}.
+\]
+The expected number of tested amplified coins is at most
+$\E K=2$, so the expected number of $q_i$-coins is at most $114$.
+This calculation charges each fresh call before its own randomness
+and remains valid when its cost and output are correlated.
+
+Propose a category uniformly and accept it using this success coin.
+The first accepted category has the softmax law, since the common
+factor $e^{-2}$ cancels. A trial succeeds with probability at least
+$e^{-3}$, so the mean number of trials is at most $e^3$.
+The total expected number of source requests is bounded by
+\[
+ 114e^3\frac{3R^2}{2}=171e^3R^2<4096R^2.
+\]
+For example $e<11/4$ implies $e^3<21$ and $171\cdot21<4096$.
+All geometric and fixed-parameter amplification costs have finite
+moments. The row sampler gives its stated uniform finite-bit bound
+conditional on the requested category. Predictable charging over
+the race proves $O(R^2B^4)$ auxiliary work. Almost-sure termination
+follows from the component factories and the positive trial
+acceptance probability.
+\end{proof}
+

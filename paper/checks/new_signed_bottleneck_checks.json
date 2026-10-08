@@ -1,0 +1,29 @@
+{
+  "precision_decimal_digits": 120,
+  "total_checks": 6381,
+  "counts": {
+    "gate_range": 15,
+    "source_constant": 15,
+    "normalized_radius": 105,
+    "derivative_bounds": 315,
+    "strip_imaginary": 2604,
+    "strip_modulus": 2604,
+    "taylor_constant": 75,
+    "taylor_first": 75,
+    "taylor_second": 75,
+    "taylor_value_tail": 225,
+    "taylor_second_tail": 225,
+    "cache_miss_cancellation": 48
+  },
+  "max_absolute_identity_residuals": {
+    "taylor_constant": "2.753170814463187e-121",
+    "taylor_first": "4.538193650214045e-123",
+    "taylor_second": "1.890914020922519e-124",
+    "cache_miss_cancellation": "0.0"
+  },
+  "largest_truncation_error_over_proved_bound": {
+    "value_tail": "3.001220140237987e-53",
+    "second_tail": "1.395091300464969e-53"
+  },
+  "status": "passed; finite deterministic checks; not interval certified; no sampler benchmark"
+}

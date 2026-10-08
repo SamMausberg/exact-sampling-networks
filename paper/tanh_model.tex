@@ -1,0 +1,135 @@
+\subsection{The tanh network model and quantitative bounds}\label{app:tanhmodel}
+Let \(n\ge2\), \(D\ge1\), and \(b\ge1\). A network has activations
+\begin{equation}\label{eq:network}
+h_{0,j}=x_j\in\{-1,1\},\qquad
+h_{\ell,i}=\tanh\!\left(b_{\ell,i}
++\sum_{j=1}^n w_{\ell,ij}h_{\ell-1,j}\right),
+\quad 1\le\ell\le D.
+\end{equation}
+All parameters are multiples of \(2^{-b}\), and
+\[
+|b_{\ell,i}|\le1,\qquad
+S:=\max_{\ell,i}\sum_j|w_{\ell,ij}|\le s.
+\]
+The exact row norm \(S\) is computed from the weights. The target
+bit has probability \((1+h_{D,1}(x))/2\).
+
+Preprocessing, probes, and online work are charged as in
+Section~\ref{sec:models}, including every precision refinement.
+A \emph{recursive call} is an invocation of the
+normalized sampler for a neuron or input, including a repeated
+invocation of the same coordinate. The root is counted as well.
+Write
+\begin{equation}\label{eq:bitlength}
+\bits=b+\lceil\log_2(n+D+2)\rceil+16.
+\end{equation}
+This is at most the bit scale \(B\) of \eqref{eq:main-B}, so every
+bound stated here with \(\bits\) also holds with \(B\). A plain \(B\)
+in a lemma of this appendix bounds the encoding lengths of the
+parameters and addresses that the lemma uses.
+
+\begin{theorem}[Exact sampling upper bound]\label{thm:upper}
+One uniform algorithm samples the target exactly for every network
+with \(S\le2\), and terminates almost surely. Deterministic preprocessing
+uses \(O(Dn^2\bits^6)\) bit operations and \(O(Dn^2\bits)\) stored bits.
+Uniformly over all contexts, with \(\delta=(S-1)_+\),
+\begin{equation}\label{eq:maincall}
+\E N_{\rm calls}\le80(D+1)^2e^{51\delta D}.
+\end{equation}
+Expected online bit work is
+\begin{equation}\label{eq:mainbit}
+O\!\left(\bits^4(D+1)^2e^{51\delta D}\right).
+\end{equation}
+The constants in these \(O\)-bounds are absolute.
+\end{theorem}
+
+The explicit power \(2\) in \eqref{eq:maincall} counts recursive
+calls. Equation \eqref{eq:mainbit} also charges the manipulation of
+finite parameters and refinable scalar probabilities. A stable
+fixed-precision coefficient recurrence proves the fourth-power
+overhead in Section~\ref{sec:fixedprecision}.
+For \(S\le1\), Theorem~\ref{thm:fusedcritical} lowers the power of
+depth in \eqref{eq:maincall} and \eqref{eq:mainbit} to \(35/32\),
+and Theorem~\ref{thm:zero-bias-linear} gives a linear bound when all
+biases are zero.
+
+Our lower bounds hold even with unlimited preprocessing. Set
+\[
+m=2^{\lfloor\log_2n\rfloor},\qquad
+F_{a,0}(z)=z,\qquad F_{a,d+1}(z)=\tanh(aF_{a,d}(z)).
+\]
+If \(a/m\) is on the parameter grid, a legal network realizes
+\(F_{a,D}(m^{-1}\sum_{j=1}^m x_j)\): the first distinguished row
+has weights \(a/m\), and each later distinguished row has one
+incoming weight \(a\). All other neurons and all biases are zero.
+
+\begin{theorem}[Universal query lower bounds]\label{thm:lower}
+For this network and \(a>0\), every exact sampler satisfies
+\begin{equation}\label{eq:lowerexact}
+\sup_x\E[Q\mid x]\ge
+\frac{a^{2D}}{1+(3m-2)a^{2D}H_D/m^2},
+\qquad H_D=\sum_{j=0}^{D-1}a^{-2j},
+\end{equation}
+where \(Q\) counts distinct input probes. If \(a>1\), then
+\begin{equation}\label{eq:lowersuper}
+\sup_x\E[Q\mid x]\ge
+\frac{a^2-1}{4a^2-1}\min\{a^{2D},m\}.
+\end{equation}
+At \(a=1\) and \(1\le D\le m\),
+\begin{equation}\label{eq:lowercritical}
+\sup_x\E[Q\mid x]\ge\frac{\sqrt D}{100}.
+\end{equation}
+These bounds apply to every almost surely terminating exact algorithm.
+\end{theorem}
+
+\begin{remark}[Other averaging widths]\label{rem:lower-general-m}
+The proof in Section~\ref{sec:lower} uses \(m\) only through the
+output \(F_{a,D}(m^{-1}\sum_{j=1}^m x_j)\) and the condition
+\(D\le m\) in \eqref{eq:lowercritical}. Theorem~\ref{thm:lower}
+therefore holds for every integer \(1\le m\le n\), for example every
+power of two \(m\le n\), whenever \(a/m\) is on the parameter grid.
+It also holds for every legal network with this output, whatever its
+other weights.
+\end{remark}
+
+Specialize now to \(L=\lceil\log_2n\rceil\), \(D=L\), and \(b=20L\).
+Let \(\cost_n(s)\) be the infimum of worst-network, worst-context
+expected online bit work among uniform exact samplers with
+\(O(Ln^2\log^6n)\) preprocessing time and storage. The norm \(s\)
+is fixed as \(n\) grows.
+
+\begin{corollary}[The norm threshold]\label{cor:threshold}
+For every fixed \(0\le s\le1\), \(\cost_n(s)=\log^{O(1)}n\).
+For every fixed \(s>1\),
+\begin{equation}\label{eq:dichotomy}
+\cost_n(s)=n^{\Theta(\min\{\log s,1\})}.
+\end{equation}
+Explicitly, for \(1<s\le2\),
+\begin{equation}\label{eq:explicitexponents}
+\Omega_s\!\left(n^{\min\{2\log_2s,1\}}\right)
+\le\cost_n(s)\le
+\widetilde O_s\!\left(\min\{n^2,n^{51(s-1)/\log2}\}\right).
+\end{equation}
+For larger fixed \(s\), \(\widetilde O_s(n^2)\) is an upper bound.
+\end{corollary}
+
+\begin{corollary}[The transition window]\label{cor:window}
+Let \(s_n=1+\delta_n\), \(0\le\delta_n\le1\), with \(D=L\) and
+\(b=20L\). If \(\delta_nL=O(\log L)\), the upper bound is
+polylogarithmic. If \(\delta_nL/\log L\to\infty\), no polylogarithmic
+expected online bound is possible. Quantitatively, if
+\(\delta L\ge4\log(30L)\), then for all sufficiently large \(L\)
+some legal network and context require at least \(e^{\delta L/4}\)
+expected input probes.
+\end{corollary}
+
+\begin{proposition}[Separation from numerical evaluation]\label{prop:evaluation}
+For the critical mean-chain network
+\(F_{1,L}(m^{-1}\sum_jx_j)\), every always-correct algorithm that
+returns its activation with absolute error at most \(2^{-20L}\)
+must probe all \(m\ge n/2\) relevant inputs. Even an evaluator with
+success probability at least \(2/3\) on every context requires
+\(m/3\) probes in expectation under uniform inputs. Exact output
+sampling has polylogarithmic expected online bit work.
+\end{proposition}
+

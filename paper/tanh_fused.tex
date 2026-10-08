@@ -1,0 +1,481 @@
+\subsubsection{An exact scalar factory}
+
+From here on fix the absolute constants
+\[
+ \eta=1/64,\qquad \alpha=65/64,\qquad
+ \varphi(z)=\sqrt{\alpha-z^2},\qquad
+ c_0=17/16,\qquad M_0=2^{22},\qquad J_0=2^{25}.
+\]
+Consider a row with \(0<\rho\le1/32\) and \(0\le a\le4\rho\).
+Negative \(a\) is handled by complementing source and output signs.
+Write
+\[
+ q=\tanh\rho,\quad t=\tanh a,\quad c=tq,\quad
+ G(z)=\tanh(\rho z)/q,\quad
+ F(z)=\frac{G(z)+c}{1+cG(z)}.
+\]
+The function
+\[
+ H(z)=\frac{F(z)-z}{1-z^2}=\sum_{k\ge0}h_kz^k
+\]
+has removable singularities at \(z=\pm1\).
+
+\begin{lemma}[Coefficients of the correction]\label{lem:fusedcoeff}
+The function \(H\) is analytic on a neighborhood of the closed
+complex disk \(|z|\le2\). Its first coefficients obey
+\[
+ h_0=c\ge0,\qquad h_1=(1-c^2)\rho/q-1\ge0,
+ \qquad h_0\le4\rho^2,\quad h_1\le\rho^2/3.
+\]
+For \(k\ge2\),
+\begin{equation}\label{eq:fusedtail}
+ |h_k|\le200\rho^4\,2^{-k}.
+\end{equation}
+Also, with \(u=t/\rho\in[0,4]\),
+\[
+ |h_0-u\rho^2|\le2\rho^4,
+ \qquad |h_1-\rho^2/3|\le100\rho^4.
+\]
+\end{lemma}
+\paragraph{Proof idea.}
+Expand the scalar correction on a complex disk where all denominators stay
+away from zero. Cauchy's estimate bounds the entire coefficient tail, while
+direct differentiation identifies the two coefficients handled separately by
+the factory.
+
+\begin{proof}
+We use the complex bound \eqref{eq:tanhfifth}.
+On \(|z|=2\), use \(q/\rho\ge1-\rho^2/3\) to obtain
+\[
+ \left|G(z)-z-\frac{\rho^2}3z(1-z^2)\right|
+ \le200\rho^4,\quad |G(z)-z|\le4\rho^2,\quad |G(z)|<3.
+\]
+Here the two fifth-order Taylor remainders, after division by
+\(\rho\), total at most \(170\rho^4\); the denominator and
+the quadratic correction increase this to less than
+\(200\rho^4\).  The denominator \(1+cG\) has modulus at
+least \(1-12\rho^2>49/50\). The sharper numerator bound
+\(|G+c|\le2+8\rho^2\) also gives
+\[
+ |F(z)|\le\frac{2+8\rho^2}{1-12\rho^2}<3
+ \qquad(|z|\le2).
+\]
+Moreover
+\[
+ F-z-\frac{\rho^2}3z(1-z^2)-c(1-z^2)
+ =G-z-\frac{\rho^2}3z(1-z^2)
+ +\frac{c\{z^2-G^2-cG(1-z^2)\}}{1+cG}.
+\]
+The last fraction has modulus at most
+\(4\rho^2(20\rho^2+60\rho^2)/(49/50)\).
+The entire expression is therefore bounded by \(600\rho^4\).
+On this circle \(|1-z^2|\ge3\), so
+\begin{equation}\label{eq:fusedHbound}
+ |H(z)-c-(\rho^2/3)z|\le200\rho^4.
+\end{equation}
+The denominators above are nonzero throughout the disk.  Since
+\(F(1)=1\) and \(F(-1)=-1\), its apparent singularities in
+\(H\) are removable.  Cauchy's estimate now proves
+\eqref{eq:fusedtail} and the assertion about \(h_1\).
+
+Direct differentiation at zero gives the displayed values of
+\(h_0,h_1\).  The real Taylor bound implies
+\(q\le\rho(1-\rho^2/4)\), whereas
+\(\rho/q\le1+\rho^2/3\) by \eqref{eq:xcothx}. Consequently
+\[
+ h_1\ge\rho^2/4-17\rho^4>0,
+\]
+using \(c^2\le16\rho^4\) and \(\rho/q\le17/16\).
+Finally \(|tq-t\rho|\le4\rho^4/3\), proving the remaining
+estimate.
+\end{proof}
+
+Here is an explicit factory for \(F\).  Read one source sign
+\(X_1\).  Put \(A=h_0\), \(B=h_1\), and \(e_0=200\rho^4\).
+After \(X_1=+1\), choose a majority-of-three continuation with
+probability \(2(B-A)_+\).  After \(X_1=-1\), choose such a
+continuation with probability \(2B+2\min(A,B)\), or an OR
+continuation with probability \(2(A-B)_+\).  A majority
+continuation stops as soon as two signs agree.  An OR continuation
+after the negative first sign reads one further sign and returns it.
+
+In either case, reserve the additional probability \(e_0\) for a
+tail proposal.  Otherwise return \(X_1\).  For a tail proposal,
+draw \(K\ge2\) with \(\Pr(K=k)=2^{1-k}\), and choose its
+positive or negative correction with respective probabilities
+\[
+ \frac{(h_k)_+}{200\rho^4 2^{-k}},\qquad
+ \frac{(-h_k)_+}{200\rho^4 2^{-k}}.
+\]
+On rejection return \(X_1\).  On acceptance, read \(X_2\).
+If \(X_1=X_2\), return their common sign.  Otherwise return
+the chosen sign times the product of \(k\) fresh source signs.
+All category probabilities are valid: their total is at most
+\(9\rho^2+200\rho^4<1/100\).  The positive-part formulas
+avoid deciding an exact equality between computable real numbers.
+
+\begin{lemma}[Exactness and source cost]\label{lem:fusedfactory}
+The factory terminates almost surely and has mean \(F(z)\).
+Define
+\[
+ E(A,B,z)=B(3-z^2)-2Az+(A-B)_+(1+z).
+\]
+Its expected number of source signs is
+\[
+ A_{\mathrm f}(\rho,t,z)
+ =1+E(h_0,h_1,z)
+   +\sum_{k\ge2}|h_k|\{2+k(1-z^2)\}.
+\]
+In particular,
+\begin{equation}\label{eq:fusedarity}
+ A_{\mathrm f}\le1+\rho^2 e(u,z)+1000\rho^4,
+\end{equation}
+where
+\[
+ e(u,z)=
+ \begin{cases}
+  1-z^2/3-2uz,&0\le u\le1/3,\\
+  2/3-z/3-z^2/3+u(1-z),&u\ge1/3.
+ \end{cases}
+\]
+\end{lemma}
+\paragraph{Proof idea.}
+Condition on the first source sign to compute the majority and OR
+corrections. Opposite first signs expose the product correction, whose
+geometric mixture supplies the remaining Taylor series. The same
+conditioning counts every additional source request.
+
+\begin{proof}
+Conditioning on \(X_1\), the majority and OR continuations
+change its mean by precisely \((1-z^2)(A+Bz)\).
+The signed tail component has mean
+\(z\pm(1-z^2)z^k/2\), since two source signs disagree with
+probability \((1-z^2)/2\).  Its unconditional probability is
+\(2(h_k)_+\) or \(2(-h_k)_+\), independently of \(X_1\).
+Absolute convergence therefore gives mean
+\(z+(1-z^2)H(z)=F(z)\).
+
+Conditional on a positive first sign, a majority continuation
+uses \((3-z)/2\) additional signs on average; after a negative
+one it uses \((3+z)/2\).  The OR continuation uses one.
+This yields \(E(A,B,z)\).  A tail component uses, beyond the
+first sign, \(1+k(1-z^2)/2\) signs on average, proving the
+exact cost formula.  Its geometric index is finite almost surely.
+
+The function \(E\) is continuous, with separate Lipschitz
+constants \(2\) in \(A\) and \(3\) in \(B\).  Hence the first
+two coefficient errors cost at most \(304\rho^4\).
+The tail costs at most
+\[
+ 200\rho^4\sum_{k\ge2}(k+2)2^{-k}=500\rho^4.
+\]
+Substitution of \((A,B)=(u\rho^2,\rho^2/3)\) gives
+\eqref{eq:fusedarity}.  Known scalar decisions terminate almost
+surely by the same interval-comparison lemma as the original
+factory.
+\end{proof}
+
+\subsubsection{The weighted estimate}
+
+Let \(k=(1-t^2)/(1-t^2q^2)\).  After the internal gate, the
+normalized mean before the center error is \(v=kF(z)\).
+As in Section~\ref{app:potential}, concavity gives
+\(\sum_jp_j\varphi(v_j)\le\varphi(z)\), and the ratio
+\(\theta/\varphi(\theta v)\) increases with \(\theta\).
+It therefore suffices to bound
+\[
+ W_{\mathrm f}=A_{\mathrm f}k\frac{\varphi(z)}{\varphi(kF(z))}.
+\]
+
+\begin{lemma}[A fixed potential bound]\label{lem:fusedlocal}
+For \(0<\rho\le1/32\) and \(0\le a\le4\rho\),
+\begin{equation}\label{eq:fusedlocal}
+ \log W_{\mathrm f}\le\frac{17}{16}\rho^2+2^{22}\rho^4.
+\end{equation}
+For \(a>4\rho\), the original majority and race factory obeys
+the same weighted estimate.  Negative biases are complemented.
+The center error multiplies the estimate by
+\(\exp(64\varepsilon/r_\ell)\).
+\end{lemma}
+\paragraph{Proof idea.}
+Combine the local source expansion with the logarithm of the potential
+ratio. Its leading quadratic form can be maximized explicitly over the
+normalized bias; a uniform fourth-order remainder controls the error.
+
+\begin{proof}
+Put \(d=\alpha-z^2\), and
+\[
+ b(u,z)=(1-z^2)(z/3+u)-u^2z.
+\]
+The bounds in Lemma~\ref{lem:fusedcoeff} imply
+\[
+ |kF(z)-z-\rho^2b(u,z)|\le1000\rho^4,
+ \qquad |kF(z)-z|\le22\rho^2.
+\]
+For completeness, the first remainder is at most
+\(602\rho^4+80\rho^4+17\rho^4<700\rho^4\):
+these are respectively the remainder in \(F-z\), the term
+\(t^2(F-z)\), and the difference \(k-(1-t^2)\).
+Here \(|F-z|\le5\rho^2\), \(|b|<21\), and
+\(0\le k-(1-t^2)\le17\rho^4\).
+Also \(\log k\le-u^2\rho^2+17\rho^4\).
+Taylor's theorem for \(\log\varphi\), whose first and second
+derivatives have absolute bounds \(1/\eta\) and
+\(9/(4\eta^2)\), gives
+\[
+ \log W_{\mathrm f}
+ \le C_\eta(u,z)\rho^2+
+ \left(1017+\frac{1000}\eta+
+                   \frac{1089}{2\eta^2}\right)\rho^4,
+ \qquad
+ C_\eta=e(u,z)-u^2+\frac{zb(u,z)}d.
+\]
+At \(\eta=1/64\), the coefficient of \(\rho^4\) is
+\(2295289<2^{22}\).
+
+We show \(C_\eta\le17/16\) throughout \(0<\eta\le1/64\).
+For \(u\le1/3\),
+\[
+ C_\eta=1-\frac{\eta z^2}{3d}
+       -z\left(1+\frac\eta d\right)u-\frac\alpha d u^2.
+\]
+If \(z\ge0\), this is at most one.  Otherwise maximize the
+quadratic over all real \(u\).  With \(y=z^2\), the desired
+bound is equivalent to
+\[
+ P_\eta(y)=3(1-y)(2y-1)^2
+       +\eta(6-35y+48y^2)+\eta^2(3-32y)\ge0.
+\]
+For \(y=1/2+v\), \(0\le v\le1/2\), the first term is
+nonnegative, the coefficient of \(\eta\) is
+\(1/2+13v+48v^2\ge1/2\), and that of \(\eta^2\) is at
+least \(-29\).  Thus \(P_\eta\ge\eta/2-29\eta^2>0\).
+For \(y=1/2-v\), \(0\le v\le1/2\),
+\[
+ P_\eta\ge6v^2-13\eta v+\eta/2-13\eta^2
+ =6(v-13\eta/12)^2+\eta/2-481\eta^2/24>0.
+\]
+Both inequalities use only \(\eta\le1/64\).
+
+For \(u\ge1/3\),
+\[
+ C_\eta=2/3-z/3-\frac{\eta z^2}{3d}
+       +\left(1-\frac{\eta z}d\right)u-\frac\alpha d u^2.
+\]
+If its unconstrained maximum occurs below \(1/3\), the maximum
+on the half-line is attained at the boundary, already covered.
+Otherwise \(z^2+\eta z\le\alpha/3\), implying \(z\ge-3/5\).
+Completing the square and discarding the nonpositive term
+\(\eta z^2(\eta/(4\alpha)-1/3)/d\) gives
+\[
+ C_\eta\le11/12-
+      \left(1/3+\frac\eta{2\alpha}\right)z-
+      \frac{z^2}{4\alpha}.
+\]
+This quadratic decreases for \(z\ge-3/5\).  Its value at
+\(-3/5\) is
+\(67/60+(30\eta-9)/(100\alpha)\le21/20<17/16\), since
+\(\eta\le1/64<7/110\).  This proves the small-bias assertion.
+
+For \(a>4\rho\), monotonicity and
+\(\tanh(4\rho)\ge4\rho-(4\rho)^3/3\) give
+\(t\ge(7/2)q\).  Lemma~\ref{lem:potential-majority-bias} gives
+\[
+ B\le\frac{-(1-2q^2)t^2+3tq}{1-q^2}\le0,
+\]
+because \(-1/2+7q^2<0\).  Its remaining majority contribution
+is at most \(\rho^2+4\rho^4/\eta^2\), covered by
+\eqref{eq:fusedlocal}.  The center shift and the factor
+\(\theta=q/r_\ell\le1\) are treated exactly as in
+\eqref{eq:potentialW}.
+\end{proof}
+
+\subsubsection{Consequences for depth}
+
+Use the original factory at levels \(\ell\le J_0\), and the
+new scalar factory above \(J_0\) when \(\rho\le1/32\) and
+\(|a|\le4\rho\).  All tests use stored rational quantities.
+Outside this case retain the original factory.
+
+\begin{theorem}[Improved critical bound]\label{thm:fusedcritical}%
+\label{thm:criticalrefined}
+For row norms at most one, this sampler is exact and satisfies
+\[
+ \E N_{\rm calls}=O((D+1)^{35/32}).
+\]
+Its preprocessing obeys the original bound, and its expected
+online bit work is \(O(\bits^4(D+1)^{35/32})\).
+Preprocessing may select between this bound and the quadratic
+critical bound of Theorem~\ref{thm:upper}.
+\end{theorem}
+\paragraph{Proof idea.}
+Use the fused estimate only above a fixed cutoff. Weighted offspring
+products across those layers give a power of depth, and the final output
+gate reduces that power by one half. The original sampler bounds the finite
+prefix.
+
+\begin{proof}
+When \(D>J_0\), every squared row radius above level \(J_0\)
+is at most \(2/J_0<1/1024\).  On this interval the derivative
+of \(c_0v+M_0v^2\) is at most
+\(17/16+4M_0/J_0=25/16<2\).
+The cumulative rounding and center terms are each less than
+\(1/100\), as in Section~\ref{app:potential}.
+The ideal fourth-power contribution to a suffix starting at
+\(k\ge J_0\) is at most
+\[
+ \frac{9M_0}{4(k+1)}\le\frac9{32}<1.
+\]
+Consequently its weighted offspring product is at most
+\[
+ e^2\left(\frac{D+1}{k+1}\right)^{51/32}.
+\]
+The original normalized subtree bound
+\(36(J_0+1)^{5/2}\) applies below the cutoff because those
+levels retain the original factory.  Keep the root factor
+\(r_D\le2/\sqrt{D+1}\).  Since
+\(\max\varphi/\min\varphi=\sqrt{65}<9\),
+\(e^2<8\), and \(\sum_{j\ge1}j^{-51/32}<3\),
+\[
+ \E N_{\rm calls}
+ \le5617(J_0+1)^{29/32}(D+1)^{35/32}
+ <10^{11}(D+1)^{35/32}.
+\]
+The final inequality uses \(J_0+1\le2^{26}\), so
+\((J_0+1)^{29/32}<2^{24}\).
+For \(D\le J_0\), the original \(80(D+1)^2\) bound is
+smaller than the same displayed estimate.
+Conditional charging and almost-sure termination are unchanged.
+\end{proof}
+
+\begin{proposition}[Improved fixed supercritical rate]
+\label{prop:fusedrate}
+For \(s=1+\delta\), \(0<\delta\le2^{-16}\), let
+\(r_*\) be the positive fixed point of \(r=\tanh(sr)\), and
+put $u_*=sr_*$. There is an explicitly computable rate
+$\Gamma_s=(17/16)u_*^2+O(u_*^4)$ such that, for every network
+with actual maximum row norm $S\le s$, the sampler with reference
+gain $\max\{1,S\}$ obeys
+\[
+ \E N_{\rm calls}=O_s(e^{D\Gamma_s}),\qquad
+ \frac{51}{16}\delta\le\Gamma_s
+ \le\frac{51}{16}\delta+O(\delta^2).
+\]
+The constants in the rate estimates are absolute; explicit choices
+for the rate and prefactor are given in the proof.
+The prefactor is for fixed \(s\); the original uniform
+transition-window theorem remains in force.
+\end{proposition}
+\paragraph{Proof idea.}
+Compare all sufficiently late radii with the positive fixed point.
+Contraction bounds the accumulated transient error, so the limiting weighted
+offspring factor determines the exponential rate.
+
+\begin{proof}
+Use
+\[
+ \Gamma_s=\frac{17}{16}u_*^2+2^{22}u_*^4,\qquad H_0=2^{14},
+\]
+and the computable prefactor
+\[
+ C_\delta=1+\sqrt{65}
+ \exp\left(1+\frac{3H_0}{200}+\frac{8H_0}{\delta}\right)
+ \left(\exp(23(J_0+1))+
+                  \frac1{1-\exp(-51\delta/16)}\right).
+\]
+For \(D>J_0\) and \(j\ge J_0\), the comparison radii satisfy
+\[
+ s^2r_j^2\le4\delta+6/J_0+24/(100J_0)<1/1024.
+\]
+On \([0,1/1024]\), the derivative of
+\(17v/16+2^{22}v^2\) is at most
+\(17/16+8192<H_0\).
+Write \(\lambda=s(1-r_*^2)\).  The ideal-radius contraction
+and the rounding proof give the suffix bound
+\[
+ \exp\left(1+3H_0/200+8H_0/\delta\right)
+ \exp((D-k)\Gamma_s).
+\]
+Here \(1-\lambda\ge\delta\), as in
+Lemma~\ref{lem:nearcriticalgap}.  Below \(J_0\), the
+original normalized subtree has mean at most
+\(\exp(23(J_0+1))\).  Weighted charging and a geometric sum
+prove the stated bound, including \(D\le J_0\).
+Finally
+\(3\delta\le u_*^2\le3\delta+(3/2)\delta^2\), and
+\(3+(3/2)\delta\le25/8\).  Thus the quadratic error is at
+most
+\[
+ \left(51/32+2^{22}(25/8)^2\right)\delta^2
+ <40960002\delta^2.
+\]
+\end{proof}
+
+\subsubsection{Finite-bit implementation}
+
+Only the small-radius branch is new.  The probabilities
+\(h_0,h_1\), their positive parts, and their minimum are
+computable with the existing scalar interval oracles; all these
+operations are Lipschitz.  No sign or equality oracle is required.
+For the tail coefficients there is a direct formal-series oracle.
+Set \(A=\rho/q\) and
+\[
+ X(z)=\frac{e^{2\rho z}-1}{2\rho}
+      =\sum_{k\ge1}\frac{(2\rho)^{k-1}}{k!}z^k.
+\]
+Then
+\[
+ F(z)=\frac{c+(A+c\rho)X(z)}{1+(\rho+cA)X(z)}.
+\]
+Its denominator has constant coefficient one.  Truncating at
+degree \(K\), applying the quotient recurrence, and then
+dividing \(F-z\) formally by \(1-z^2\) computes \(h_K\).
+The computation rounds after each arithmetic operation, as in
+Lemma~\ref{lem:coefficient-four}; it never carries a growing
+common rational denominator.
+
+Here are explicit error bounds for this new quotient.  Let
+\(\zeta=2^{-V}\) be the rounding unit and first enclose \(A,c\)
+to absolute error \(\zeta\).  Computing \(A\) needs only
+\(O(\bits)\) additional guard bits because \(q\ge\rho/2\)
+and a nonzero dyadic row has \(\log(1/\rho)=O(\bits)\).
+The recurrence
+\(x_1=1\), \(x_{j+1}=2\rho x_j/(j+1)\)
+has multipliers at most \(1/32\), so each computed \(x_j\)
+has error at most \(2\zeta\).  The numerator and denominator
+coefficients of the displayed quotient then have error at most
+\(10\zeta\) apiece.  Its true nonconstant denominator norm
+is less than \(1/8\):
+\[
+ \rho+cA<1/16,\qquad \sum_{j\ge1}|x_j|<2.
+\]
+Also \(|F(z)|<3\) on \(|z|=2\), so every true coefficient
+of \(F\) has absolute value at most three.
+
+If the previous coefficient errors are at most \(E\le1\),
+one quotient step has error at most
+\(E/8+(50K+20)\zeta\), including the rounded products and
+sum.  Induction bounds every error through degree \(K\) by
+\(100(K+1)\zeta\).  The final recurrence
+\(h_j=F_j-\mathbf1_{\{j=1\}}+h_{j-2}\), with missing
+negative-index terms zero, gives error at most
+\(101(K+1)^2\zeta\).  Taking
+\(V=m+4\bits+4K+64\), and replacing \(m\) by \(m+2\)
+for an enclosure of width \(2^{-m}\), validates the preceding
+induction and supplies the requested certificate.
+There are \(O(K^2)\) operations on
+\(O(\bits+K+m)\)-bit integers.  Schoolbook multiplication and
+division therefore give \(O((\bits+K+m)^4)\) bit work.
+The acceptance denominator \(200\rho^4 2^{-K}\) requires only
+\(O(\bits+K)\) further precision bits, preserving that bound.
+
+The geometric tail proposal gives finite moments of every order
+for \(k\).  Interval comparisons have geometric precision tails.
+The conditional distribution of a coefficient sign is implemented
+through its two nonnegative parts in the displayed probabilities.
+An accepted branch never requires resolving whether a zero
+coefficient is positive.  The original reached-trial lemma charges
+all arithmetic, rejected proposals, and subsequent source work.
+Thus a reached invocation costs \(O(\bits^4)\) expected scalar
+bit work, including every precision refinement.  No table of
+coefficients is added to preprocessing storage.

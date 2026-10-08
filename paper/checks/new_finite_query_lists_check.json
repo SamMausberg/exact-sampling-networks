@@ -1,0 +1,6 @@
+{
+  "precision_decimal_digits": 120,
+  "all_checks_passed": true,
+  "total_cases": 5240,
+  "status": "deterministic consistency checks only"
+}

@@ -1,0 +1,145 @@
+\section{Numerical checks and Lean formalization}
+\label{app:checks}
+
+\subsection{Deterministic checks}
+
+The mathematical proofs do not use numerical premises.
+The accompanying scripts provide independent consistency checks
+for selected identities and inequalities. Exact rational
+arithmetic is used for the finite hypergeometric,
+operator, and matrix identities. The main analytic identity checks use
+120 decimal digits, and positional reduction uses 450 digits.
+The new carrier recurrence checks use binary64 arithmetic with
+the tolerances recorded in their JSON report. These finite checks do not certify an inequality on a
+continuum and do not measure an implementation's sampling
+runtime.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}p{.36\textwidth}Y@{}}
+\toprule
+Construction & Recorded checks\\
+\midrule
+Indexed lower bound &
+93,262 score, embedding, probability-gap, and exponent checks\\
+Dynamic fixed-rank grid &
+15 coordinate charts; 7,425 cell-score checks;
+four rank-growth streams; one 200-record near-subspace case\\
+Moment decoder &
+108 attention-coordinate checks; eight background replay
+schedules; 52 geometric-moment inequalities\\
+Positional rotations &
+108 reduction cases, including 34 period-boundary cases
+with a different computed period quotient\\
+Corrected Bernstein factory &
+624 hypergeometric moment cases; 4,900 ratio checks;
+3,960 coefficient bounds; 800 degree-elevation identities\\
+Signed scalar bottleneck &
+6,381 checks on fifteen signed networks through depth sixteen,
+including the complex strip and Taylor value/derivative bounds\\
+Two-source Bernstein factory &
+117 operator identities; 3,159 coefficient bounds;
+957 hypergeometric fourth-moment identities\\
+Three-source factory and batching &
+32 operator identities; 14,336 coefficient bounds;
+6,561 seven-product matrix identities\\
+Column-envelope correction &
+27 antithetic identities; 1,728 covariance-pair identities;
+324 third-moment entries; 90 tilted laws over 2,232 signed endpoints\\
+Gaussian RMS factory &
+543 error-function, sine, Gaussian, and normalization identities\\
+Scalar normalization law &
+1,380 geometric-majority, curvature, and radius checks\\
+Additive and affine FFN families &
+Recorded rational recurrence and high-precision floor,
+amplification, and bounded-readout checks\\
+New carrier gain law &
+108 binary64 scenarios; 207,100 reciprocal-square comparisons\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Each numerical check script writes a JSON report with its precision,
+case counts, and limitations. For example, the largest recorded
+Taylor identity residual in the signed-bottleneck checks was
+$2.76\cdot10^{-121}$ after rounding upward for reporting.
+The associated truncation errors were below the analytic
+bounds in every tested case. This is numerical evidence
+consistent with the proof.
+
+The two-source and three-source scripts use exact rational and
+integer arithmetic throughout, without floating-point tolerances.
+Every recorded case passed. In both coefficient tests, the largest
+ratio of the tested coefficient magnitude to its proposed envelope
+was $1/2$. These are finite polynomial test cases; this ratio is
+neither a proved extremum over the function class nor a replacement
+for the uniform coefficient bounds in the proofs.
+
+The dynamic-grid checks recorded no old-record migrations in
+four streams that grow in affine rank after a long constant
+prefix.  The largest recorded accepted-mass identity residual
+was below $6.06\cdot10^{-123}$.  The moment checks compared
+exact integer counters with direct Taylor sums and exponential
+attention; the largest identity residual was below
+$1.74\cdot10^{-118}$.  All eight tested background schedules
+used at most two historical-token replays per append, including
+a prefill of one million tokens.  The positional cases used
+positions of up to 201 bits and checked the phase-error bound
+even when the approximate period quotient differed from the
+true quotient.  These checks implement selected invariants,
+not an exact sampler or a timing benchmark.
+
+\subsection{Lean 4 formalization}
+\label{app:lean}
+
+The directory \texttt{formalization} of the repository
+\url{https://github.com/SamMausberg/exact-sampling-networks} contains a
+Lean~4 development with Mathlib. It has more than 2{,}400 theorems. It
+builds with warnings treated as errors, and an audit of every declaration
+finds only the axioms \texttt{propext}, \texttt{Classical.choice} and
+\texttt{Quot.sound}. The documentation of each theorem names the paper
+result it formalizes by its label, and a generated map lists the theorems
+for each label. Running \texttt{python3 verify.py} repeats the build, the
+axiom audit, and a check that every cited label exists in this paper or in
+the conference version.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}Y@{}}
+\toprule
+Lean directory & Paper results\\
+\midrule
+\texttt{Conference} & The proofs of the conference version: one bounded
+tanh row, bounded charts, the appendable grid index, the finite moment
+evaluator, depth-uniform prefix stability, and exact sampling from a
+maintained evaluator.\\
+\texttt{Tanh}, \texttt{Stopping} & Scalar factories, radius recursions and
+rates, majority and arity bounds, product arity, and the stopping lemmas
+(Lemma~\ref{lem:stopping}, Lemma~\ref{lem:newprecisionstop}).\\
+\texttt{Lower}, \texttt{Instance} & Lemma~\ref{lem:transcript},
+Theorem~\ref{thm:lower}, the finite joint and critical laws, and
+Appendix~\ref{app:instance}.\\
+\texttt{Critical} & Theorems~\ref{thm:rank-two-critical},
+\ref{thm:fixed-rank-critical} and~\ref{thm:column-envelope-critical}, and
+Section~\ref{sec:critical-score-ceiling}.\\
+\texttt{Residual} & Residual networks and fused factories, including
+Theorem~\ref{thm:residualupper}.\\
+\texttt{Attention} & Appendix~\ref{app:attention}.\\
+\texttt{Normalization} & Appendix~\ref{app:normalization}.\\
+\texttt{Checkpoint} & Appendix~\ref{app:checkpoint}.\\
+\texttt{Links} & Statements that combine results of several modules.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The formalization covers the probability laws, exactness identities,
+stopping estimates and quantitative inequalities of these proofs, with the
+paper's constants. It does not cover the bit-operation cost model, data
+structures, the certified arithmetic routines, or the complexity-theoretic
+reductions and hypotheses. When a proof uses a fact from outside the paper,
+such as the cosh product of~\cite{dlmf} or a coefficient bound from complex
+analysis, the Lean statement takes that fact as an explicit hypothesis, and
+its module lists it. The lower bounds are proved for samplers given as
+finite mixtures of decision trees that answer repeated queries from a cache.
+The reduction from an almost surely terminating algorithm with an infinite
+random tape to this form is not formalized.

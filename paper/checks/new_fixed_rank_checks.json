@@ -1,0 +1,15 @@
+{
+  "status": "all finite exact checks passed",
+  "arithmetic": "fractions.Fraction, no floating point",
+  "seed": 20261008,
+  "counts": {
+    "arrangements": 90,
+    "stored_representatives": 11180,
+    "strict_sign_checks": 65024,
+    "query_sign_checks": 11446,
+    "stored_key_order_checks": 780,
+    "count_bound_checks": 90
+  },
+  "scope": "dimensions 1, 2, 3; degeneracies and boundary queries included",
+  "limitations": "finite checks are not a proof or a sampler benchmark"
+}

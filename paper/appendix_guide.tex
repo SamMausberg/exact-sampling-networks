@@ -1,0 +1,62 @@
+\section*{Guide to the proofs}
+\addcontentsline{toc}{section}{Guide to the proofs}
+
+The scalar factories establish exact local laws. Radius and potential
+bounds control their composition. Finite transcript identities give
+input lower bounds. The attention appendix separates a fresh context,
+an explicit cache, and a maintained neural decoder. Normalization
+then supplies the additive product and its sharp carrier example.
+Each formal proof begins with its main idea.
+
+Neural biases are $b_{\ell,i}$; the unindexed $b$ bounds their
+encoding length. The scalar factory uses $c_{\ell,i}$ for interval
+centers. Attention temperature is $\beta$. Appendix~\ref{app:tanh}
+uses the bit scale
+$\mathcal B=b+\lceil\log_2(n+D+2)\rceil+16$ of~\eqref{eq:bitlength},
+which is at most $B$ of~\eqref{eq:main-B}; its bounds therefore also
+hold with $B$.
+When a table contains $M$ groups or candidate queries, $B$ also
+includes $\lceil\log_2(M+1)\rceil$. For rational residual schedules,
+it includes the actual lengths of the stored radius prefixes.
+A common dyadic grid keeps those lengths within the displayed
+parameter and address scale; unrelated rational denominators
+may require a larger $B$.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{.42\textwidth}Y@{}}
+\toprule
+Main result & Detailed statement and proof\\
+\midrule
+One tanh row & Theorem~\ref{thm:new-single-row-law}\\
+Critical $35/32$ exponent & Theorem~\ref{thm:fusedcritical}\\
+Zero-bias linear upper & Theorem~\ref{thm:zero-bias-linear}\\
+Query lower bounds and the norm threshold & Theorem~\ref{thm:lower}; Corollaries~\ref{cor:threshold} and~\ref{cor:window}\\
+Every fixed first-layer rank & Theorem~\ref{thm:fixed-rank-critical}; elementary low-rank implementations in Theorems~\ref{thm:rank-two-critical} and~\ref{thm:rank-three-critical}\\
+Bounded first-layer column envelope & Theorem~\ref{thm:column-envelope-critical}; arbitrary algebraic rank\\
+Convex residual scale & Theorem~\ref{thm:residualfused} and Corollary~\ref{cor:residual-loglog-depth}\\
+Attention race and positional search & Theorems~\ref{thm:attentionprimitive} and~\ref{thm:binaryattentionlaw}\\
+Indexed lower bound at standard scaling & Theorem~\ref{thm:indexedlowerlogtwo} and Corollary~\ref{cor:indexedlogtwoblock}\\
+Appendable affine-rank index & Theorem~\ref{thm:dynamicfixedrank}\\
+Full exact decoder & Theorem~\ref{thm:momentdecoder} and Corollary~\ref{cor:affineheadmoment}\\
+Checkpoint certificates and dimensions & Appendix~\ref{app:checkpoint}\\
+Limits of second-order score bounds & Propositions~\ref{prop:critical-hessian-majorant} and~\ref{prop:critical-matrix-score}\\
+Integer stopped-score obstruction & Corollary~\ref{cor:new-integer-score}\\
+Fixed model and positional rotations & Corollaries~\ref{cor:fixedmodelcontext} and~\ref{cor:fixedpositionalrotation}\\
+Implicit rank-one query & Theorem~\ref{thm:implicitrankone}\\
+Worst-case rank-one query law & Theorem~\ref{thm:rankone-worstlaw}\\
+Finite candidate list & Theorem~\ref{thm:finite-query-list}\\
+RMS normalization & Theorems~\ref{thm:rmsfloor} and~\ref{thm:gaussianrms}\\
+Scalar RMS law at a fixed amplitude & Theorem~\ref{thm:scalar-rms-amplitude}\\
+Additive product & Theorem~\ref{thm:pn-abstract}\\
+Sharp carrier-family cost & Theorems~\ref{thm:pn-family-query-law} and~\ref{thm:pn-family-bit-law}\\
+Relative-floor lower families & Theorem~\ref{thm:pn-normalized-gain}; Corollary~\ref{cor:pn-scheduled-lower}\\
+GELU and SwiGLU lower families & Theorem~\ref{thm:real-ffn-lower} and Corollary~\ref{cor:real-ffn-scheduled}\\
+Instance complexity & Appendix~\ref{app:instance}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+A known scalar coin always denotes finite certified computation.
+An unknown-mean coin denotes a supplied independent source interface.
+The proofs below do not depend on the Lean formalization described
+in Appendix~\ref{app:lean}.

@@ -1,0 +1,135 @@
+\subsection{Finite cached data and exact scalar decisions}
+\label{sec:newcachebits}
+
+In the static-cache problem, the cache is built before the query is
+revealed, and cached coordinates are finite dyadic numbers. This
+model already contains the hard instances below.
+Section~\ref{sec:models} describes what a cache of transcendental
+neural values must provide in addition.
+
+\begin{lemma}[A precision stopping bound]
+\label{lem:newprecisionstop}
+Let $p\in[0,1]$. Suppose a deterministic routine returns an interval
+$I_t\ni p$ of length at most $2^{-t}$ at cost at most
+$C(B+t)^d$, for every integer $t\ge1$, where $B\ge1$ and $d\ge1$.
+Compare these intervals with the first $t$ bits of one uniform
+$U\in[0,1]$, refining until the intervals separate. The resulting
+bit is exactly $\mathbf1_{\{U<p\}}$. It stops almost surely and
+has expected work at most
+\[
+ 2^{d+5}d!\,C(B+1)^d+O(B+1)
+\]
+after increasing $C$ by an absolute constant to include interval
+arithmetic. The probability of reaching beyond precision $t$ is
+at most $\min\{1,2^{2-t}\}$.
+\end{lemma}
+\paragraph{Proof idea.}
+An undecided comparison places the uniform random number close to one fixed probability.  This event shrinks geometrically with precision, and its tail can be summed against every reached arithmetic cost.
+
+\begin{proof}
+Replace each interval by its intersection with previous intervals.
+The uniform's prefix interval has length $2^{-t}$. If the two
+intervals overlap, then $|U-p|\le2^{1-t}$, so the overlap event has
+probability at most $2^{2-t}$. Their intersection can persist
+forever only when $U=p$, an event of probability zero. Every
+decision agrees with the comparison against $p$.
+
+The expected sum of stage costs is at most
+\[
+ C(B+1)^d+8C\sum_{t\ge2}2^{-t}(B+t)^d.
+\]
+Since $B\ge1$, $(B+t)^d\le B^d(t+1)^d$. The inequalities
+$(t+1)^d\le d!\binom{t+d}{d}$ and the negative-binomial generating
+function give
+\[
+ \sum_{t\ge0}2^{-t}(t+1)^d\le d!2^{d+1}.
+\]
+The displayed constant is larger than the resulting total. The
+random prefix itself uses one additional bit per stage and has
+bounded expected length. No derivative under a random stopping
+time is used in this argument.
+\end{proof}
+
+\begin{lemma}[Exactification from certified intervals]
+\label{lem:newexactification}
+Suppose a fast query routine supplies an interval for a desired
+Bernoulli probability $p$ of width at most $2^{-m}$, at cost $F_m$.
+Suppose a fallback routine supplies intervals of width $2^{-t}$
+at cost at most $H(B+t)^d$ for every $t>m$.
+There is an exact sampler of expected cost
+\[
+ F_m+O(m)+2^{d+5}d!\,2^{-m}H(B+m+1)^d.
+\]
+In particular, $m=\max\{1,\lceil\log_2\max\{1,H\}\rceil\}$ makes the
+fallback contribution polynomial in $B+\log(H+2)$.
+\end{lemma}
+\paragraph{Proof idea.}
+The fast enclosure settles most uniform comparisons.  A complete evaluation is needed only near its boundary, and choosing the initial precision from the fallback cost makes that rare work affordable.
+
+\begin{proof}
+Use the fast interval and $m$ uniform bits first. If the intervals
+overlap, continue with the same uniform and the fallback routine
+at precisions $m+1,m+2,\ldots$. At stage $m+r$, the probability
+of being reached is at most $2^{3-m-r}$. Thus the expected fallback
+cost is at most
+\[
+ 8\,2^{-m}H\sum_{r\ge1}2^{-r}(B+m+r)^d.
+\]
+The same negative-binomial estimate proves the stated bound.
+Every interval is certified, so the stopping decision has no error.
+\end{proof}
+
+This lemma does not apply merely because an approximation is correct
+with high probability. An invalid interval, however rare, can change
+the output law. A randomized approximation procedure can be used
+when its returned interval is always valid and its expected cost
+has the required bound, with that conditional cost accounted for.
+
+\begin{lemma}[A finite-bit scan for cached attention]
+\label{lem:newcachescan}
+Let $q,k_1,\ldots,k_T$ be dyadic vectors of width $n$, with $b$ bits
+per coordinate, and let $v_j\in[-1,1]$ be dyadic. Let $\beta\ge0$
+be dyadic of $b$ bits or let $\beta=\sqrt n$.
+For $Y=\sum_j e^{a_j}v_j/\sum_j e^{a_j}$, with
+$a_j=\beta\langle q,k_j\rangle/n$, the Bernoulli probability
+\[
+ p=\frac{1+\tanh(\tanh Y)}2
+\]
+can be sampled exactly with
+$O(Tn(b+\log(T+n))^4)$ expected bit operations.
+The same asymptotic bound samples an attention index exactly.
+\end{lemma}
+\paragraph{Proof idea.}
+Shift all scores by their maximum, so a denominator term equals one.  Certified absolute errors then control the normalized mean or cumulative probabilities, and interval refinement turns those enclosures into an exact sample.
+
+\begin{proof}
+Find a largest inner product using exact dyadic arithmetic.
+As $\beta\ge0$, it also maximizes the score. Shift by that score
+and put $w_j=e^{a_j-a_{\max}}\le1$. At least one $w_j$ is one,
+so $Z=\sum_jw_j\ge1$.
+
+At requested output precision $t$, enclose every $w_j$ to width
+$2^{-P}$ with $P=t+\lceil\log_2(T+1)\rceil+8$. The negative
+exponential algorithm in Lemma~\ref{lem:newnegativeexp} applies.
+Both the numerator and denominator sums then have error at most
+$T2^{-P}$. Since the exact numerator has absolute value at most
+$Z$ and $Z\ge1$, interval division gives an interval for $Y$ of
+width at most $2^{-t-3}$ after clipping to $[-1,1]$.
+The two tanh maps are 1-Lipschitz and have bounded arguments.
+Their certified series evaluations supply a probability interval
+of width at most $2^{-t}$. Its cost is
+$O(Tn(b+t+\log(T+n))^4)$, and
+Lemma~\ref{lem:newprecisionstop} proves the expected bound.
+
+For an attention index, form intervals for all normalized prefix
+weights and compare one lazy uniform with them. There are at most
+$T-1$ interior boundaries. Use precision
+$P=t+2\lceil\log_2(T+1)\rceil+8$ per weight and read the same
+$P$ bits of the uniform. Each boundary enclosure has width at most
+$8T2^{-P}$, and the uniform-prefix interval adds at most $2^{-P}$
+on either side. The union over the boundaries consequently has
+measure at most $10T^2 2^{-P}\le2^{2-t}$. The same stopping
+and work calculation applies. This also proves almost-sure
+termination if several neighboring weights are extremely small.
+\end{proof}
+

@@ -1,0 +1,185 @@
+\subsection{Fusing the first vote with the bias correction}
+\label{app:fused}
+
+For row norms at most one, the uniform algorithm uses reference gain
+one in the radius recurrence. The exact row norms still determine the row
+mixtures and their radii \(\rho\). This choice preserves the sampler,
+its exactness proof, and the bound \(80(D+1)^2\). We prove a smaller
+power of depth in two steps. First we assign a positive weight to each
+reached call; the weights are used only in the analysis. Then, at
+sufficiently small row radius, we replace the bias race by a factory
+whose first vote also selects the bias correction. This reduces the
+critical power without changing the represented function.
+
+\subsubsection{Weighted local estimates for the critical sampler}
+\label{app:potential}
+
+Fix \(0<\eta\le1/4\), write \(\alpha=1+\eta\), and define
+\[
+\varphi(v)=\sqrt{\alpha-v^2},\qquad
+\ell(v)=\log\varphi(v),\qquad -1\le v\le1.
+\]
+The function \(\varphi\) is even and concave, with
+\(\sqrt\eta\le\varphi\le\sqrt\alpha\). Direct differentiation gives
+\begin{equation}\label{eq:potentialderivatives}
+\ell'(v)=-\frac{v}{\alpha-v^2},\qquad
+\ell''(v)=-\frac{\alpha+v^2}{(\alpha-v^2)^2},\qquad
+|\ell'|\le\eta^{-1},\quad
+|\ell''|\le\frac9{4\eta^2}.
+\end{equation}
+
+At a nonzero row put
+\[
+q=\tanh\rho,\quad g=\frac{\tanh(\rho z)}q,\quad t=\tanh a.
+\]
+If \(t<0\), complement source and output signs; evenness of
+\(\varphi\) leaves the analysis unchanged. Assume henceforth that
+\(t\ge0\), and set
+\[
+c=tq,\qquad k=\frac{1-t^2}{1-c^2},\qquad
+T_c(g)=\frac{g+c}{1+cg}.
+\]
+The exact midpoint and radius satisfy
+\(R=qk\) and \(h=m+RT_c(g)\). For the stored center
+\(c_{\rm row}\) and radius \(r\), let
+\[
+\theta=q/r\le1,\qquad \delta=(m-c_{\rm row})/r.
+\]
+The parent's normalized mean is
+\(v=\delta+\theta kT_c(g)\in[-1,1]\).
+
+Assign a child of normalized mean \(v_j\) the analysis weight
+\(\varphi(v_j)\). If its row-mixture probability and sign are
+\(p_j\) and \(\sigma_j\), Jensen's inequality gives
+\[
+\sum_jp_j\varphi(v_j)
+=\sum_jp_j\varphi(\sigma_jv_j)
+\le\varphi\!\left(\sum_jp_j\sigma_jv_j\right)=\varphi(z).
+\]
+Applying Lemma~\ref{lem:stopping} first to the majority and then
+to the race therefore gives
+\begin{equation}\label{eq:weightedchildren}
+\E\sum_{\rm children}\varphi(v_j)
+\le\theta kA_{\rm seq}(\rho,z)\frac{1+c}{1+cg}\varphi(z).
+\end{equation}
+This use of the lemma permits correlation between a source's cost
+and returned sign. The event that requests a source is determined
+before its fresh randomness is used.
+
+For fixed \(|u|\le1\), the function
+\(\theta/\varphi(\theta u)\) is increasing on \([0,1]\).
+Both \(\theta kT_c(g)\) and \(v\) lie in \([-1,1]\), so
+\eqref{eq:potentialderivatives} bounds the effect of the center
+shift by \(\exp(|\delta|/\eta)\). Consequently the right side
+of \eqref{eq:weightedchildren}, divided by \(\varphi(v)\), is at most
+\begin{equation}\label{eq:potentialW}
+\exp\!\left(\frac\varepsilon{\eta r}\right)W,
+\qquad
+W=A_{\rm seq}(\rho,z)k\frac{1+c}{1+cg}
+\frac{\varphi(z)}{\varphi(kT_c(g))}.
+\end{equation}
+
+\begin{lemma}[Majority cost and the bias contribution]
+\label{lem:potential-majority-bias}
+For $0<\eta\le1/4$ and $0<\rho\le1/16$, the majority term
+satisfies
+\[
+ \log A_{\rm seq}+\ell(z)-\ell(g)
+ \le\left(1-\frac{\eta z^2}{3(\alpha-z^2)}\right)\rho^2
+      +\frac4{\eta^2}\rho^4.
+\]
+The remaining bias term
+$B=\log k+\log((1+c)/(1+cg))+\ell(g)-\ell(kT_c(g))$
+obeys
+\[
+ B\le\frac{-(1-2q^2)t^2+3tq}{1-q^2}.
+\]
+In particular $B\le0$ when $t\ge(7/2)q$.
+\end{lemma}
+
+\paragraph{Proof idea.}
+A real Taylor expansion controls the majority contribution. For the bias
+term, express the potential along the coordinate $\operatorname{arctanh}g$.
+Its derivative is bounded by one, which controls the whole translation even
+near the endpoints.
+
+\begin{proof}
+First record Taylor bounds that hold throughout \(\rho\le1/16\):
+\begin{equation}\label{eq:potentialgtaylor}
+\left|g-z-\frac{\rho^2z(1-z^2)}3\right|\le11\rho^4,
+\qquad |g-z|\le\rho^2/2.
+\end{equation}
+Indeed, for complex \(|w|\le1\),
+\(|\cosh w-1|\le\cosh1-1<3/5\) and
+\(|\sinh w|\le\sinh1<6/5\), by \(8/3<e<11/4\); hence
+\(|\tanh w|<3\). Cauchy's coefficient estimate and oddness give
+\begin{equation}\label{eq:tanhfifth}
+|\tanh w-w+w^3/3|\le5|w|^5\qquad(w\in\mathbb C,\ |w|\le1/16).
+\end{equation}
+Also
+\(q/\rho\ge1-\rho^2/3\ge767/768\), by integrating
+\(\tanh'(u)\ge1-u^2\). Subtracting \(zq/\rho\) from the
+numerator expansion leaves an error at most \(10\rho^4\);
+dividing by \(q/\rho\) adds less than \(\rho^4\).
+Finally, \(1/3+11/256<1/2\).
+
+Lemma~\ref{lem:arity}, Taylor's theorem for \(\ell\), and
+\eqref{eq:potentialgtaylor} give, with \(d_z=\alpha-z^2\),
+\begin{align}
+\log A_{\rm seq}+\ell(z)-\ell(g)
+&\le\left(1-\frac{\eta z^2}{3d_z}\right)\rho^2
+ +\left(1+\frac{11}\eta+\frac9{32\eta^2}\right)\rho^4\notag\\
+&\le\left(1-\frac{\eta z^2}{3d_z}\right)\rho^2
+ +\frac4{\eta^2}\rho^4.\label{eq:potentialmajority}
+\end{align}
+The second line uses
+\(\eta^2+11\eta+9/32\le99/32<4\).
+
+It remains to bound the bias contribution
+\[
+B=\log k+\log\frac{1+c}{1+cg}+\ell(g)-\ell(kT_c(g)).
+\]
+Since \(k\le1\), the last difference
+is at most \(\ell(g)-\ell(T_c(g))\). For \(v=\tanh u\),
+\[
+\left|\frac{d}{du}\ell(\tanh u)\right|
+=\frac{|v|(1-v^2)}{\alpha-v^2}\le1.
+\]
+Thus that difference is at most \(\artanh c\), including
+\(g=\pm1\) by continuity. The race logarithm is at most
+\(2\artanh c\). Since
+\[
+\log k\le-\frac{1-2q^2}{1-q^2}t^2,
+\qquad \artanh c\le\frac{tq}{1-q^2},
+\]
+we obtain
+\[
+B\le\frac{-(1-2q^2)t^2+3tq}{1-q^2}.
+\]
+If \(t\ge(7/2)q\), its numerator is at most
+\(tq(-1/2+7q^2)\le0\), because \(q\le\rho\le1/16\).
+
+\end{proof}
+
+\paragraph{Bounds at a fixed cutoff.}
+For gain one, $\coth^2u=1+\sinh^{-2}u\le1+u^{-2}$ gives
+$R_j^2\ge1/(j+1)$.  Lemmas~\ref{lem:radius} and~\ref{lem:rounding}
+therefore give
+\[
+ (j+1)^{-1}\le R_j^2\le3/(2j+3),\quad
+ 0\le r_j-R_j\le3j\varepsilon,\quad r_j\le1.
+\]
+The original normalized sampler at level $J$ obeys
+\begin{equation}\label{eq:normalizedcutoff}
+ M_J\le1+e^3(J+1)^{5/2}\sum_{k\ge1}k^{-5/2}
+ \le36(J+1)^{5/2}.
+\end{equation}
+This follows from the suffix proof of Theorem~\ref{thm:upper},
+with the root gate omitted, and $\sum k^{-5/2}\le5/3$, $e^3<21$.
+For $\eta=1/64$, $J\ge2^{25}$, $D>J$, the center terms in
+\eqref{eq:potentialW} sum to at most
+$64\varepsilon D\sqrt{D+1}<1/100$. If a squared-radius potential
+has derivative at most two, the proof of Lemma~\ref{lem:rounding}
+shows that rounding changes a suffix logarithm
+by at most $12D^2\varepsilon<1/100$. These estimates use
+$\varepsilon\le[100(D+1)^4]^{-1}$.

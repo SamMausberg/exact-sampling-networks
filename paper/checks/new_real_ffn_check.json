@@ -1,0 +1,988 @@
+{
+  "precision_decimal_digits": 120,
+  "all_checks_passed": true,
+  "status": "deterministic consistency checks only",
+  "case_counts": {
+    "activation_identity": 402,
+    "affine_identity": 505,
+    "normalized_comparison": 648,
+    "head_comparison": 648,
+    "score_bound": 108,
+    "full_cube_floor": 2002
+  },
+  "total_cases": 4313,
+  "scores": [
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.2886052944365466123208015",
+      "proved_score": "0.00244768890621236669127894"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3279898563534610480934817",
+      "proved_score": "0.00244768890621236669127894"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.4647494957543244621333768",
+      "proved_score": "0.002486608375060705442200767"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3271359702063674144010461",
+      "proved_score": "0.001950685786602176065724121"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4111741222226569237568187",
+      "proved_score": "0.001950685786602176065724121"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.6797213389159404459191063",
+      "proved_score": "0.001987321583792910632720402"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3106430943700575415939815",
+      "proved_score": "0.003937129927179450283484547"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3751125835002154751804944",
+      "proved_score": "0.003937129927179450283484547"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.616325628834456682081136",
+      "proved_score": "0.004105538659017888134566553"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3330384682459990919547737",
+      "proved_score": "0.005872369549186003190412179"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4240116078888304660091569",
+      "proved_score": "0.005872369549186003190412179"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7223888726742722864852226",
+      "proved_score": "0.007179887458222942294418225"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3189113066514835820352982",
+      "proved_score": "0.006364164687207474953301573"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3951083231035303491628989",
+      "proved_score": "0.006364164687207474953301573"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6778028280137503576133418",
+      "proved_score": "0.007160088065169612404628303"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3348221147749775173936043",
+      "proved_score": "0.008637632803295998050502506"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4277455953656948205440409",
+      "proved_score": "0.008637632803295998050502506"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7306294445262223737768627",
+      "proved_score": "0.01621518272233256875992518"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.2975453748192135952360795",
+      "proved_score": "0.002516571487510074336613243"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3497381963006612348077964",
+      "proved_score": "0.002516571487510074336613243"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.5349245906645071198950889",
+      "proved_score": "0.002558928068664800547285461"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.329855689376322323370826",
+      "proved_score": "0.002211881947658549119228605"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4183341168643852676367479",
+      "proved_score": "0.002211881947658549119228605"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7083750038637489263137208",
+      "proved_score": "0.002265729354539459426229386"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3139631332613664247725238",
+      "proved_score": "0.004242847869602428738776561"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.384535273898817824577219",
+      "proved_score": "0.004242847869602428738776561"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6491424432582644593123285",
+      "proved_score": "0.004455851501681419011541675"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3337869210529146014530599",
+      "proved_score": "0.007071953691746658041316745"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.425888088870191808794337",
+      "proved_score": "0.007071953691746658041316745"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7270670809157532244114404",
+      "proved_score": "0.009808169655974717203852399"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3202474925876349071610419",
+      "proved_score": "0.006917536322920005428626487"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3989612583425348789989314",
+      "proved_score": "0.006917536322920005428626487"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.687766151957167035385912",
+      "proved_score": "0.007977405961496370737555167"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3350986216928477503541993",
+      "proved_score": "0.00877599659857785988202632"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4284153287157161677667916",
+      "proved_score": "0.00877599659857785988202632"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.731978062839116820960581",
+      "proved_score": "0.01719046036273580645233976"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.2994998558389846375576016",
+      "proved_score": "0.002537714496624640435968374"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3547889620066811053919359",
+      "proved_score": "0.002537714496624640435968374"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.5536370681717255197010515",
+      "proved_score": "0.002581166265584926701501338"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3303856337751895859086883",
+      "proved_score": "0.002313870493604867307469678"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4196763859396767387111634",
+      "proved_score": "0.002313870493604867307469678"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7127514867065743041790647",
+      "proved_score": "0.002375730177205653229032867"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3146973666686655605286695",
+      "proved_score": "0.004335094863462104609381846"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3866306918035121844084677",
+      "proved_score": "0.004335094863462104609381846"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6560183510127202061462403",
+      "proved_score": "0.004563063497853068194155471"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3339480128156690038053076",
+      "proved_score": "0.007400368242011872605645542"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4262870680884482906460934",
+      "proved_score": "0.007400368242011872605645542"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7279961250828650354436174",
+      "proved_score": "0.01074605087336466785133524"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3205530700432998129904043",
+      "proved_score": "0.007075805855988423969055698"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3998420743077279520421741",
+      "proved_score": "0.007075805855988423969055698"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.689937484650486139156327",
+      "proved_score": "0.008222943370135928500240518"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3351613957666166190218387",
+      "proved_score": "0.008796005380436752218980696"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4285680922280745320891424",
+      "proved_score": "0.008796005380436752218980696"
+    },
+    {
+      "activation": "gelu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7322834328053932649324215",
+      "proved_score": "0.01734231770719797491037029"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.2959011673919883098471927",
+      "proved_score": "0.00244768890621236669127894"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3438786875161024760932791",
+      "proved_score": "0.00244768890621236669127894"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.4932348612684755826438884",
+      "proved_score": "0.002486608375060705442200767"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3290194847648935253613535",
+      "proved_score": "0.001950685786602176065724121"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4154540786046191311553378",
+      "proved_score": "0.001950685786602176065724121"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.6899005949132244795460532",
+      "proved_score": "0.001987321583792910632720402"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.316599685548110042809397",
+      "proved_score": "0.003937129927179450283484547"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3886799823364678563906081",
+      "proved_score": "0.003937129927179450283484547"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6446368042593075963188008",
+      "proved_score": "0.004105538659017888134566553"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3343428428898229326894503",
+      "proved_score": "0.005872369549186003190412179"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4266335178939439676848106",
+      "proved_score": "0.005872369549186003190412179"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7266606244904547550642569",
+      "proved_score": "0.007179887458222942294418225"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.323759024634018914151013",
+      "proved_score": "0.006364164687207474953301573"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.4054384199465009591137856",
+      "proved_score": "0.006364164687207474953301573"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6946958148180086021575498",
+      "proved_score": "0.007160088065169612404628303"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3358884515646282493603732",
+      "proved_score": "0.008637632803295998050502506"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4297465503842812675701733",
+      "proved_score": "0.008637632803295998050502506"
+    },
+    {
+      "activation": "silu",
+      "alpha": "1.0",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7334270305200638782547815",
+      "proved_score": "0.01621518272233256875992518"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3038015925404750554645193",
+      "proved_score": "0.002516571487510074336613243"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3637448736785619481354099",
+      "proved_score": "0.002516571487510074336613243"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.5632178125426358638646046",
+      "proved_score": "0.002558928068664800547285461"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3313122307947119108479962",
+      "proved_score": "0.002211881947658549119228605"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.421345449768050488734077",
+      "proved_score": "0.002211881947658549119228605"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7137400844225054009357098",
+      "proved_score": "0.002265729354539459426229386"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3192177977676385583687744",
+      "proved_score": "0.004242847869602428738776561"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3960325833753810772816546",
+      "proved_score": "0.004242847869602428738776561"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6703364908562493262512286",
+      "proved_score": "0.004455851501681419011541675"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3349317487847185738757616",
+      "proved_score": "0.007071953691746658041316745"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4280742417286842696821671",
+      "proved_score": "0.007071953691746658041316745"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7302394997721578887303407",
+      "proved_score": "0.009808169655974717203852399"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3247460747618853982202159",
+      "proved_score": "0.006917536322920005428626487"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.4081886189661117756698033",
+      "proved_score": "0.006917536322920005428626487"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.7015725134637911341755473",
+      "proved_score": "0.007977405961496370737555167"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3360977749714426660668434",
+      "proved_score": "0.00877599659857785988202632"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4302429243667230667244009",
+      "proved_score": "0.00877599659857785988202632"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.25",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7344237252066124013372521",
+      "proved_score": "0.01719046036273580645233976"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3055016975145508340260607",
+      "proved_score": "0.002537714496624640435968374"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.3681997370616213818489354",
+      "proved_score": "0.002537714496624640435968374"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.5809415343126858040187035",
+      "proved_score": "0.002581166265584926701501338"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.331758795562048726477585",
+      "proved_score": "0.002313870493604867307469678"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4224476840763688661765402",
+      "proved_score": "0.002313870493604867307469678"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "4.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7173592285607827297478784",
+      "proved_score": "0.002375730177205653229032867"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3197945957394903227410173",
+      "proved_score": "0.004335094863462104609381846"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.397645999420466266709317",
+      "proved_score": "0.004335094863462104609381846"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.6755473368735399142211557",
+      "proved_score": "0.004563063497853068194155471"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3350587783117216540698955",
+      "proved_score": "0.007400368242011872605645542"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4283817970351306855938385",
+      "proved_score": "0.007400368242011872605645542"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "8.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7309575697730194436776141",
+      "proved_score": "0.01074605087336466785133524"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 4,
+      "actual_score": "0.3249720162574590615524525",
+      "proved_score": "0.007075805855988423969055698"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 7,
+      "actual_score": "0.4088165113345186884597523",
+      "proved_score": "0.007075805855988423969055698"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "2.0",
+      "width": 16,
+      "actual_score": "0.7030775266931495309321968",
+      "proved_score": "0.008222943370135928500240518"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 4,
+      "actual_score": "0.3361454115652271788223238",
+      "proved_score": "0.008796005380436752218980696"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 7,
+      "actual_score": "0.4303566252336736234523583",
+      "proved_score": "0.008796005380436752218980696"
+    },
+    {
+      "activation": "silu",
+      "alpha": "0.0625",
+      "effective_depth": "16.0",
+      "gain": "4.0",
+      "width": 16,
+      "actual_score": "0.7346512171146430580095628",
+      "proved_score": "0.01734231770719797491037029"
+    }
+  ]
+}

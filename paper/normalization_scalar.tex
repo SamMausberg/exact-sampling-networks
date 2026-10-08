@@ -1,0 +1,172 @@
+\subsection{Scalar normalization at a specified output radius}
+\label{sec:scalar-rms-amplitude}
+
+We retain the output radius as a parameter. A larger radius reduces
+the requested sign mean and permits an initial thinning gate.
+The geometric-majority identity in Lemma~\ref{lem:rmsgeommajority}
+gives the upper bound in the scalar law below.
+
+\begin{lemma}[A second-derivative bound from uniformly finite mean work]
+\label{lem:new-curvature-transfer}
+Let $f\colon[-1,1]\to[-1,1]$ be twice continuously differentiable.
+Suppose a single exact factory, valid for every source-sign mean
+$z\in[-1,1]$, returns a sign of mean $f(z)$ and uses at most $K$
+source requests in expectation uniformly over $z$.  Then
+\[
+ K\ge\frac12\sup_{-1<t<1}(1-t^2)|f''(t)|.
+\]
+Only the first moment of the source count is assumed.
+\end{lemma}
+\paragraph{Proof idea.}
+Run the factory on uniformly sampled entries of a finite hidden
+vector. The finite transcript curvature bound applies to this experiment
+without a second moment for the stopping time. Second derivatives of its
+Bernstein polynomial converge to the requested scalar derivative.
+
+\begin{proof}
+For an integer $m\ge2$, give a query algorithm a hidden sign vector
+$x\in\{-1,1\}^m$.  Simulate each requested source sign by drawing an
+independent uniform index in $[m]$ and returning its coordinate.  Repeated
+coordinates can be cached.  Conditional on $x$, these source signs are
+independent and have mean $M(x)=m^{-1}\sum_i x_i$.  Thus the output
+has exact conditional mean $f(M(x))$, and its number $Q$ of distinct
+input probes satisfies $\mathbb E[Q\mid x]\le K$.
+
+Give the hidden coordinates independent signs of common mean
+$t\in(-1,1)$ and put $H_m(t)=\mathbb E_t f(M)$. The finite-input
+transcript bound of Lemma~\ref{lem:transcript} gives
+\[
+ |H_m''(t)|\le\frac{2\mathbb E_tQ}{1-t^2}
+             \le\frac{2K}{1-t^2}.
+\]
+It requires no moment assumption on the stopping time beyond the
+stated mean-work bound.
+
+It remains to pass to the desired scalar function.  With
+$p=(1+t)/2$, the function $H_m$ is the Bernstein polynomial
+\[
+ H_m(t)=\sum_{j=0}^m\binom mjp^j(1-p)^{m-j}f(2j/m-1).
+\]
+Let $J$ have distribution $\operatorname{Bin}(m-2,p)$, and let
+$U,V$ be independent uniforms on $[0,1]$, independent of $J$.
+Twice differentiating the polynomial, then expressing its second
+finite difference by two integrals, gives
+\[
+ H_m''(t)=\left(1-\frac1m\right)
+ \mathbb E\,f''\!\left(\frac{2J}{m}-1+\frac{2(U+V)}m\right).
+\]
+The argument lies in $[-1,1]$ and converges to $t$ in probability,
+since its variance is $O(1/m)$ and its mean differs from $t$ by
+$-2t/m$.  Uniform continuity and boundedness of $f''$ imply
+$H_m''(t)\to f''(t)$.  Pass to the limit in the preceding inequality
+and then take the supremum over $t$.
+\end{proof}
+
+\begin{theorem}[Scalar RMS cost at a specified amplitude]
+\label{thm:scalar-rms-amplitude}
+Let $\kappa>0$ and $A\ge1$.  Consider factories valid for every
+unknown sign mean $z\in[-1,1]$ whose output mean is
+\[
+ f_{\kappa,A}(z)
+ =\frac{z}{A\sqrt{\kappa^{-1}+z^2}}.
+\]
+Let $Q^*(\kappa,A)$ be the infimum, over all such exact factories,
+of their worst-case expected number of source requests.  Then
+\begin{equation}
+ \frac{\sqrt\kappa+\kappa}{8A}
+ \le Q^*(\kappa,A)
+ \le\frac{1+2\kappa}{A\sqrt{1+\kappa^{-1}}}
+ \le\frac{3(\sqrt\kappa+\kappa)}A.
+ \label{eq:scalar-rms-amplitude-law}
+\end{equation}
+For rational $\kappa,A$, the upper construction has expected auxiliary
+bit work
+\[
+ O\!\left(B^4\left[1+\frac{\sqrt\kappa+\kappa}{A}\right]\right),
+\]
+where $B\ge16$ includes their encoding lengths and source-address
+lengths.  Its expected source count has the explicit middle bound in
+\eqref{eq:scalar-rms-amplitude-law}.
+\end{theorem}
+\paragraph{Proof idea.}
+A known thinning gate rescales the geometric-majority identity
+to the requested amplitude. Curvature gives the lower bound when the
+normalization is steep; coupling the two deterministic source biases
+handles the remaining parameter range.
+
+\begin{proof}
+Put $\theta=\kappa^{-1}$ and
+$q=1/[A\sqrt{1+\theta}]\le1$. Lemma~\ref{lem:rmsgeommajority} gives
+\[
+ \frac{z\sqrt{1+\theta}}{\sqrt{\theta+z^2}}
+ =\mathbb E M_K(z),\qquad
+ \Pr(K=k)=\frac\theta{1+\theta}
+               \left(\frac1{1+\theta}\right)^k,
+ \quad k\ge0.
+\]
+First open a known gate of probability $q$.  On its closed branch
+return a fair sign.  On its open branch draw $K$ and return the
+majority of $2K+1$ fresh source signs.  This yields exactly
+$f_{\kappa,A}$.  Since $\mathbb EK=\kappa$, its complete-majority
+source cost is $q(1+2\kappa)$.  If $\kappa\le1$, use
+$q\le\sqrt\kappa/A$ and $1+2\kappa\le3$.  If $\kappa\ge1$, use
+$q\le1/A$ and $1+2\kappa\le3\kappa$.  These prove the upper bounds.
+
+For $\kappa\ge1$, direct differentiation gives
+\[
+ |f_{\kappa,A}''(t)|
+ =\frac{3\kappa^{-1}|t|}
+        {A(\kappa^{-1}+t^2)^{5/2}}.
+\]
+Take $t=1/(2\sqrt\kappa)$.  Then
+\[
+ |f_{\kappa,A}''(t)|=\frac{48\kappa}{25\sqrt5 A},\qquad
+ 1-t^2\ge\frac34.
+\]
+Lemma~\ref{lem:new-curvature-transfer} gives
+\[
+ Q^*(\kappa,A)\ge\frac{18\kappa}{25\sqrt5 A}
+                 >\frac\kappa{4A}
+                 \ge\frac{\sqrt\kappa+\kappa}{8A}.
+\]
+The strict comparison follows by squaring $72>25\sqrt5$.
+
+For $0<\kappa\le1$, run the factory at source means $+1$ and $-1$.
+Every source request then returns the same deterministic sign, so the
+factory reads one input coordinate in $\{-1,1\}$.
+Lemma~\ref{lem:attentioncoupling} bounds the probability of any
+source request below by the total variation distance between the
+two required output laws,
+\[
+ f_{\kappa,A}(1)=\frac{\sqrt\kappa}{A\sqrt{1+\kappa}}
+                \ge\frac{\sqrt\kappa}{\sqrt2 A}.
+\]
+Every uniform expected-cost bound is at least this probability,
+which is more than the stated lower bound.
+
+The outer known gate uses certified square-root intervals and a lazy
+uniform comparison, with expected $O(B^4)$ auxiliary work.  Draw $K$
+only after that gate opens.  The simplest exact implementation flips the known rational coin
+with success probability $1/(1+\kappa)$ until its first success
+and lets $K$ count the failures.  Each such coin has expected
+$O(B^2)$ bit work by integer rejection.  Its geometric tail gives,
+for each fixed integer $r$, a bound
+\[
+ \mathbb E[(1+K)(1+\log(K+2))^r]
+ \le C_r(1+\kappa)(1+\log(\kappa+2))^r.
+\]
+This follows by dividing the geometric distribution into intervals
+of length $\lceil1+\kappa\rceil$ and summing its exponential tail.
+Counters, source addresses, and majority evaluation therefore have
+conditional expected auxiliary cost $O((1+\kappa)B^4)$.  The initial
+gate multiplies this cost by $q$.  The preceding inequalities finish
+the bit bound.  Known comparisons stop almost surely, $K$ is finite
+almost surely, and the finite majority terminates.
+\end{proof}
+
+For the earlier scalar floor interface, let $\kappa=R^2/\epsilon\ge1$
+and return RMS at radius $2R/\sqrt\epsilon=2\sqrt\kappa$.
+This is $A=2\sqrt\kappa$ in the theorem, so its optimal uniform
+source cost has order $\sqrt\kappa$.  At the fixed radius $A=4$, the
+cost instead has order $\kappa$.  Both statements are consistent;
+they request different output amplitudes.

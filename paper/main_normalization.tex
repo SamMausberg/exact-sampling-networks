@@ -1,0 +1,233 @@
+\section{Normalization and additive residuals}
+\label{sec:additive-main}
+
+\subsection{Two exact interfaces for RMS normalization}
+
+Let $a\in[-R,R]^n$, let $\varepsilon\ge0$, and consider
+$\RMS_\varepsilon(a)$ from~\eqref{eq:main-rms}.
+RMS normalization removes the mean-subtraction step of
+LayerNorm \cite{zhang2019rmsnorm}. The Gaussian construction
+below also applies to regularized LayerNorm after centering.
+
+\begin{theorem}[Exact RMS normalization]
+\label{thm:main-rms}
+Suppose $R>0$, $\varepsilon\ge0$, and $\lambda>0$ are known rational
+parameters, and $\lambda$ certifies
+$\varepsilon+n^{-1}\sum_j a_j^2\ge\lambda$ on every allowed input,
+and put $\kappa=\max\{1,R^2/\lambda\}$. Independent signs of mean
+$a_j/R$ suffice for an exact sign interface for
+$\RMS_\varepsilon(a)_i$ at radius $2R/\sqrt\lambda$, using at most
+$O(1+\kappa^2)$ expected source requests and
+$O(\kappa^2B^4)$ auxiliary bit operations.
+
+If $\varepsilon>0$, a second construction has radius $4\sqrt n$.
+With $\kappa_\varepsilon=R^2/\varepsilon$, it uses at most
+$1+n\kappa_\varepsilon$ expected source requests and
+$O(n(1+\kappa_\varepsilon)B^4)$ auxiliary work.
+\end{theorem}
+
+Theorems~\ref{thm:rmsfloor} and~\ref{thm:gaussianrms} prove the bounds
+for the two constructions. The first samples a coordinate and two independent
+signs, whose disagreement probability represents
+$(1-n^{-1}\sum_j(a_j/R)^2)/2$. A linear Bernoulli factory uses
+the certified floor, and a negative-binomial expansion supplies
+the inverse square root. The second projects onto a random Gaussian
+direction; an error-function factory gives an arcsine transform of
+$a_i/\sqrt{\|a\|_2^2+n\varepsilon}$, which a signed sine-series
+mixture inverts. Applied to signs of mean $(a_i-\bar a)/(2R)$, with
+$\bar a=n^{-1}\sum_j a_j$, it also gives regularized LayerNorm at
+radius $4\sqrt n$ (Corollary~\ref{cor:gelulayernorm}).
+Error-function factories and trigonometric stochastic constructions
+have prior precedents \cite{flajolet2011buffon,gaines1969}, and
+Gaussian sign identities and inverse-power corrections occur
+in rounding theory \cite{braverman2011grothendieck}.
+The contribution here is the explicit normalization interface,
+its source and bit bounds, and its use inside the network
+recurrence.
+
+A positive stabilizer alone gives no uniform small cost.
+For the scalar family
+\[
+ f_{\kappa,A}(z)=\frac{z}{A\sqrt{\kappa^{-1}+z^2}},
+ \qquad A\ge1,
+\]
+the optimal uniform source count obeys
+\begin{equation}
+ \frac{\sqrt\kappa+\kappa}{8A}
+ \le Q^*(\kappa,A)
+ \le \frac{1+2\kappa}{A\sqrt{1+\kappa^{-1}}}
+ \le \frac{3(\sqrt\kappa+\kappa)}A
+ \label{eq:main-scalar-rms-law}
+\end{equation}
+(Theorem~\ref{thm:scalar-rms-amplitude}). At fixed $A$ and large
+$\kappa$ the cost is of order $\kappa$, and increasing the radius to
+order $\sqrt\kappa$ reduces it to order $\sqrt\kappa$. The lower bound
+needs only a uniform first moment.
+
+\subsection{The additive recursion}
+
+Consider sublayers
+\[
+ H_j=H_{j-1}+F_j(H_{j-1}),\qquad |H_0|\le1,
+ \qquad |F_j(H)_{t,i}|\le U_j,
+\]
+where $U_j\ge0$ is a known bound. Set
+$R_j=1+\sum_{k\le j}U_k$. The quantity $B$ includes the full
+finite encodings of these radius prefixes.
+Suppose an exact sign of mean $F_j(H)_{t,i}/U_j$ uses at most
+$m_j$ expected predecessor signs of mean
+$H_{t',i'}/R_{j-1}$ and at most $C_0B^4L_j$ expected local bit
+work. Zero updates are omitted. These are uniform conditional
+bounds, so they remain valid when the factory is called
+adaptively.
+
+\begin{theorem}[An additive cost product]
+\label{thm:main-additive}
+Put
+\[
+ P_j=\prod_{k=1}^j\left(1+\frac{U_km_k}{R_{k-1}}\right).
+\]
+There is an exact sampler for $H_{J,t,i}/R_J$ with at most
+$P_J/R_J$ expected input leaves and at most
+\begin{equation}
+ C_0B^4\frac{P_J}{R_J}
+ \left(2+\sum_{j=1}^J\frac{U_j(1+L_j)}{P_j}\right)
+ \label{eq:main-additive-cost}
+\end{equation}
+expected bit work.
+If $m_j\le m$ for $m\ge1$ and $L_j\le L$, these bounds become
+$R_J^{m-1}$ leaves and
+\[
+ C_0B^4(2+L)(1+\log R_J)R_J^{m-1}
+\]
+bit operations.
+\end{theorem}
+
+Theorem~\ref{thm:pn-abstract} proves this statement.
+To sample $H_j/R_j$, choose the input contribution with probability
+$1/R_j$ or update $k\le j$ with probability $U_k/R_j$. A prefix table
+makes this choice directly, so the algorithm never traverses a long
+sequence of identity branches; an update's children restart the
+procedure at an earlier level. A linear recurrence for the bit work
+and the inequality $\sum_jU_j/R_j\le\log R_J$ show that auxiliary
+arithmetic adds only a logarithm in the residual radius.
+
+\subsection{Pre-norm attention and feed-forward updates}
+
+Consider the pre-norm blocks~\eqref{eq:main-prenorm}.
+A \emph{relative energy certificate} with constant $\gamma>0$
+asserts, at every requested normalization and for every allowed
+input and position,
+\begin{equation}
+ \varepsilon_j+\frac1n\sum_i H_{j-1,t,i}^2
+       \ge \gamma R_{j-1}^2 .
+ \label{eq:main-relative-floor}
+\end{equation}
+This is an additional hypothesis on the network and its allowed
+inputs. It does not follow from a fixed stabilizer: with stabilizer
+three, networks of logarithmic depth can force linear query cost
+(Theorem~\ref{thm:pn-absolute-lower} and
+Corollary~\ref{cor:pn-fresh-query}).
+
+With the power of two $G\in[2/\sqrt\gamma,4/\sqrt\gamma)$ and
+$K_\gamma=1+228\max\{1,\gamma^{-2}\}$ of Theorem~\ref{thm:pn-relative},
+set
+\begin{equation}
+ E=e^{2|\beta|s^2G^2},\quad \rho=sG,\quad
+ m=\max\{1,(2E-1)K_\gamma,\,2\rho(1+\rho)K_\gamma\}.
+ \label{eq:main-prenorm-m}
+\end{equation}
+These constants bound the number of predecessor requests for
+normalized attention and tanh updates. Like $m$, the local
+arithmetic factor $L$ of that theorem depends only on $\gamma,s,\beta$.
+The unscaled update radii are $sG$ and $1$, and a step size
+multiplies an update's radius without changing its sign factory.
+Theorem~\ref{thm:main-additive} then gives polynomial dependence
+on $1+\tau$, where $\tau$ is total step size, and only address
+dependence on $T$ (Corollary~\ref{cor:pn-stepsizes}). For a common
+step $\alpha$ and $D$ blocks, one may use $R=1+\alpha D(sG+1)$.
+A final RMSNorm satisfying the same relative certificate,
+followed by a bounded affine softmax head, adds a constant
+factor when its row norm is fixed (Theorem~\ref{thm:pn-relative}).
+A readout of the unnormalized stream costs at most a further
+factor $R^2$ (Theorem~\ref{thm:quadraticscaledhead}).
+
+The polynomial scale is necessary in a uniform theorem. There are
+tanh families with a full-input relative certificate and a fixed
+bounded readout that require
+\begin{equation}
+ \Omega_s(\min\{(1+\tau)^{2(s-1)},n\})
+ \label{eq:main-prenorm-lower}
+\end{equation}
+probes for every fixed legal gain $s>1$. This holds for arbitrary
+prescribed dyadic steps in $[0,1]$, with $\tau$ their sum
+(Theorem~\ref{thm:pn-normalized-gain}, whose exponent is larger, and
+Corollary~\ref{cor:pn-scheduled-lower}). Thus a
+polylogarithmic accumulated step size is sufficient and necessary
+for a uniform polylogarithmic guarantee in these fixed-parameter
+classes (Corollary~\ref{cor:pn-effective-threshold}). Convex
+supercritical residuals instead have the $\log\log n$ step-mass
+scale. The next theorem sharpens the additive exponent for one
+explicit family.
+
+\begin{theorem}[A sharp additive family]
+\label{thm:main-carrier}
+Put $c=\tanh1$ and fix a legal dyadic $s>c/\sqrt2$.
+For $n\ge4$, let $N$ be the largest power of two at most $n/2$
+and put $\eta=N/n$. For prescribed dyadic steps
+$a_0,\ldots,a_{D-1}\in[0,1]$, write
+\[
+ R_j=1+\sum_{k<j}a_k,\quad R=R_D,\qquad
+ \nu_\eta=\frac{s}{c\sqrt\eta}-1.
+\]
+There is an explicit additive tanh family with stabilizer $3$,
+row norms at most $s$, and a fixed bounded binary head whose
+optimal worst-input query cost is
+\[
+ \Theta_s(\min\{R^{2\nu_\eta},n\}).
+\]
+After $O_s((D+1)n^2B^6)$ weight preprocessing, exact sampling
+uses $O_s(B^4\min\{R^{2\nu_\eta},n\})$ expected bit operations.
+The entire input sign cube satisfies a relative energy floor
+stronger than $R_j^2/12$.
+\end{theorem}
+
+Theorem~\ref{thm:pn-family-query-law} proves the query law and
+Theorem~\ref{thm:pn-family-bit-law} the bit bound.
+One group carries the unknown feature mean. An equal-sized group
+moves deterministically at speed $c$, driven by a bias of $-1$.
+After division by the residual radius, the feature gain approaches
+$s/(c\sqrt\eta)$, and the transcript score gives the lower bound. For
+the upper bound, two unknown means and one observed sign determine
+the head, and a Taylor oracle on a complex neighborhood of radius
+proportional to $R^{-\nu_\eta}$ supplies its corrected Bernstein
+factory. Rounding is amplified only through factors
+$1+O_s(a_j/R_{j+1})$, so the required precision grows logarithmically
+in depth. The full additive class may have a different worst-case
+exponent.
+
+The additive product also covers common feed-forward activations.
+Write $\GELU(v)=v\Phi(v)$ and
+$\operatorname{SwiGLU}(u,v)=u\,v\,\sigma(v)$, where $\Phi$ is
+the standard normal distribution function and
+$\sigma(v)=(1+e^{-v})^{-1}$. For bounded affine inputs,
+error-function, product, and logistic factories give exact interfaces
+with polynomial source cost in their radius
+(Lemma~\ref{lem:gelu-swiglu}). For every fixed legal dyadic gain
+$s\ge2$, affine GELU and SwiGLU lower constructions with an explicit
+relative floor and a final RMSNorm also
+satisfy~\eqref{eq:main-prenorm-lower}
+(Theorem~\ref{thm:real-ffn-lower} and
+Corollary~\ref{cor:real-ffn-scheduled}). The identities
+$\GELU(v)-\GELU(-v)=v$ and $\SiLU(v)-\SiLU(-v)=v$, where
+$\SiLU(v)=v\sigma(v)$, embed the required linear amplification using
+three hidden units.
+
+The relative-floor product gives a sufficient condition for an
+architecture. Its constants can be large when row norms grow or
+the floor is small. In particular, the score factor in
+\eqref{eq:main-prenorm-m} grows exponentially in $\sqrt n$ at
+standard scaling. The decoder of Section~\ref{sec:full-decoder-main}
+instead uses the prefilled cache and charges full width-dependent
+arithmetic at one position, while controlling its dependence on
+context length.

@@ -1,0 +1,75 @@
+\section{Quantities to check on a model}
+\label{sec:checkpoint}
+
+The current bounds become unusable as rank grows. The following
+quantities make that limitation testable before an implementation
+is attempted.
+
+Let $n$ be residual width and $d,a$ one head's key and value
+dimensions. Standard scores are $\langle q,k\rangle/\sqrt d$;
+RMSNorm averages over $n$. Fold its learned gain into every
+following map: $W^{\rm eff}=W\operatorname{diag}(g)$.
+The effective row budget is $\max_i\sum_j|W_{ij}g_j|$.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.35\textwidth}Y@{}}
+\toprule
+Certificate & Cost quantity to evaluate\\
+\midrule
+Common affine key rank $r$ and coordinate bounds $Q_{\max},K$ &
+$M_T\le\min\{T,(r+1)(5+32r\bar\beta Q_{\max}K)^r\}$;
+index query work $O_r((d+M_T+\log T)B^4)$.\\
+An exact score sign at radius $A_{\rm coin}$ &
+Unindexed attention uses at most
+$2e^{2A_{\rm coin}}-1$ predecessor requests.\\
+Weighted tanh row radius $\rho=\sum_j|w_j|R_j$ and row bias $|c|\le1$ &
+At most $2\rho(1+\rho)$ source requests.\\
+RMS floor $\lambda\le\varepsilon+\|h\|_2^2/n$ at radius~$R$ &
+$\kappa=\max\{1,R^2/\lambda\}$; the floor factory uses
+$O(1+\kappa^2)$ source requests at radius $2R/\sqrt\lambda$.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+The first row is Theorem~\ref{thm:conf-grid} for keys of dimension $d$.
+The other rows, the decoder for rectangular heads, and the claims of
+the next paragraph are proved in the full version~\cite{mausbergfull2026}.
+
+The rank certificate includes every allowed position. Rotary
+maps can enlarge the common key span; a small rank for each
+individual transformed matrix does not bound their joint span.
+Even a rank-one unrotated image can have a full common rotated span.
+For unrotated heads, the exact score rank
+$\operatorname{rank}[W_Q^TW_K;b_Q^TW_K]$
+can replace key rank after a proved recoding.
+An approximate-space supplied-cache index is also exact when its
+certified coordinate residual $\eta$ satisfies
+$\bar\beta Q_{\max}\eta\le1/8$. Its acceptance test uses the actual score.
+This is a finite-cache result, with no approximate-rank extension
+claimed for the neural moment decoder.
+
+For a bounded chart, the full decoder uses
+$H=\lceil\max\{1,2r|\beta|Q_{\max}K\}\rceil$ as a safe coefficient bound.
+At attention precision $p$ it stores
+\[
+ N_m=\binom{m+r}{r},\qquad m=\lceil8(p+3H+7)\rceil
+\]
+features, with $(a+1)N_m$ counters per head and precision index.
+The routine precision is $O(\log T)$ plus a stability guard
+computed from row norms and normalization floors.
+The full version gives the token work polynomial and a numerical
+worksheet for these counts. It retains its rank-dependent
+constants. Even at illustrative degree $m=256$, rank eight
+requires more than $5\cdot10^{14}$ features.
+
+Weights give exact row sums and ranks. A score maximum or energy
+minimum observed on selected texts describes those contexts;
+a universal theorem needs a certificate for every allowed
+history. Positive inside-root $\varepsilon$ always gives
+$\lambda=\varepsilon$. For additive residuals, record each update
+radius and use the product in the additive theorem, including
+the final head. A small measured score range need not supply
+the score-sign interface required by the Poisson factory.
+Verification that reads the current context is part of online
+work. The formulas predict construction sizes and bit-work
+bounds; timing and speedup require calibrated implementations.

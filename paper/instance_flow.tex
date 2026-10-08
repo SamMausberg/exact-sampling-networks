@@ -1,0 +1,109 @@
+\subsection{An exact query characterization with exponential size}
+\label{sec:query-flow-lp}
+
+For completeness, an instance has an exact finite optimization
+description if exponential preprocessing is allowed.
+
+Let \(p:\{-1,1\}^m\to[0,1]\) be the required probability of
+returning one.  Write \(\Sigma=\{-1,*,1\}^m\) for the partial
+assignments, and \(\sigma\preceq x\) if \(x\) extends
+\(\sigma\).  At a partial assignment \(\sigma\), introduce
+nonnegative variables \(u_\sigma,v_\sigma\) for stopping with
+one or zero and \(a_{\sigma i}\) for querying an unassigned
+coordinate \(i\).  Define the incoming flow by
+\[
+ w_{*^m}=1,\qquad
+ w_\sigma=
+ \sum_{i:\sigma_i\ne *}a_{\sigma^{(i\leftarrow *)},i}
+ \quad(\sigma\ne *^m).
+\]
+Minimize \(C\), subject to
+\begin{align*}
+ w_\sigma&=u_\sigma+v_\sigma+
+                 \sum_{i:\sigma_i=*}a_{\sigma i}
+ &&(\sigma\in\Sigma),\\
+ \sum_{\sigma\preceq x}u_\sigma&=p(x)
+ &&(x\in\{-1,1\}^m),\\
+ \sum_{\sigma\preceq x}\sum_{i:\sigma_i=*}a_{\sigma i}
+ &\le C
+ &&(x\in\{-1,1\}^m).
+\end{align*}
+Denote the value of this program by \(\mathsf{Flow}(p)\).
+It has \(O(m3^m)\) variables and \(O(3^m+2^m)\) constraints.
+
+\begin{lemma}[Flow characterization]\label{lem:instanceflow}
+The infimum of the worst-input expected number of distinct probes
+among exact samplers for \(p\) is \(\mathsf{Flow}(p)\).
+This statement counts queries only.  It permits exponential
+preprocessing and storage.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Merge decision-tree histories that reveal the same partial input.
+Their stopping and query probabilities form a conserved flow. Conversely,
+normalizing a feasible flow gives a sampler; a small complete-scan correction
+then shows that computable probabilities attain the same infimum.
+
+\begin{proof}
+First consider a randomized decision tree with no repeated query.
+All histories that end at the same partial assignment \(\sigma\)
+have probabilities determined by the answers recorded in \(\sigma\).
+Their probabilities are therefore the same on every full input
+extending \(\sigma\).  Add their probabilities of stopping with
+one, stopping with zero, or querying \(i\), to obtain
+\(u_\sigma,v_\sigma,a_{\sigma i}\).
+The incoming-flow identity and conservation hold by construction.
+On a full input \(x\), summing the one-stopping flows gives the
+output probability, and summing the query flows gives the expected
+query count.  Every exact sampler supplies a feasible solution with
+\(C\) equal to its worst-input expected query count.  The same
+finite-input reduction used for the transcript lemma applies to
+almost surely terminating algorithms with arbitrary internal work.
+
+Conversely, at a state with \(w_\sigma>0\), stop with one, stop
+with zero, or query \(i\), with respective probabilities
+\(u_\sigma/w_\sigma\), \(v_\sigma/w_\sigma\), and
+\(a_{\sigma i}/w_\sigma\).  A state with zero incoming flow is
+unreachable.  Each query fixes one new coordinate, so the process
+stops after at most \(m\) queries.  Induction on the number of
+fixed coordinates shows that its probability of reaching
+\(\sigma\), on any input extending \(\sigma\), is exactly
+\(w_\sigma\).  The output and cost constraints thus give the
+specified law and cost.  This proves equality when arbitrary
+real transition probabilities are permitted.
+
+For the feed-forward networks in this paper, the same infimum is obtained by
+computable finite-bit samplers.  Their output probabilities belong
+to \([\varepsilon,1-\varepsilon]\) for an explicitly computable
+\(\varepsilon>0\).  For example, any rational number below
+\((1-\tanh(1+s))/2\) suffices when the output row norm is at
+most \(s\).  All \(2^m\) probabilities are computable to
+arbitrary precision by evaluating the network.
+
+The flow value is continuous quantitatively on this interior cube.
+If \(p,q\in[\varepsilon,1-\varepsilon]^{2^m}\) and
+\(\delta=\|p-q\|_\infty\le\varepsilon\), put
+\(\gamma=\delta/\varepsilon\).  For \(\delta>0\), the table
+\[
+ r(x)=\frac{p(x)-(1-\gamma)q(x)}{\gamma}
+\]
+belongs to \([0,1]^{2^m}\).  Mix a sampler for \(q\), with
+probability \(1-\gamma\), and a complete input scan followed by
+an \(r(x)\)-coin, with probability \(\gamma\).  It follows that
+\[
+ |\mathsf{Flow}(p)-\mathsf{Flow}(q)|
+ \le\frac{m}{\varepsilon}\|p-q\|_\infty.
+\]
+The case \(\delta=0\) is immediate.  A rational approximation
+\(q\) admits an exactly solved rational flow program.  Using the
+same mixture with a certified approximation error and
+\(\varepsilon/2\) in place of \(\varepsilon\) yields an exact
+finite-bit sampler whose query cost approaches
+\(\mathsf{Flow}(p)\).  The residual scalar probability is
+computable; a lazy fair-bit comparison samples it exactly.  Hence
+computability does not change the infimum.
+\end{proof}
+
+The flow program accounts for all signed cancellations because it
+uses the complete output table.  Its size exceeds the permitted
+preprocessing budget exponentially.

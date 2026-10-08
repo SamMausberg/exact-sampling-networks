@@ -1,0 +1,162 @@
+{
+  "precision_decimal_digits": 120,
+  "total_checks": 501,
+  "counts": {
+    "coefficient_positivity": 15,
+    "derivative_at_one": 15,
+    "weighted_coefficient_bound": 15,
+    "imaginary_derivative_bound": 15,
+    "partial_mass_bound": 15,
+    "partial_arity_bound": 15,
+    "derivative_loss": 105,
+    "monotone_derivative": 105,
+    "range_bound": 105,
+    "arity_integral": 7,
+    "majority_recurrence": 49,
+    "explicit_tail_cutoff": 20,
+    "explicit_rounding_mass": 20
+  },
+  "max_absolute_residuals": {
+    "derivative_at_one": "4.840739893561648e-122",
+    "arity_integral": "3.872591914849318e-121",
+    "majority_recurrence": "1.936295957424659e-121"
+  },
+  "network_checks": [
+    {
+      "seed": 1,
+      "depth": 1,
+      "lambda": "0.25",
+      "range": "0.2449186624037091292778011",
+      "partial_arity_49": "0.265412492915939556807354",
+      "arity_bound": "0.5",
+      "imaginary_derivative_ratio": "1.007853370978728547694742"
+    },
+    {
+      "seed": 1,
+      "depth": 2,
+      "lambda": "0.59375",
+      "range": "0.4732730278298826441198458",
+      "partial_arity_49": "1.016128150438947426312879",
+      "arity_bound": "1.679378605318050370452005",
+      "imaginary_derivative_ratio": "1.056185616854084887162907"
+    },
+    {
+      "seed": 1,
+      "depth": 4,
+      "lambda": "0.62174224853515625",
+      "range": "0.4173236399932933121179648",
+      "partial_arity_49": "1.433731819502465151072841",
+      "arity_bound": "2.486968994140625",
+      "imaginary_derivative_ratio": "1.059691602659909735070453"
+    },
+    {
+      "seed": 1,
+      "depth": 8,
+      "lambda": "0.6149716609070310369133949",
+      "range": "0.3435186261759109734658532",
+      "partial_arity_49": "1.853955762355027021207077",
+      "arity_bound": "3.47880505331932558158244",
+      "imaginary_derivative_ratio": "1.053491420510715955394617"
+    },
+    {
+      "seed": 1,
+      "depth": 16,
+      "lambda": "0.6149508309421049708776621",
+      "range": "0.2686352227583771503881116",
+      "partial_arity_49": "2.538849301285320718362629",
+      "arity_bound": "4.919606647536839767021297",
+      "imaginary_derivative_ratio": "1.051336882202161472107739"
+    },
+    {
+      "seed": 7,
+      "depth": 1,
+      "lambda": "0.25",
+      "range": "0.2449186624037091292778011",
+      "partial_arity_49": "0.265412492915939556807354",
+      "arity_bound": "0.5",
+      "imaginary_derivative_ratio": "1.007853370978728547694742"
+    },
+    {
+      "seed": 7,
+      "depth": 2,
+      "lambda": "0.6328125",
+      "range": "0.4972780386521295251925207",
+      "partial_arity_49": "1.108256142162711786561827",
+      "arity_bound": "1.789864039878448421139637",
+      "imaginary_derivative_ratio": "1.059319171502014080610878"
+    },
+    {
+      "seed": 7,
+      "depth": 4,
+      "lambda": "0.702362060546875",
+      "range": "0.4467191405941137634239001",
+      "partial_arity_49": "1.753332760122183025655093",
+      "arity_bound": "2.8094482421875",
+      "imaginary_derivative_ratio": "1.071643156159712100044899"
+    },
+    {
+      "seed": 7,
+      "depth": 8,
+      "lambda": "0.6956453095408505760133266",
+      "range": "0.3590855957271235526207724",
+      "partial_arity_49": "2.324149786243100909985176",
+      "arity_bound": "3.935164125415602793301472",
+      "imaginary_derivative_ratio": "1.066905050949295192911452"
+    },
+    {
+      "seed": 7,
+      "depth": 16,
+      "lambda": "0.6955298322858219158196408",
+      "range": "0.2758426088727331124217271",
+      "partial_arity_49": "3.211181687272654095211861",
+      "arity_bound": "5.564238658286575326557126",
+      "imaginary_derivative_ratio": "1.065269390129115975765695"
+    },
+    {
+      "seed": 29,
+      "depth": 1,
+      "lambda": "0.25",
+      "range": "0.2449186624037091292778011",
+      "partial_arity_49": "0.265412492915939556807354",
+      "arity_bound": "0.5",
+      "imaginary_derivative_ratio": "1.007853370978728547694742"
+    },
+    {
+      "seed": 29,
+      "depth": 2,
+      "lambda": "0.7421875",
+      "range": "0.5407531940575970543660583",
+      "partial_arity_49": "1.489143689450085923940776",
+      "arity_bound": "2.099223256647562963065007",
+      "imaginary_derivative_ratio": "1.08651800305265553513247"
+    },
+    {
+      "seed": 29,
+      "depth": 4,
+      "lambda": "0.6721954345703125",
+      "range": "0.4318305162954061422958812",
+      "partial_arity_49": "1.654966834442837591250306",
+      "arity_bound": "2.68878173828125",
+      "imaginary_derivative_ratio": "1.069489929569614957171689"
+    },
+    {
+      "seed": 29,
+      "depth": 8,
+      "lambda": "0.6676274630444822832942009",
+      "range": "0.3516500987201646063346375",
+      "partial_arity_49": "2.174340212557261151222897",
+      "arity_bound": "3.776671251400996620837255",
+      "imaginary_derivative_ratio": "1.063316525428275547037497"
+    },
+    {
+      "seed": 29,
+      "depth": 16,
+      "lambda": "0.6676402277613083935620037",
+      "range": "0.2724528473323190925733333",
+      "partial_arity_49": "2.984498005649224093413963",
+      "arity_bound": "5.34112182209046714849603",
+      "imaginary_derivative_ratio": "1.060862699003351364647843"
+    }
+  ],
+  "status": "passed; deterministic identities and inequalities; not interval certified; no sampler benchmark"
+}

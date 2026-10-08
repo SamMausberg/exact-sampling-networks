@@ -1,0 +1,20 @@
+[project]
+name = "exact-sampling-networks"
+version = "1.0.0"
+description = "Exact sampling from neural networks: manuscript, finite checks, and Lean formalization"
+authors = [{ name = "Samuel Mausberg" }]
+license = "MIT AND CC-BY-4.0"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = ["formalization/.lake"]
+
+[tool.ruff.lint]
+select = ["E4", "E9", "F", "I", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

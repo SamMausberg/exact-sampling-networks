@@ -1,0 +1,150 @@
+\section{Relation to attention approximation and prior factories}
+\label{sec:prior-main}
+
+A runtime comparison must match the output and preprocessing:
+an approximate attention vector, an attention index, and a final
+token impose different requirements.
+
+KDEformer and HyperAttention give operator-norm approximations of the
+attention product that hold with high probability
+\cite{kdeformer2023,hyperattention2023}. Such a guarantee supplies no
+certified interval for every output probability on every random run.
+MagicPIG samples through a prefill-built locality-sensitive hash index
+\cite{magicpig2024}; its implemented self-normalized estimate is
+generally biased. Appendix~\ref{app:related} states these three
+guarantees with their parameters. Randomly perturbed nearest-neighbor
+methods give exact categorical samples when a valid top-$k$ oracle is
+available \cite{mussmann2017}, and approximate retrieval then needs
+additional certification or an error allowance. Smooth-kernel data
+structures, including the quasi-Monte Carlo construction of Charikar,
+Kapralov, and Waingarten \cite{charikar2024qmc}, offer another positive
+route for their specified kernel class. Their smoothness condition does
+not include the Gaussian kernel at arbitrary scale. These results therefore do not remove the
+constant-gap indexed lower bound proved here.
+
+Alman and Song's earlier high-precision theorem does not by itself
+give the constant-gap sampling conclusion of
+Theorem~\ref{thm:main-index-hard}. They study approximation of a
+complete attention matrix-vector computation, with dimension, entry
+bounds, and inverse-polynomial accuracy linked together
+\cite{alman2023attention}. Kernel-density lower bounds also depend on
+the batch model and the requested accuracy
+\cite{aggarwal2022polynomial,alman2024kde}. Estimating an
+inverse-polynomial probability gap by repeated samples can erase a
+desired exponent saving; the constant final-token gap avoids that
+loss.
+
+Maintaining feature sums for causal attention is established work.
+Katharopoulos et al.~\cite{katharopoulos2020linear} give recurrent
+prefix states for feature attention. Heinsen and
+Kozachkov~\cite{heinsen2026taylor} give the Taylor monomials,
+feature count, and accumulated states at arbitrary truncation
+order. Our decoder uses those representations with certified
+error, rank-preserving rounding, and a precision schedule that
+supports the exact original law through all layers.
+Exact decisions from finite probability approximations also have
+prior constructions. Han and Hoshi~\cite{han1997interval} study interval sampling, and
+Brassard, Devroye, and Gravel \cite{brassard2019remote} give floored
+rejection envelopes and geometric refinement tails. The decoder
+combines these principles with a causal neural evaluator and
+background replay to prove a complete finite-bit maintenance bound.
+Dynamic attention maintenance~\cite{vandenbrand2024dynamic} and
+dynamic KDE~\cite{liang2025dynamic} support entry or point updates
+with numeric outputs, which differ from an appended neural record
+followed by one exact categorical sample.
+
+Stochastic computing represents values by event probabilities
+\cite{gaines1967,gaines1969,browncard2001}. Bernoulli-factory theory
+supplies analytic constructions, positive series, multivariate
+races, and composition principles
+\cite{nacuperes2005,holtz2011,mendo2019,dughmi2017,morina2022}.
+We attribute these tools where they enter and make no novelty claim
+for scalar factory representations. Koskela, Karvonen,
+{\L}atuszy{\'n}ski, and Span{\`o} \cite{koskela2026debiased} give a
+scalar debiased Bernoulli construction based on smooth Bernstein
+approximants. Its outcome-independent sample count is useful for
+composition, but does not supply the dense multivariate coefficient
+oracle needed by the unrestricted critical problem. Randomized
+telescoping and antithetic empirical means are also established
+tools \cite{rheeglynn2015,blanchetglynn2015,blanchetchenglynn2015}.
+The column-envelope theorem makes its correction estimates bounded on
+every branch. Its common derivative majorants, exact quadratic and
+quartic tilts, and retained observations then give a sign with the
+required law and the stated input cost.
+
+\section{Scope, remaining questions, and evidence}
+\label{sec:status}
+
+\subsection{What follows for decoding}
+
+Before prefill, standard score scaling can force linear positional
+search. After prefill, fixed-rank neural key maps with a positive
+normalization stabilizer give $\poly_r(n,\log T)$ conditional expected
+work per token. The OVH obstruction concerns ranks and widths that
+grow with the context. Pre-norm additive residuals, RMSNorm, and
+SwiGLU occur in widely used
+architectures~\cite{touvron2023llama2,zhang2019rmsnorm,shazeer2020glu},
+but no theorem here establishes favorable rank or numerical constants
+for a trained checkpoint. Section~\ref{sec:checkpoint} lists the
+quantities to certify on a model and shows how fast the moment
+dimension grows with rank.
+
+\subsection{Open problems}
+
+\paragraph{Main open problem: the unrestricted critical exponent.}
+For zero-bias networks with every row norm at most one, the worst-case
+query gap remains $\Omega(\sqrt D)$ versus $O(D)$. Does an exact
+sampler use $O(\sqrt{D+1})$ expected input probes at arbitrary rank,
+under the same weight preprocessing budget and with polylogarithmic
+bit overhead? Even $\sqrt{D+1}\log^{O(1)}(D+2)$ probes would close
+the depth exponent. No factor $\log^{O(1)}n$ is hidden in this query
+claim: at logarithmic depth such a factor could absorb the whole gap.
+The fixed-rank theorem has constants and a bit exponent that depend
+on the rank, and the column envelope $\sum_j\max_i|w_{1,ij}|$ may be
+$n$, so these two certificates leave the general critical exponent
+unsettled.
+
+The final analysis sharpens the limitations of two proof routes.
+The integer stopped-score obstruction also holds for bounded real
+estimators, so delayed Bernoulli rounding does not reduce the leading
+local amplification cost (Corollary~\ref{cor:new-integer-score}).
+A common derivative majorant shows that the
+sum of one-coordinate coupling witnesses is at most one. Even grouped,
+matrix-valued second-order score witnesses are at most $\sqrt{6D}$
+(Propositions~\ref{prop:critical-hessian-majorant}
+and~\ref{prop:critical-matrix-score}). These are ceilings on the stated
+lower-bound methods. They neither prove a faster global sampler nor
+rule out a stronger lower bound by another method.
+Near unit row norm, the supercritical gap remains between
+$2\log s$ and $(51/16)(s-1)+O((s-1)^2)$ per layer.
+
+The full relative-floor class has an open additive exponent,
+as does the carrier family's boundary $\nu_\eta=0$. A general instance
+law also faces computational obstacles. Let $Q^*(W)$ be the optimal
+worst-input expected number of distinct probes for a network $W$.
+At fixed $s>1$, a deterministic polynomial-time algorithm that
+approximates $1+Q^*(W)$ within a polylogarithmic factor on width-$n$
+networks of depth $\lceil\log_2n\rceil$ with row norms at most $s$
+and precision $b=20\lceil\log_2n\rceil$ would imply
+$\mathrm P=\mathrm{NP}$. A randomized one that succeeds with
+probability at least $2/3$ would imply
+$\mathrm{NP}\subseteq\mathrm{BPP}$ (Theorem~\ref{thm:instance-hardness}).
+
+For attention, useful remaining questions concern deletions,
+weaker geometric promises, and algorithms whose rank dependence
+is useful at model dimensions. Sharp normalization laws under input-dependent energy certificates
+also remain open.
+
+\subsection{Proofs, numerical checks, and Lean}
+
+The appendices prove the theorem claims and identify imported
+results and conditional hypotheses. The source includes numerical
+and exact-arithmetic checks of coefficient identities, degree
+elevation, score embeddings, and residual recurrences. These finite
+checks provide supplementary evidence. No sampler benchmark or
+trained-model evaluation was performed.
+
+A Lean~4 formalization with Mathlib in the repository
+\url{https://github.com/SamMausberg/exact-sampling-networks} checks the
+probability laws, exactness identities and inequalities of the proofs,
+using only the standard axioms (Appendix~\ref{app:lean}).

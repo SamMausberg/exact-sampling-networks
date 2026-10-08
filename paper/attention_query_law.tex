@@ -1,0 +1,184 @@
+\subsection{A sharp query law for a cache with two keys}
+\label{sec:rankonequerylaw}
+
+A fast cache index can remove the length of the cached prefix from
+the query cost. It cannot generally remove the width of a fresh
+query. The following family makes this distinction quantitative.
+
+\begin{theorem}[Two-key attention]
+\label{thm:rankonequerylaw}
+Let $n\ge1$, and let $\beta\ge0$ be dyadic or equal to $\sqrt n$.
+A cache contains equal numbers of the
+keys $\mathbf1$ and $-\mathbf1$, with respective scalar values $+1$
+and $-1$. The fresh query is $x\in\{-1,+1\}^n$, accessed by coordinate
+probes. Scores are $\beta\langle x,k\rangle/n$. Apply one tanh row
+to the attention value and use the two logits given by that row and
+its negative. Let $Q^*(n,\beta)$ be the infimum, over exact samplers,
+of the worst-case expected number of fresh-query probes. Arbitrary
+preprocessing independent of $x$ is allowed. Then, with absolute
+implicit constants,
+\[
+ Q^*(n,\beta)=\Theta\!\left(\min\{n,\beta+\beta^2\}\right).
+\]
+There is a finite-bit implementation with expected online work
+\[
+ O\!\left(B^4\left[1+\min\{n,\beta+\beta^2\}\right]\right),
+\]
+where $B$ contains the parameter encoding lengths and $\log(n+2)$.
+The cache can be stored by its two key types and multiplicities.
+At standard scaling, the fresh-query probe complexity is $\Theta(n)$,
+independently of the number of cached copies.
+\end{theorem}
+\paragraph{Proof idea.}
+The two-key cache turns the query mean into a scalar tanh composition.  Factories give the upper bound.  For the lower bound, a product-distributed query and the transcript score relate the output derivative to the number of coordinates read.
+
+\begin{proof}
+Write $M=n^{-1}\sum_i x_i$ and $F_3=\tanh\circ\tanh\circ\tanh$.
+The attention value is $\tanh(\beta M)$, so the final token has
+mean $F_3(\beta M)$ when written as a sign.
+
+For the upper bound, obtain a source sign of mean $M$ by querying
+one uniform coordinate. The arbitrary-radius tanh factory uses at
+most $2\max\{\beta,\beta^2\}$ such requests, and each of the next
+two unit-radius tanh factories uses at most two requests to its
+predecessor. Fresh randomness gives the factor eight. Repeated
+input coordinates may be cached, which can only reduce the number
+of probes. Alternatively read all $n$ input coordinates and make a
+certified scalar comparison. Choose the cheaper construction from
+the known parameters. The quadratic-radius bit bound and the
+precision stopping lemma give the stated finite-bit work.
+
+For $0\le\beta\le1$, the output laws on $x=\mathbf1$ and
+$x=-\mathbf1$ have total variation distance $F_3(\beta)$.
+Couple all preprocessing and online random bits. Until the first
+probe the executions are identical, so the probability of making
+at least one probe is at least that distance. The inequalities
+$\tanh u\ge u/2$ for $u\in[0,1]$ give
+$F_3(\beta)\ge\beta/8$. This proves the required bound in this range,
+since $\beta+\beta^2\le2\beta$.
+
+For $\beta\ge1$, draw the query coordinates independently with
+common mean $t$, and let $H(t)$ be the mean of the output sign.
+At $t=0$, put $S=\sum_i x_i$ and $Z=S/\sqrt n$. Differentiating
+the finite product distribution gives
+\[
+ H'(0)=\mathbb E_0[F_3(\beta S/n)S]
+ =\sqrt n\,\mathbb E_0\left[Z F_3\left(\frac\beta{\sqrt n}Z\right)\right].
+\]
+Here $\mathbb E Z^2=1$ and $\mathbb E Z^4=3-2/n\le3$.
+Paley--Zygmund's inequality, or its elementary Cauchy--Schwarz proof,
+therefore gives
+\[
+ \Pr(|Z|\ge1/2)\ge\frac{(1-1/4)^2}{3}=\frac3{16}.
+\]
+Let $d=\min\{\beta/\sqrt n,1\}$. On this event, oddness and
+monotonicity imply
+\[
+ ZF_3\left(\frac\beta{\sqrt n}Z\right)
+ \ge\frac12 F_3(d/2)\ge\frac d{32}.
+\]
+The integrand is nonnegative everywhere, hence
+$H'(0)\ge3\min\{\beta,\sqrt n\}/512$.
+Lemma~\ref{lem:transcript} and Cauchy--Schwarz give
+\[
+ \sup_x\mathbb E_xQ\ge\mathbb E_0Q
+ \ge H'(0)^2
+ \ge\frac1{32768}\min\{\beta^2,n\}.
+\]
+Finally $\beta+\beta^2\le2\beta^2$ in this range. Combining both
+ranges gives the universal lower constant $1/65536$.
+The case $\beta=0$
+is a fair output coin and uses no input probes.
+\end{proof}
+
+\begin{theorem}[Worst-case query cost for a rank-one cache]
+\label{thm:rankone-worstlaw}
+Let $T,n\ge2$, and let $\beta\ge1$ be dyadic or equal to $\sqrt n$.
+Consider all length-$T$ caches with finitely encoded dyadic keys and
+values, whose keys
+lie in $[-1,1]^n$ on one affine line, whose scalar values lie in
+$[-1,1]$, and whose fresh query is $x\in\{-1,1\}^n$ accessed by
+coordinate probes. The required output sign has mean
+$\tanh(\tanh Y(x))$, where $Y$ is the attention-coordinate mean
+with scores $\beta\langle x,k_j\rangle/n$.
+Allow preprocessing independent of $x$ and polynomial in the cache
+length, width, and parameter encoding size.
+
+The optimal worst-cache, worst-query expected probe cost is
+\[
+ \Theta\!\left(\min\{n,\beta^2\}\right),
+\]
+with absolute implicit constants.  The upper bound has expected online bit work
+\[
+ O\!\left([1+\min\{n,\beta^2\}+\log T]B^4\right)
+\]
+after polynomial $(T,n,B)$ prefill, where $B\ge16$ includes all parameter
+encoding lengths and $\log_2(T+n+2)$. At standard scaling the sharp
+fresh-query probe order is $n$, independently of the prefix length.
+The theorem is a worst-case law over the stated class of caches.
+\end{theorem}
+\paragraph{Proof idea.}
+The two-key construction supplies the lower bound for every cache length.  For the upper bound, express an arbitrary line cache using its two extreme keys and expose the resulting one-dimensional query through source signs; use the explicit index when reading the whole query is cheaper.
+
+\begin{proof}
+For even $T$, the equal-multiplicity two-key cache in
+Theorem~\ref{thm:rankonequerylaw} supplies the lower bound even
+with arbitrary preprocessing independent of $x$.
+For odd $T$, use $T-1$ equally split keys and one zero key with
+value zero. Its attention output has the same sign as
+$\tanh(\beta M)$ and magnitude at least
+$(2/3)|\tanh(\beta M)|$. The map
+$\phi(u)=\tanh(\tanh u)$ is increasing and concave for $u\ge0$,
+so the absolute output mean is at least $(2/3)|F_3(\beta M)|$.
+The first-score calculation in that theorem therefore gives
+$H'(0)\ge\min\{\beta,\sqrt n\}/256$.
+Lemma~\ref{lem:transcript} proves the same lower constant
+$1/65536$ in this case as well.
+
+For the upper bound, find the two extreme keys along the affine line.
+Their midpoint is $c$ and their half-difference is $u$. Then
+\[
+ k_j=c+t_ju,\qquad |t_j|\le1,\qquad \|u\|_\infty\le1.
+\]
+If all keys agree, the attention value is independent of the query.
+Otherwise each $t_j$ is a rational ratio of two dyadic coordinate
+differences, so its bit length is $O(B)$. A fresh sign of mean
+$z=\langle x,u\rangle/n$ needs at most one input probe: select
+coordinate $i$ with mass $|u_i|/n$, return its signed input, and
+complete the unused mass with a fair sign. Independent selections
+give independent source signs for every fixed query.
+
+The rank-one reduction after Theorem~\ref{thm:implicitrankone}, with
+$R=n$ and $p=(1+z)/2$, gives slopes $a_j=2\beta t_j$ and a rational
+slope bound $2\beta\le\Lambda\le4\beta$.
+Its radius-two attention sign needs fewer than
+$45\Lambda^2\le720\beta^2$ source requests.
+The arbitrary-radius tanh factory in
+Theorem~\ref{thm:quadraticradiusbits} needs at most eight such signs
+to generate a sign of mean $\tanh Y$, and at most two further
+calls produce a sign of mean $\tanh(\tanh Y)$.
+Predictable charging gives at most $11520\beta^2$ input requests.
+Its expected bit work is $O(\beta^2B^4)$.
+
+Alternatively, read all $n$ input signs and use the explicit
+rank-one index in Theorem~\ref{thm:newrankone}. Its work is
+$O((n+\log T)B^4)$ and its probe count is $n$.
+Use the implicit construction only when $12000\beta^2<n$.
+Then its prefill factor $\Lambda^4$ is $O(n^2)$, so its
+$O(T^3(1+\Lambda^4)B^4)$ preprocessing is polynomial in
+$T,n,B$. In the other case the near-linear explicit index
+suffices. Thus no preprocessing exponential in the encoding of
+a numerically huge temperature is being claimed.
+This proves the two upper bounds and almost-sure termination.
+\end{proof}
+
+\paragraph{Adding the current position.}
+The affine-line index also tolerates a fixed number of explicitly
+available exceptional keys, such as the current position's own key.
+Use the monotone geometric blocks for the line and one singleton
+block per exception. Shift by the largest weight among the line and
+the exceptions. The ideal envelope is at most twice the total mass;
+the same dyadic floor argument gives at most $17/8$ proposals.
+The additional query work is proportional to the number of exceptional
+inner products. Thus including the current position does not require
+its key to lie on the cached affine line.

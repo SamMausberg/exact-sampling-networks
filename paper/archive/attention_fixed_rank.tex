@@ -1,0 +1,297 @@
+\subsection{Fixed affine rank at every temperature}
+\label{sec:fixedrankalltemp}
+
+Polynomial prefill can remove the numerical temperature dependence
+for every fixed affine rank.  The price is a much larger index than
+the near-linear index for one affine line.  The construction first
+indexes the order of all projected keys, then uses the decreasing-weight
+envelope of Lemma~\ref{lem:newmonotoneenvelope}.
+
+Point location in arrangements of hyperplanes is classical.  For
+example, Meiser~\cite{meiser1993pointlocation} gives polynomial space
+at each fixed dimension and logarithmic query dependence on the
+number of hyperplanes.  We give a slower elementary construction
+here so that its preprocessing, rational arithmetic, and treatment
+of tied scores are explicit.  No geometric oracle is assumed.
+
+\begin{lemma}[An elementary index for hyperplane arrangements]
+\label{lem:elementaryarrangement}
+Let $r\ge1$, and let $\mathcal H$ be a family of at most $H$
+proper affine hyperplanes in $\mathbb R^r$, given by rational
+coefficients of encoding length at most $b$.  There is a finite
+family of nonempty, open, full-dimensional convex cells such that:
+\begin{enumerate}
+ \item every cell avoids all hyperplanes in $\mathcal H$, and every
+ input affine form has a constant strict sign on each cell;
+ \item the cells have disjoint interiors, and their closures cover
+ $\mathbb R^r$;
+ \item their number is at most $(H+1)^{2^r-1}$;
+ \item each cell has a stored rational representative; a rational
+ query point can be located in the closure of one stored cell using
+ at most $(2^r-1)\lceil\log_2(H+1)\rceil+O(r)$ comparisons of
+ rational affine forms.
+\end{enumerate}
+For each fixed $r$, all coefficients and representatives have
+encoding length $O_r(b+1)$.  The preprocessing work and stored bits
+are at most
+\[
+ (H+1)^{2^r-1}\operatorname{poly}_r(b+\log(H+2)),
+\]
+and query bit work is
+$\operatorname{poly}_r(b+b_q+\log(H+2))$, where $b_q$ bounds the
+query-coordinate encoding lengths.  Hyperplanes with identical zero
+sets, empty zero sets, and identically zero forms can be removed by
+exact rational tests.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Project the hyperplanes one coordinate at a time.  Their crossing sets partition the lower-dimensional space into regions with a fixed vertical order.  Lifting those regions gives cells and a recursive binary-search index that also handles boundary ties.
+
+\begin{proof}
+In one dimension, sort the distinct rational zeros and store the
+open intervals between consecutive zeros, including the two
+unbounded intervals.  Their representatives may be chosen as
+midpoints, or one unit beyond an outer endpoint.  With no zeros
+use the representative zero.  Binary search locates a query in
+the closure of one interval.  At a zero, either adjacent interval
+is valid.  There are at most $H+1$ intervals, establishing the base
+case.
+
+Suppose $r\ge2$, write a point as $(x,y)$ with
+$x\in\mathbb R^{r-1}$, and separate the affine forms according to
+whether their coefficient of $y$ is zero.  A form with nonzero
+coefficient has zero set
+\[
+ y=f_i(x),
+\]
+where $f_i$ is rational affine.  Remove identical functions among
+the $f_i$, and let their number be $K\le H$.  In the projection
+space, collect the nontrivial zero sets of all differences
+$f_i-f_j$ and of all input forms independent of $y$.  This gives
+at most
+\[
+ H'\le \binom K2+H-K\le (H+1)^2-1
+\]
+proper affine hyperplanes.  Constant nonzero forms have empty zero
+sets and are discarded; zero forms add no constraint.
+
+Construct the lower-dimensional index recursively.  On each of
+its cells $C$, the distinct functions $f_i$ have a strict order
+that is independent of $x\in C$.  Obtain this order by evaluating
+them at the stored representative $x_C$ and sorting.  Write the
+order as
+$f_{i_1}<\cdots<f_{i_K}$ on $C$.  Above $C$, create the $K+1$
+open cells
+\[
+ \{(x,y):x\in C,\ f_{i_j}(x)<y<f_{i_{j+1}}(x)\},
+ \qquad 0\le j\le K,
+\]
+with the usual endpoints $f_{i_0}=-\infty$ and
+$f_{i_{K+1}}=+\infty$.  When $K=0$, use $C\times\mathbb R$.
+Every such cell is nonempty, open, and convex.  A representative
+uses $x_C$ and the midpoint of the two finite threshold values;
+at an unbounded end take the finite threshold minus or plus one.
+All original affine forms have a fixed strict sign in a lifted
+cell, including those independent of $y$.
+
+For a query $(x,y)$, first recurse to obtain a cell $C$ whose
+closure contains $x$.  Its stored threshold order remains a weak
+order at $x$, by continuity.  A binary search through this order
+finds an index $j$ for which
+\[
+ f_{i_j}(x)\le y\le f_{i_{j+1}}(x).
+\]
+Equal threshold values cause no difficulty.  We now verify that
+the returned lifted cell really has $(x,y)$ in its closure.
+Choose $x_m\in C$ tending to $x$.  Its corresponding open vertical
+interval is nonempty.  The distance of $y$ from this interval
+tends to zero because each finite endpoint is a continuous affine
+function and $y$ lies between the limiting endpoints.  Choose a
+point $y_m$ in the interval whose distance from $y$ is at most
+that interval distance plus $1/m$.  Then
+$(x_m,y_m)\to(x,y)$.  This proves the closure claim even when the
+two limiting endpoints coincide.  Disjointness of cell interiors
+follows from the recursive projection and the disjoint vertical
+intervals.
+
+Let $N_r(H)$ bound the number of cells.  The construction gives
+\[
+ N_r(H)\le(H+1)N_{r-1}(H')
+ \le(H+1)\bigl((H+1)^2\bigr)^{2^{r-1}-1}
+ =(H+1)^{2^r-1}.
+\]
+At successive projection levels, the logarithm of the number of
+hyperplanes plus one grows by at most a factor of two.  Summing
+the binary-search costs gives the stated comparison count.
+
+The projected coefficients are obtained from two previous affine
+forms by rational division and subtraction.  The number of such
+projection stages is at most $r-1$.  A representative at each
+stage is obtained by substituting the preceding representative
+into at most two affine forms and taking a midpoint or adding one.
+Each operation combines only $O(r)$ rational numbers.  Induction
+therefore bounds every coefficient and representative by
+$C_r(b+1)$ bits for a constant $C_r$ independent of $H$.
+
+At each projection cell, sorting its $K$ threshold values costs
+$O(K\log(K+2))$ rational comparisons.  The stored threshold order
+has $K$ indices, while that projection cell gives $K+1$ lifted
+cells.  Thus this storage and sorting cost are bounded by a
+logarithmic factor times the number of cells created, with rational
+arithmetic charged.  Generating all pairs of forms costs $O(H^2)$
+operations at a projection step, which is absorbed by the displayed
+bound whenever its dimension is at least two.  The one-dimensional
+base step uses direct sorting and creates no pairwise projection.
+This proves the preprocessing and storage bounds.  Query tests
+use only the precomputed rational coefficients and supplied query
+coordinates, establishing the bit bound.
+\end{proof}
+
+\begin{theorem}[An exact index for any fixed affine rank]
+\label{thm:fixedrankalltemperature}
+Fix $r\ge0$.  Let $T\ge2$ cached dyadic keys in $\mathbb Q^n$
+have affine dimension at most $r$, with dyadic scalar values in
+$[-1,1]$.  Suppose cache coordinates, values, and a fresh explicit dyadic
+query have at most $b$ bits each.  Let the nonnegative temperature
+$\beta$ be dyadic of at most $b$ bits, or let $\beta=\sqrt n$.
+For
+\[
+ B=16+b+\lceil\log_2(T+n+2)\rceil,
+\]
+there is an exact attention-index sampler with the following bounds:
+\[
+ \begin{split}
+ \text{prefill work and stored bits}
+ &\le T^{\max\{1,2^r-1\}}\operatorname{poly}_r(n,B),\\
+ \text{expected online bit work}
+ &=O_r\bigl((n+\log T)B^4\bigr).
+ \end{split}
+\]
+Its expected number of proposed keys is at most $17/8$.
+The bounds have no dependence on the numerical size of $\beta$
+or of the scores beyond their input encoding lengths.  A fresh
+value sign gives the exact attention-coordinate mean.  Composing
+with the unit tanh row and the bounded two-logit head changes the
+online bound by only an absolute factor.
+\end{theorem}
+
+\paragraph{Proof idea.}
+The query matters only through its projections onto the affine key span.  Index every possible projected order in fixed dimension, then apply the decreasing-weight envelope to the order selected by the query.
+
+\begin{proof}
+Find the actual affine rank $r'\le r$ by exact rational Gaussian
+elimination.  If $r'=0$, all scores agree and a uniform index
+suffices.  Otherwise choose one key $c$ and $r'$ independent key
+differences $u_1,\ldots,u_{r'}$.  Express each key uniquely as
+\[
+ k_j=c+\sum_{a=1}^{r'}\xi_{j,a}u_a.
+\]
+One nonsingular $r'\times r'$ coordinate minor determines each
+$\xi_j$.  Cramer's rule, or rational elimination, shows that its
+numerators and denominators have $O_r(b+1)$ bits.  The basis
+selection, coefficient construction, and rank-promise verification
+cost $T\operatorname{poly}_r(n,B)$ bit operations.
+
+For a query $q$, define its $r'$ projected coordinates
+\[
+ v_a=\langle q,u_a\rangle.
+\]
+The score of key $j$ is a common additive term plus
+$(\beta/n)\langle v,\xi_j\rangle$.  Thus its order is determined
+by the signs of the at most $\binom{T}{2}$ forms
+\[
+ \langle v,\xi_j-\xi_k\rangle.
+\]
+Their homogeneity saves one dimension in the arrangement index.
+For each coordinate $a\le r'$ and sign $\sigma\in\{-1,1\}$,
+construct the chart $v_a=\sigma$.  It has $r'-1$ free coordinates
+$y_b$, $b\ne a$, and its pairwise forms are
+\[
+ \sigma(\xi_{j,a}-\xi_{k,a})
+ +\sum_{b\ne a}(\xi_{j,b}-\xi_{k,b})y_b.
+\]
+Discard constant forms and apply
+Lemma~\ref{lem:elementaryarrangement} to the proper hyperplanes
+in each chart.  When $r'=1$, each chart is a single point and no
+point-location structure is needed.  At the representative of
+each chart cell, sort the $T$ projected keys and store their
+permutation.  This costs $T\log(T+2)$ comparisons and $T$ indices
+per cell.  For $r'\ge2$, the total size of the $2r'$ chart indices
+is at most
+\[
+ 2r'T(H+1)^{2^{r'-1}-1}\operatorname{poly}_r(n,B)
+ \le T^{2^{r'}-1}\operatorname{poly}_r(n,B),
+\]
+where $H\le T^2$ and factors depending only on $r$ are absorbed.
+For $r'=1$ this is $T\operatorname{poly}(n,B)$.  Together with
+the rank-zero case these are bounded by the stated exponent.
+
+At query time compute $v$.  If $v=0$, all scores agree and use a
+uniform index.  Otherwise select an index $a$ with $v_a\ne0$, put
+$\sigma=\operatorname{sign}(v_a)$, and query its chart at
+$y_b=v_b/|v_a|$.  Multiplication by the positive number $|v_a|$
+recovers the original pairwise score differences.  Locate a chart
+cell whose closure contains $y$.  Its stored descending score order
+is weakly valid at $y$: each pairwise difference has a fixed sign
+on the open cell and has the corresponding weak sign on its closure.
+The discarded constant forms have the same sign everywhere, and
+identically zero forms represent ties everywhere.  Thus the stored
+order is weakly valid for the original query, including every tie.
+The order is unchanged by any positive temperature; at temperature
+zero use a uniform index.
+
+Apply the dyadic decreasing-weight envelope from the proof of
+Theorem~\ref{thm:newrankone}.  It needs only the sorted permutation,
+$O(\log T)$ score evaluations, and a constant expected number of
+proposed-member score evaluations.  There is no need to read the
+entire permutation online.  Its absolute exponential enclosures,
+dyadic proposal floors, and final acceptance comparisons give
+exactness and the bound $17/8$ on the number of proposals.
+
+The projection uses $nr'$ dyadic products and additions.  Its
+coordinates have $O_r(B)$ bits.  Chart selection and rational
+division preserve that encoding bound.  Point location uses
+$O_r(\log T)$ rational affine comparisons with
+$O_r(B)$-bit coefficients.  These costs fit in the displayed
+$O_r((n+\log T)B^4)$ bound.  The static index has polynomial size
+at fixed $r$, so its addresses require only $O_r(B)$ bits.
+After the query projection is available, evaluate each shifted score
+using the stored affine coordinates:
+\[
+ a_j-a_{\max}=\frac\beta n
+          \langle v,\xi_j-\xi_{\max}\rangle.
+\]
+This takes $O_r(1)$ rational operations on $O_r(B)$-bit numbers.
+The result is rational, or a rational divided by $\sqrt n$ under
+standard scaling, exactly the two cases of the finite-exponential
+routine.  Thus the $O(\log T)$ block scores and the constant expected
+number of member scores do not repeat the length-$n$ projection.
+Known value signs and
+the two scalar factories complete the claim about the final token.
+\end{proof}
+
+The construction is an existence result with an explicit polynomial
+prefill budget.  The exponent grows rapidly with the affine rank.
+For rank one it is near-linear in $T$, with the sharper arithmetic
+bound given in Theorem~\ref{thm:newrankone}.  For rank two the
+$T^3\operatorname{poly}(n,B)$ construction also has a direct angular
+description: sort the $O(T^2)$ pairwise tie directions in the query
+plane and store one key order per angular sector.  An exact orientation
+comparison and binary search locate the query direction, and a
+direction on a boundary may use either adjacent weak order.
+Here each homogeneous tie line contributes its two opposite
+rational rays.  Sort rays by their half-plane and the sign of their
+two-by-two determinant.  After duplicate rays are removed, each
+sector has angle less than $\pi$, except when there is only one
+tie line.  In the former case the sum of its two boundary vectors
+is a rational interior representative; in the latter case a
+quarter-turn of a boundary vector represents each of the two open
+half-planes.  These representatives give the stored orders.
+The same half-plane and determinant comparisons locate a nonzero
+query ray by binary search; the zero query has all scores tied.
+With no tie lines every key projection is identical.  This gives
+an explicit finite-arithmetic construction of the stated rank-two
+bound.
+The general fixed-rank theorem is compatible with
+Theorem~\ref{thm:indexedlowerlogtwo}, whose hard affine ranks grow
+with the context length.

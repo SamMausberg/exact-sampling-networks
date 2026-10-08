@@ -1,0 +1,14 @@
+Copyright (c) 2026 Samuel Mausberg.
+
+Manuscripts (PDF and LaTeX), original figures, and written research material
+are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+See LICENSES/CC-BY-4.0.txt.
+
+Original software, including the Python checks, the Lean formalization, build
+scripts, and software documentation, is licensed under the MIT License.
+See LICENSES/MIT.txt.
+
+These grants apply only to Samuel Mausberg's original contributions.
+Third-party material retains its own license and notices.
+
+Please cite the work as described in CITATION.cff.

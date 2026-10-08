@@ -1,0 +1,11 @@
+formalization/.lake/
+paper/qa/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.xdv
+paper/structural_check.json
+__pycache__/

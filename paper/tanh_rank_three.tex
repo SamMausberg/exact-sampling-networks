@@ -1,0 +1,235 @@
+\subsection{A third scalar input and batched preprocessing}
+\label{sec:rank-three-critical}
+
+The preceding analytic argument extends to every fixed first-layer
+rank. Preprocessing is the restriction: the known function must be
+compiled on a multidimensional grid. Batching all grid centers before
+each dense linear layer brings rank three within the original budget.
+
+\begin{theorem}[Critical sampling after a rank-three first layer]
+\label{thm:rank-three-critical}
+Under the assumptions of Theorem~\ref{thm:rank-two-critical},
+replace the first-layer rank bound by three. Exact sampling uses
+$O(\sqrt{D+1})$ expected input probes and
+$O(\sqrt{D+1}\,B^5)$ expected online bit operations.
+At $D=\lceil\log_2n\rceil$ and $b=O(\log n)$, preprocessing
+and storage remain $O(Dn^2\log^6n)$. The worst-case query order
+is $\Theta(\sqrt D)$ under the same width and grid conditions.
+For first-layer rank at most two, the sharper $B^4$ online bound
+of Theorem~\ref{thm:rank-two-critical} still applies.
+\end{theorem}
+
+\paragraph{Proof idea.}
+The analytic estimates and source law extend to three variables. Their
+direct dense preprocessing would exceed the chosen logarithmic budget. Each
+linear layer, however, acts on the Taylor coefficients at every grid center
+by the same weight matrix. Compute all those products together using exact
+integer matrix multiplication. The seven-product recursion supplies enough
+saving even with schoolbook integer arithmetic.
+
+\begin{proof}
+We give the construction for any fixed $r$, then specialize its
+preprocessing count to $r=3$. The determinant-doubling basis
+construction gives $r$ original rows of absolute sum at most one
+and representation coefficients of magnitude at most two. Its
+fixed-order rational arithmetic has $O_r(B)$-bit operands and
+$O_r(n^2B^3)$ work. Thus $r$ independent scalar source streams
+represent the first layer, with at most one input probe per draw.
+The first preactivation on the enlarged box is bounded by $c=2r$.
+After the first tanh, every output has magnitude at most one, so
+the subsequent critical radius bound is unchanged.
+
+For $D\ge2$, use a dyadic gate $q$ with
+$q\le6/\sqrt{D+1}$, $q^{-1}\le\sqrt D$, and
+$\|F/q\|_\infty\le4/5$. Depth one has the direct unit-row
+factory. The derivative induction in the rank-two proof holds at
+every order with first-preactivation bound $c=2r$. With the same
+constants $C_k$, it gives $\|D^kF\|_{1,\mathrm{ent}}
+\le C_k(2r)^kD^{(k-1)/2}$ through order $2r+2$.
+For $f(p)=F(2p-1)/q$, take
+\[
+ M_k=2^kC_k(2r)^k(D+1)^{\lceil k/2\rceil}.
+\]
+In Lemma~\ref{lem:fixed-rank-bernstein},
+$S_\ell=O_r(D^{\ell+2})$, $m_0=O_r(D+1)$, and
+$\overline A=O_r((D+1)^2)$. The gate therefore gives
+$O_r(\sqrt{D+1})$ expected probes.
+
+The uniform Taylor oracle uses a complex tube of width
+$1/(8r\sqrt D)$, grid spacing $\Theta_r(D^{-1/2})$, and
+$O_r(D^{r/2})$ centers. A radius-two polydisk in scaled variables
+lies inside this tube. Each output coefficient satisfies
+$|b_\nu|\le2^{1-|\nu|}$. A total-degree-$K$ truncation, with
+$K=O_r(B)$, provides all required derivatives through order $2r$.
+Its geometric tails have a fixed polynomial factor in $K$; the
+only scale conversion is at most $a^{-2r}q^{-1}$, polynomial in
+$D$ for fixed $r$. Choose
+$P=\lceil2\log_2(n^2D)\rceil=O(B)$ and
+$\varepsilon=2^{-P}\le(n^2D)^{-2}$.
+Thus $O_r(B)$ stored bits per coefficient suffice for this
+absolute accuracy $\varepsilon$.
+The total-degree residual calculation also has explicit finite
+precision margins. On the unit polydisk, neuron coefficient norms
+are at most $2^{r+1}$. First-layer preactivations are affine with
+coefficient norm at most $2r+1$, and later preactivations have norm
+at most $2^{r+1}$. Thus a perturbed exponent input has norm at most
+$2^{r+2}+1$. Every complex preactivation has imaginary part below
+one half, so $|1+e^{2s}|\ge1$ and reciprocal coefficient norm is
+at most $2^r$. Put
+\[
+ a_r=2^{r+4}+4r+16.
+\]
+The exponential residual identity from the rank-two proof bounds
+nonlinear-layer amplification by $2^{a_r}$ and local rounding error
+by $2^{2a_r}n(K+2)^{4r+8}2^{-M}$. Indeed the Euler recurrence has
+at most $(K+1)^{2r}$ products; its degree factors and divisions
+contribute only polynomial powers of $K$. Solving its residual
+equation has norm at most $\exp(2(2^{r+2}+1))$. An inverse
+perturbation of coefficient norm below $2^{-r-1}$ keeps the inverse
+norm at most $2^{r+1}$. These bounds fit the displayed constants.
+If the stored coefficient precision is $S_0$, it suffices to take
+\[
+ M=S_0+4a_r(D+1)+
+ \lceil\log_2(256nD(K+2)^{4r+10})\rceil+4rb.
+\]
+The resulting error induction verifies all perturbation margins
+and leaves width below $2^{-S_0}$. Here
+$S_0=O_r(B)$ and hence $M=O_r(B+D)$. There are
+\[
+ N_K=\binom{K+r}{r}=O_r(K^r)
+\]
+coefficients per center. Rounded evaluation of the required fixed
+list of derivatives costs $O_r((B+\operatorname{bits}(p))^{r+2})$.
+
+Each factory correction contains only one $O(m)$ hypergeometric
+average. The rank-two uniform-comparison argument, with the evaluation
+power $r+2$ in place of four, therefore gives
+$O_r((D+1)B^{\max\{4,r+2\}})$ conditional expected work, including source
+selection, coefficient evaluation, and arbitrary precision
+refinement. For $r\ge2$, the direct augmented-forward cost with its fourth
+power of precision is included in the exponent $r+2$.
+Multiplying by the gate gives the stated online bound for $r=3$.
+
+It remains to charge preprocessing. Batch every Taylor coefficient
+at every center into one matrix $X$ with $n$ rows and
+\[
+ C=O_r(D^{r/2}K^r)
+\]
+columns. At each subsequent linear layer compute $WX$ together.
+The entries of $X$ have a common working dyadic denominator $2^M$,
+and the original weights have denominator $2^b$. Clear these
+denominators, multiply the resulting integer matrices exactly, and
+round the completed entries back to the working grid. There is no
+rounding inside the matrix multiplication.
+
+We use Strassen's seven-product recursion~\cite{strassen1969}.
+For clarity, its exact arithmetic identities are recorded here.
+For two block matrices $A,B$, form
+\begin{align*}
+ Q_1&=(A_{11}+A_{22})(B_{11}+B_{22}),&
+ Q_2&=(A_{21}+A_{22})B_{11},\\
+ Q_3&=A_{11}(B_{12}-B_{22}),&
+ Q_4&=A_{22}(B_{21}-B_{11}),\\
+ Q_5&=(A_{11}+A_{12})B_{22},&
+ Q_6&=(A_{21}-A_{11})(B_{11}+B_{12}),\\
+ Q_7&=(A_{12}-A_{22})(B_{21}+B_{22}).
+ \end{align*}
+The output blocks are
+\[
+ C_{11}=Q_1+Q_4-Q_5+Q_7,\quad C_{12}=Q_3+Q_5,\quad
+ C_{21}=Q_2+Q_4,\quad C_{22}=Q_1-Q_2+Q_3+Q_6.
+\]
+Direct expansion proves these identities over the integers. The
+recurrence $T(k)=7T(k/2)+O(k^2)$ gives $O(k^\omega)$ scalar
+operations, $\omega=\log_2 7$.
+
+Choose a power of two $k\in[C,2C)$, pad $n$ to a multiple of
+$k$, and pad the coefficient columns to $k$. There are
+$\lceil n/k\rceil^2$ square block products. The scalar operation
+count is
+\[
+ O\!\left(n^2C^{\omega-2}+C^\omega\right).
+\]
+This estimate also covers $C>n$. Recursive input sums have at most
+$O(\log C)$ levels, and output recombination adds at most four
+terms per level. Even the crude bound of $C^4$ on intermediate
+magnitude growth gives bit length
+$M+b+O(\log n+\log C)=O_r(B+D)$. Schoolbook scalar arithmetic
+therefore costs $O_r(M^2)$ per operation. The first affine layer
+in basis coordinates has only $r$ inputs and is computed directly;
+its rational coefficients introduce no dense matrix factor.
+
+Nonlinear coefficient recurrences use $O_r(K^{2r})$ scalar
+operations per neuron and center. Constant exponentials use
+$O_r(M^3)$ bits. The full preprocessing bound is consequently
+\[
+ O_r\!\left(n^2B^3+D\left[
+ n^2C^{\omega-2}+C^\omega+
+ nD^{r/2}K^{2r}+nD^{r/2}M\right]M^2\right),
+\]
+where the first term is the basis computation.
+Working matrices and stored tables fit this bound. Only the final
+Taylor table, the network weights, and the scalar source selectors
+are retained online.
+
+At $r=3$ and logarithmic depth and parameter precision,
+$C=O(\log^{9/2}n)$. The dense term is
+\[
+ O\!\left(n^2\log^{3+(9/2)(\omega-2)}n\right).
+\]
+Since $7^6<2^{17}$, one has $\omega<17/6$, and its logarithmic
+exponent is less than $27/4<7$. The nonlinear term is
+$O(n\log^{21/2}n)$ and the padding term is a fixed power of
+$\log n$. Both fit $O(n^2\log^7n)$ because every fixed power
+of $\log n$ is dominated by any fixed positive power of $n$.
+This is $O(Dn^2\log^6n)$ for the stated depth. The rank-one mean
+chain supplies the matching query lower bound.
+\end{proof}
+
+\begin{corollary}[The finite-input critical law for low input rank]
+\label{cor:rank-three-finite-input}
+For first-layer rank at most $r\in\{1,2,3\}$, the samplers can be
+chosen to use
+\[
+ O\!\left(\min\{\sqrt D,n/\sqrt D\}\right)
+\]
+expected input probes and
+\[
+ O\!\left(
+ (1+\min\{\sqrt D,n/\sqrt D\})
+ B^{\max\{4,r+2\}}\right)
+\]
+expected bit operations, after the stated general-depth preprocessing.
+The worst-case query order over this network class is sharp when
+$b\ge\lceil\log_2\min\{n,D+1\}\rceil$.
+\end{corollary}
+
+\paragraph{Proof idea.}
+The same function oracle also supports a rare full-input read. On the open
+amplitude gate, reading the context determines the few basis means exactly.
+The cached oracle then samples the known output probability without a dense
+forward pass except on a sufficiently rare precision-refinement event.
+
+\begin{proof}
+In addition to the source factory, consider opening its dyadic gate
+$q=O(D^{-1/2})$ and reading all $n$ signs only when that gate opens.
+Compute the $r$ basis means exactly with $O(nB^2)$ bit operations.
+The known sign mean on the open branch is $F(z)/q$. Its cached
+interval costs $O(B^{\max\{4,r+2\}})$ bits. Direct refinement
+has unconditional conditional-on-gate cost
+$O(H\varepsilon B^4)\le O(B^4)$, because
+$\varepsilon\le H^{-2}$ and $H=n^2D$. This follows from the same
+fresh-uniform interval-measure argument as before. The expected
+probe count is at most $nq$ and the expected bit cost is
+$O((1+n/\sqrt D)B^{\max\{4,r+2\}})$. Choose this algorithm
+when $n\le D$ and the source factory otherwise.
+
+For the lower bound choose the largest power of two
+$m\le\min\{n,D+1\}$, average those $m$ coordinates in the
+first layer, and use the scalar critical mean chain. Its finite-input
+lower bound is
+$\Omega(\min\{\sqrt D,m/\sqrt D\})$, which is within an absolute
+factor of the claimed expression. The remaining inputs and neurons
+are ignored. This first matrix has rank one, and $1/m$ belongs to
+the stated dyadic grid.
+\end{proof}

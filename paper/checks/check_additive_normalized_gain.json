@@ -1,0 +1,38 @@
+{
+  "description": "Supplementary binary64 checks only; not a proof or formal verification.",
+  "seed": 731908,
+  "c": 0.7615941559557649,
+  "gamma0": 0.1152123633141937,
+  "scenarios": 108,
+  "counts": {
+    "carrier_floor": 162,
+    "floor_at_least_one_twelfth": 162,
+    "gain_discrepancy": 40,
+    "post_burnin_gain": 40,
+    "reciprocal_coefficient": 160,
+    "convexity_comparison": 800,
+    "full_reciprocal_comparison": 207100,
+    "coordinate_head": 540,
+    "actual_floor": 540,
+    "gain_product": 540,
+    "schedule_square_sum": 540,
+    "schedule_log_sum": 540,
+    "schedule_reciprocal_sum": 540
+  },
+  "worst_scaled_rhs_minus_lhs": {
+    "carrier_floor": 1.4023061753541214e-16,
+    "floor_at_least_one_twelfth": -0.2766979954566473,
+    "gain_discrepancy": 3.621631707742557e-16,
+    "post_burnin_gain": -2.865228498905026e-09,
+    "reciprocal_coefficient": 1.112985973377767e-12,
+    "convexity_comparison": 1.3877787807814457e-17,
+    "full_reciprocal_comparison": -1.094736582644962e-06,
+    "coordinate_head": -5.793250364266012e-07,
+    "actual_floor": -0.21271224270741776,
+    "gain_product": -0.04927343503711379,
+    "schedule_square_sum": -0.0021311450552573066,
+    "schedule_log_sum": -0.004657271632533742,
+    "schedule_reciprocal_sum": -0.0019493177387913743
+  },
+  "all_checks_passed": true
+}

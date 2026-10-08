@@ -1,0 +1,97 @@
+{
+  "precision_decimal_digits": 120,
+  "method": "deterministic non-interval high-precision formula checks",
+  "counts": {
+    "erf_majority": 117,
+    "erf_mass": 8,
+    "erf_arity": 8,
+    "gaussian_poisson_weight": 48,
+    "sine_series": 13,
+    "sine_mass": 1,
+    "sine_arity": 1,
+    "gaussian_arcsine": 11,
+    "rms_exactness": 216,
+    "gaussian_second_moment": 120
+  },
+  "total_checks": 543,
+  "max_absolute_residuals": {
+    "erf_majority": "1.936295957424659e-121",
+    "erf_mass": "9.681479787123296e-122",
+    "gaussian_poisson_weight": "4.840739893561648e-122",
+    "erf_arity": "9.681479787123296e-122",
+    "sine_series": "2.420369946780824e-122",
+    "gaussian_arcsine": "9.681479787123296e-122",
+    "rms_exactness": "4.840739893561648e-122",
+    "gaussian_second_moment": "1.239229412751782e-119"
+  },
+  "worst_parameters": {
+    "erf_majority": [
+      "8.0",
+      "-0.1"
+    ],
+    "erf_mass": "1.0",
+    "gaussian_poisson_weight": [
+      "0.333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+      0
+    ],
+    "erf_arity": "0.5",
+    "sine_series": "-0.99",
+    "gaussian_arcsine": "-0.999",
+    "rms_exactness": [
+      2,
+      "0.01",
+      0,
+      0
+    ],
+    "gaussian_second_moment": [
+      3,
+      "0.01"
+    ]
+  },
+  "erf_series_truncations": [
+    {
+      "c": "0.01",
+      "cutoff": 181,
+      "tail_bound": "1.70486690206e-1064"
+    },
+    {
+      "c": "0.1",
+      "cutoff": 186,
+      "tail_bound": "7.791456249e-721"
+    },
+    {
+      "c": "0.333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "cutoff": 197,
+      "tail_bound": "1.95118738773e-560"
+    },
+    {
+      "c": "0.5",
+      "cutoff": 206,
+      "tail_bound": "8.97019412303e-517"
+    },
+    {
+      "c": "1.0",
+      "cutoff": 231,
+      "tail_bound": "1.00264201003e-450"
+    },
+    {
+      "c": "2.0",
+      "cutoff": 284,
+      "tail_bound": "5.32138241143e-408"
+    },
+    {
+      "c": "4.0",
+      "cutoff": 396,
+      "tail_bound": "5.69846578649e-390"
+    },
+    {
+      "c": "8.0",
+      "cutoff": 644,
+      "tail_bound": "2.19831510189e-396"
+    }
+  ],
+  "C_sin": "0.98535208438722062330349111379064867712159256356683",
+  "sine_mass": "0.5753247255768237183657600058586067945445366291291",
+  "cosh_rational_upper": "2.5106341981398622007098131849207986645237233237178",
+  "status": "passed; not interval certified; not a stochastic sampler benchmark"
+}

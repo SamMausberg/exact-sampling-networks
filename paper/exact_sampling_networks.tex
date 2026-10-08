@@ -1,0 +1,633 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{DejaVu Sans Mono}[Scale=0.78]
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{microtype,booktabs,array,tabularx,longtable,enumitem,xcolor,fvextra,needspace}
+\usepackage{cite}
+\usepackage{tikz,pgfplots}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric,fit,backgrounds}
+\pgfplotsset{compat=1.18}
+\usepackage[unicode,colorlinks=true,linkcolor=blue!40!black,citecolor=blue!40!black,urlcolor=blue!40!black]{hyperref}
+\hypersetup{pdftitle={Exact Sampling from Neural Networks: Depth, Attention, and Decoding},pdfauthor={Samuel Mausberg}}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\E}{\mathbb E}
+\newcommand{\PP}{\mathbb P}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\sech}{\operatorname{sech}}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\Maj}{\operatorname{Maj}}
+\newcommand{\Bern}{\operatorname{Bern}}
+\newcommand{\Pois}{\operatorname{Pois}}
+\newcommand{\bits}{\mathcal B}
+\newcommand{\cost}{\mathcal T}
+\newcommand{\queries}{\mathcal Q}
+\DeclareMathOperator{\artanh}{artanh}
+\DeclareMathOperator{\TV}{TV}
+\DeclareMathOperator{\RMS}{RMSNorm}
+\DeclareMathOperator{\GELU}{GELU}
+\DeclareMathOperator{\SiLU}{SiLU}
+\setlist{nosep,leftmargin=1.6em}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{2pt}
+\linespread{1.04}
+\numberwithin{equation}{section}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\title{Exact Sampling from Neural Networks:\\Depth, Attention, and Decoding}
+\author{Samuel Mausberg\\{\normalsize Independent Researcher}}
+\date{8 October 2026\quad\textit{Full version}}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+One random output can require much less work than numerical evaluation.
+We study exact neural sampling, counting input probes, random bits,
+arithmetic, and every precision refinement.
+
+For dense tanh networks with absolute row sums at most one, weight
+preprocessing permits polylogarithmic expected sampling work at
+logarithmic depth. With zero biases, the sharp query scale is the square
+root of depth at every fixed first-layer rank, and also at arbitrary
+rank when a column envelope is bounded. The unrestricted gap between
+square-root and linear query cost remains open.
+
+Prefill changes attention. We construct an appendable cache index and a
+complete exact decoder with positive RMSNorm stabilizers. Its expected
+work is polynomial in model size and $\log T$ when each layer has a
+common affine key space of fixed rank and the context has length $T$.
+The decoder's polynomial degree grows with rank.
+These bounds give no useful speed prediction at the large ranks of
+ordinary models. A completely fixed full-rank model still has a formal
+polylogarithmic context bound, with potentially enormous constants.
+
+The decoder maintains finite Taylor moments, prepares precision in the
+background, and charges rare complete refinements by their probability.
+Its cost includes neural key and value creation. Without a context index,
+standard scaling can force linear positional search; arbitrary indexed
+queries face a conditional barrier in growing dimension. We also prove
+exact normalization factories and a matching law for an explicit
+additive-residual family. A checkpoint section gives the certificates
+and cost formulas needed to apply each positive result.
+\end{abstract}
+
+\input{figures/decoder_overview}
+\clearpage
+
+\section{Introduction}
+\label{sec:introduction}
+
+A sampler can reveal only the part of a computation needed for one
+random decision. Nonlinearity makes this difficult: independently
+randomizing activations generally changes the final distribution.
+Bernoulli factories provide exact transformations of unknown coin
+biases, but recursive composition can multiply their expected costs
+at every layer. Precision can create a second source of large work
+on rare branches. We control both effects.
+
+The paper follows three preprocessing interfaces. First, weights are
+known and a fresh input arrives. Second, prefill may build an index
+over keys and values before a fresh query. Third, a decoder must
+construct and append the next keys and values itself. A lower bound
+in the first interface need not survive the second; a static index
+in the second leaves maintenance to be proved in the third.
+
+We state the results in the order of these interfaces, for width $n$,
+depth $D$, and context length $T$. With a fresh input, tanh networks with row norms at most one have polylogarithmic
+expected sampling work at logarithmic depth, and every fixed larger
+row norm forces polynomial work on some networks
+(Theorem~\ref{thm:main-depth}). Some zero-bias networks with row norms
+at most one need $\Omega(\sqrt D)$ probes. Corrected Bernstein operators
+attain this order at every fixed first-layer rank
+(Theorem~\ref{thm:main-bottleneck}), and an empirical-mean construction
+attains it at arbitrary rank when the column envelope
+$C_{\rm col}=\sum_j\max_i|w_{1,ij}|$ is bounded
+(Theorem~\ref{thm:column-envelope-critical}). Without a context index,
+attention can force linear positional search
+(Theorem~\ref{thm:main-attention}). Under the randomized Orthogonal Vectors Hypothesis
+(OVH), polynomial prefill does not remove this barrier for arbitrary queries in growing
+dimension (Theorem~\ref{thm:main-index-hard}). For keys of fixed affine
+rank $r$, an appendable index does remove it
+(Theorem~\ref{thm:main-fixed-rank}). A complete decoder maintains
+Taylor moments and certified intervals, and background replay raises
+precision before it is needed. Its conditional expected work per token
+is $\poly_r(n,\log T)$ at standard scaling with polynomially bounded
+model parameters, including all cache work
+(Theorem~\ref{thm:main-decoder}). For an explicit pre-norm additive
+family, we determine the query exponent on its entire input cube, with
+a matching bit bound (Theorem~\ref{thm:main-carrier}).
+Table~\ref{tab:results} lists the cost scales.
+Section~\ref{sec:prior-main} credits the feature representations and
+interval-sampling principles used in the construction.
+
+The results have two main limitations. The decoder bound needs a
+key-space dimension fixed independently of model width. Its degree
+increases with rank, and the feature count can become prohibitive even
+at modest ranks, so we obtain no practical runtime guarantee for
+large-rank checkpoints; Section~\ref{sec:checkpoint} makes this
+quantitative. For zero-bias networks with row norms at most one and
+unrestricted first-layer rank, the gap between $\Omega(\sqrt D)$ and
+$O(D)$ probes remains open (Section~\ref{sec:status}).
+
+Here $n$ is width, $D$ depth, $T$ current context length,
+$T_0$ prompt length, $V$ vocabulary size, and $b$ a bound on
+parameter encoding lengths. The common bit scale is
+\begin{equation}
+ B=16+b+\left\lceil\log_2(n+D+T+V+2)\right\rceil.
+ \label{eq:main-B}
+\end{equation}
+Irrelevant size parameters are omitted. Additional finite interface
+encodings are included as specified below. Table~\ref{tab:notation}
+lists the symbols used in more than one section.
+
+\begin{table}[ht!]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}p{.17\textwidth}Y p{.17\textwidth}Y@{}}
+\toprule
+Symbol & Meaning & Symbol & Meaning\\
+\midrule
+$n,D$ & Residual width and depth & $T,T_0,V$ & Current and prompt lengths; vocabulary size\\
+$b,B$ & Parameter encoding length and total bit scale
+ & $s$ & Maximum absolute row sum\\
+$\beta,A$ & Attention temperature and score radius
+ & $r$ & A fixed rank bound\\
+$\varepsilon,\lambda$ & Normalization stabilizer and certified energy floor
+ & $H,N_m$ & Moment coefficient bound and feature count\\
+$Q$ & Number of distinct input probes & & \\
+\bottomrule
+\end{tabularx}
+\caption{Notation used in more than one section. Each interface
+supplies the bounds used in its theorem. The precise bit scale $B$ is
+defined in~\eqref{eq:main-B}.}
+\label{tab:notation}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{.245\textwidth}>{\raggedright\arraybackslash}p{.20\textwidth}Y Y@{}}
+\toprule
+Problem & Preprocessing & Expected upper bound & Lower bound or boundary\\
+\midrule
+One tanh row, norm $s$ & Weights &
+$O(B^4[1+\min(n,s+s^2)])$ & Matching probe order\\
+\addlinespace
+Critical tanh, arbitrary biases & $O(Dn^2B^6)$ weights &
+$O(B^4(D+1)^{35/32})$ & $\Omega(\sqrt D)$ probes\\
+\addlinespace
+Critical tanh, zero biases & Same budget &
+$O(B^4(D+1))$ & $\Omega(\sqrt D)$ probes\\
+\addlinespace
+Zero biases, fixed first rank~$r$ & Original budget at logarithmic depth &
+$O_r(B^{\max\{4,r+2\}}\sqrt{D+1})$ & Matching $\Theta_r(\sqrt D)$ probes\\
+\addlinespace
+Zero biases, $C_{\rm col}\le C_0$ fixed & Same budget; arbitrary rank &
+$O_{C_0}(B^{40}\sqrt{D+1})$ & Matching $\Theta(\sqrt D)$ probes for $C_0\ge1$\\
+\addlinespace
+Fresh-context binary attention & Weights only &
+$O(B^4[1+\alpha\min(T,e^{2A})])$ & Matching probe order\\
+\addlinespace
+Arbitrary indexed attention query & Any fixed polynomial in cache size &
+$O(TnB^4)$ by a scan & No $T^{1-\epsilon}\poly(n,B)$ under randomized OVH\\
+\addlinespace
+Appendable fixed-rank cache & One pass over finite records &
+$\poly_r(n,\log T)$ at $\beta=\sqrt n$ & Fresh rank-one queries can require $\Omega(n)$\\
+\addlinespace
+Full decoder, fixed key-map rank & One prompt pass; see Theorem~\ref{thm:main-decoder} &
+Same polynomial per token, including maintenance & Polynomial degree depends on rank\\
+\addlinespace
+Additive pre-norm, relative floor & Weights and floor certificate &
+$O(B^4(2+L)(1+\log R)R^{m-1})$ for a stream sign & Sharp exponents remain open for the full class\\
+\addlinespace
+Explicit carrier family & $O_s((D+1)n^2B^6)$ &
+$O_s(B^4\min(R^{2\nu_\eta},n))$ & Matching probe order; $\eta$ is the group fraction in Theorem~\ref{thm:main-carrier}\\
+\bottomrule
+\end{tabularx}
+\caption{Main cost scales. Query lower bounds also lower-bound bit work.
+Critical matching bounds require enough input coordinates and coefficient
+precision. Fixed-rank cache bounds assume bounded coordinates;
+Theorem~\ref{thm:main-dynamic} gives their full parameter dependence.}
+\label{tab:results}
+\end{table}
+
+\section{Models and exact computation}
+\label{sec:models}
+
+\subsection{Networks, signs, and input probes}
+
+The scalar network has width $n\ge2$ and depth $D\ge1$:
+\begin{equation}
+ h_{0,j}=x_j\in\{-1,1\},\qquad
+ h_{\ell,i}=\tanh\!\left(b_{\ell,i}
+             +\sum_{j=1}^n w_{\ell,ij}h_{\ell-1,j}\right).
+ \label{eq:main-network}
+\end{equation}
+The parameters are dyadic, $|b_{\ell,i}|\le1$, and
+$\sum_j|w_{\ell,ij}|\le s$. We reserve $\beta$ for attention
+temperature and use $b_{\ell,i}$ for neural biases; the unindexed $b$ denotes encoding length. The target bit
+has probability $(1+h_{D,1})/2$ of being one. Equivalently, the
+target sign $Y\in\{-1,1\}$ has mean $h_{D,1}$.
+
+A \emph{sign interface of radius $R>0$} for a real value $u$ returns
+independent signs of mean $u/R$, with the promise $|u|\le R$.
+An identically zero value is handled by a fair sign. Independence is conditional on the fixed input. Two requests for the
+same neuron use fresh randomness. Multiplying independent signs
+multiplies their means. Choosing one of several interfaces with known
+probabilities takes the same convex combination of their means.
+These elementary identities are the basis of every construction here.
+
+Weights and biases may be preprocessed before $x$ is revealed.
+An input probe reads one specified coordinate of $x$. We charge its
+address, every fair random bit, integer arithmetic, and all precision
+refinement. A \emph{source request} is an invocation of an unknown-mean
+sign or bit interface. A lower bound on distinct input probes applies
+even if repeated coordinates are memoized. Upper bounds may count
+repeated requests; this only makes them larger.
+
+The bit scale in~\eqref{eq:main-B} charges finite scalar encodings.
+Known positive floors and nonrational algebraic temperatures require
+their specified encoding lengths as well. A factor $B^4$ is a
+conservative bound obtained with elementary fixed-point arithmetic.
+It is not a unit-cost real-arithmetic convention.
+
+\subsection{Attention and preprocessing interfaces}
+
+A causal attention row at position $t$ has
+\begin{equation}
+ a_j=\frac{\beta}{n}\langle q_t,k_j\rangle,\qquad
+ \pi_j=\frac{e^{a_j}}{\sum_{u\le t}e^{a_u}},\qquad
+ \operatorname{Att}_t=\sum_{j\le t}\pi_j v_j .
+ \label{eq:main-attention}
+\end{equation}
+Queries, keys, and values are linear maps of the preceding residual
+stream, with each row having absolute weight sum at most $s$.
+If every stream coordinate has magnitude at most $R$, then
+$|a_j|\le A:=|\beta|s^2R^2$. Standard attention scaling is
+$\beta=\sqrt n$, because then $a_j=\langle q_t,k_j\rangle/\sqrt n$.
+A convex residual sublayer replaces $h$ by
+$(1-\alpha)h+\alpha\,\mathrm{update}$.
+
+Normalization uses the RMS map with stabilizer $\varepsilon\ge0$,
+\begin{equation}
+ \RMS_\varepsilon(h)_i
+   =\frac{h_i}{\sqrt{\varepsilon+n^{-1}\sum_{j=1}^n h_j^2}}.
+ \label{eq:main-rms}
+\end{equation}
+The denominator must be positive on the allowed inputs.
+Learned coordinate gains can be absorbed into the following
+linear maps by using their resulting row norms.
+A pre-norm block normalizes before every additive update:
+\begin{equation}
+ a_\ell=h_{\ell-1}
+      +\alpha_{\ell,A}\operatorname{Att}_{\ell}
+          (\RMS_{\varepsilon_{\ell,A}}(h_{\ell-1})),\qquad
+ h_\ell=a_\ell
+      +\alpha_{\ell,F}\tanh(b_\ell+W_\ell
+          \RMS_{\varepsilon_{\ell,F}}(a_\ell)).
+ \label{eq:main-prenorm}
+\end{equation}
+The step sizes $\alpha_{\ell,A},\alpha_{\ell,F}$ are known nonnegative
+rationals. The common-step case has both equal to $\alpha$.
+
+In the \emph{fresh-context model}, only weights are preprocessed.
+All context coordinates are revealed online through probes. In the
+\emph{static-cache model}, the keys and values are known at prefill,
+and a data structure may depend on them. A query is then supplied
+online. The arbitrary-query lower bound uses this second model and
+allows every fixed polynomial prefill budget. In the
+\emph{autoregressive model}, a fixed neural model and the sampled
+token history determine each new key and value. Online work includes
+their construction, insertion, and any refinement of the cache.
+
+The positive index theorems use finitely represented cache entries.
+For example, an explicitly stored dyadic cache defines an exact
+mathematical target. An unrounded tanh computation generally produces
+transcendental values. Such a cache must retain a certified refinement
+procedure, whose cost is charged; it cannot be treated as a collection
+of exact real words. The finite-query-list theorem below allows
+certified computation of the complete candidate output laws, and
+therefore does not require storing their probabilities as exact reals.
+
+Unless a theorem states otherwise, the final output is a softmax over $V$ logits in $[-1,1]$.
+The logit interfaces must be specified, such as designated coordinates
+or a known affine readout. A range promise alone gives no algorithm
+for accessing an otherwise unspecified function.
+
+\subsection{Exactness and stopping}
+
+For a known computable probability $p$, expose the binary digits of
+a fresh uniform random variable $U$. At precision $t$, compare a
+certified interval containing $p$ with the current dyadic interval for
+$U$, and return the bit once they are disjoint. If both widths are at
+most $2^{-t}$, failure at that stage requires $U$ to lie in an interval
+of length at most $2^{2-t}$ around $p$. Thus the procedure halts almost
+surely, and stage work $C(B+t)^d$ gives expected work at most
+$2^{d+5}d!\,C(B+1)^d+O(B+1)$
+(Lemmas~\ref{lem:lazy} and~\ref{lem:newprecisionstop}). A precomputed
+table can supply these intervals. An unresolved comparison continues
+the same computation at higher precision, and the probability of this
+branch pays for its work (Lemma~\ref{lem:newexactification}). We bound
+this unconditional contribution, because conditioning on a rare miss
+can distort the remaining precision law.
+
+Recursive work is charged predictably. If the decision to request
+the next child is made before that child's fresh random tape is
+drawn, a uniform expected child cost may be multiplied by the
+expected number of requests (Lemma~\ref{lem:stopping}). Every
+recursive sampler here has finite depth.
+
+\section{From one row to a depth threshold}
+\label{sec:tanh-main}
+
+\subsection{The exact law for one row}
+
+Consider $u=\tanh(c+\sum_iw_ix_i)$ with $|c|\le1$, and put
+$\rho=\sum_i|w_i|$. A weighted coordinate request returns a sign of mean
+$z=\rho^{-1}\sum_iw_ix_i$ when $\rho>0$. This costs one input probe.
+The remaining problem is to turn independent $z$ signs into a sign
+of mean $\tanh(c+\rho z)$.
+
+\begin{theorem}[One-row cost]
+\label{thm:main-row}
+After weight preprocessing, a row of norm $\rho$ has an exact sampler
+with at most $2\rho(1+\rho)$ expected input requests and
+$O(B^4[1+\min\{n,\rho+\rho^2\}])$ expected bit work, using full evaluation
+when it is cheaper. Conversely, whenever the averaging coefficients
+fit the dyadic grid, some zero-bias rows of norm $\rho$ require
+$\Omega(\min\{n,\rho+\rho^2\})$ worst-input expected probes.
+The absolute constants and width padding are given in the proof.
+\end{theorem}
+
+Theorem~\ref{thm:new-single-row-law} proves this statement, and
+Corollary~\ref{cor:comptanhrow} gives the request bound for a row
+whose inputs are themselves supplied as signs.
+
+The construction uses a positive mixture of odd majorities.
+If $M_{2k+1}(z)$ is the mean of the majority of $2k+1$ independent
+signs of mean $z$, then
+\begin{equation}
+ M_{2k+1}'(z)=C_k(1-z^2)^k,\qquad
+ C_k=(2k+1)\binom{2k}{k}4^{-k}.
+ \label{eq:main-majority}
+\end{equation}
+A positive expansion of the derivative of a normalized tanh in
+powers of $1-z^2$ integrates to an exact mixture of these majority
+functions. A known gate restores the desired amplitude.
+A rational bias correction uses the tanh addition identity and
+an exact race. Its normalization cancels with the race acceptance,
+which keeps the expected number of children small.
+
+For the upper bound, mix the bias into a known sign source before
+applying the scalar factory. With $a=|c|+\rho$, its expected arity is
+at most $2\max\{a,a^2\}$, and only the fraction $\rho/a$ of its
+requests reaches $x$; the product is at most $2\rho(1+\rho)$. The lower bound
+combines a coupling argument when $\rho\le1$ with a stopped-score
+inequality when $\rho\ge1$, and the transition from $\rho$ to $\rho^2$
+measures the difficulty of amplifying an unknown mean.
+
+\subsection{Why constant scalar cost is insufficient}
+
+For a whole network, each child sign can itself require a factory
+(Figure~\ref{fig:recursion}).
+A direct product of worst-case scalar costs gives an exponential
+bound even at unit row norm. The depth analysis instead maintains
+an input-independent interval
+\[
+ h_{\ell,i}\in c_{\ell,i}+[-r_\ell,r_\ell],
+\]
+where the centers and outward-rounded radii are prepared from the
+weights. Sampling the normalized displacement costs close to one
+child as $r_\ell$ decreases. A final known mixture restores the
+center and radius.
+
+At zero bias and unit norm, the ideal radius satisfies
+$r_{\ell+1}=\tanh r_\ell$, starting from $r_0=1$. The bounds
+$u^{-2}+2/3\le\coth^2u\le1+u^{-2}$ give
+\begin{equation}
+ \frac1{\ell+1}\le r_\ell^2\le\frac3{2\ell+3}
+ \label{eq:main-radius}
+\end{equation}
+(Lemma~\ref{lem:radius} and Figure~\ref{fig:thresholds}), so
+$r_\ell^2=\Theta(1/\ell)$. Since $\sinh^2u\ge u^2+u^4/3$, also
+$\coth^2u\le u^{-2}+2/3+u^2/9$. Summing this over the recursion, with
+$r_i^2\le3/(2i+3)$ and $\sum_{i<\ell}1/(2i+3)\le\sqrt\ell$, gives
+$r_\ell^{-2}\le1+2\ell/3+\sqrt\ell/3$, and hence $r_\ell^2\sim3/(2\ell)$.
+Thus a per-layer cost $1+c r_\ell^2+O(r_\ell^4)$ accumulates
+polynomially in depth. For arbitrary biases, a concave potential
+charges the positions of normalized means within their intervals.
+Combining the first majority vote with the bias correction yields
+the exponent $35/32$. The proof of Theorem~\ref{thm:fusedcritical}
+gives the constants; its largest cutoff is an asymptotic proof device.
+
+\begin{theorem}[Critical and supercritical networks]
+\label{thm:main-depth}
+For row norms at most one, weight preprocessing costs
+$O(Dn^2B^6)$ and storage costs $O(Dn^2B)$; exact output sampling
+uses $O(B^4(D+1)^{35/32})$ expected bit operations.
+With zero biases the upper bound is $O(B^4(D+1))$.
+For every $D\le n/2$ on a sufficient dyadic grid, a zero-bias
+network requires $\Omega(\sqrt D)$ expected input probes.
+
+Set $D=\lceil\log_2n\rceil$ and $b=20\lceil\log_2n\rceil$.
+For every fixed $s\le1$, one uniform exact sampler has
+polylogarithmic expected online work under the original
+$O(Dn^2\log^6n)$ preprocessing budget. For every fixed $s>1$,
+the worst-case online cost is
+$n^{\Theta(\min\{\log s,1\})}$, with absolute constants in the
+exponent and fixed-$s$ prefactors.
+\end{theorem}
+
+Theorem~\ref{thm:upper} gives the preprocessing bounds,
+Theorems~\ref{thm:fusedcritical} and~\ref{thm:zero-bias-linear}
+the two upper bounds, Theorem~\ref{thm:lower} the probe bound, and
+Corollary~\ref{cor:threshold} the threshold.
+
+The supercritical statement determines the scale of the exponent.
+It does not determine its leading constant. Near $s=1$, the best
+full-class upper rate proved here is
+$(51/16)(s-1)+O((s-1)^2)$ per layer; the lower rate is $2\log s$,
+until it reaches the input-size cap. These rates leave a genuine gap.
+For convex residual tanh layers with step $\alpha$, the fixed-$s>1$
+polylogarithmic threshold at polynomial depth is
+$\alpha D=O(\log\log n)$ (Corollary~\ref{cor:residual-loglog-depth}),
+and at $s=1$ the upper bound becomes $O(B^4(1+\alpha D)^{35/32})$
+(Theorem~\ref{thm:residualfused}).
+
+Exact sampling is also separated from certified evaluation. In the
+critical mean-chain family, computing the activation to error
+$2^{-20\lceil\log_2n\rceil}$ requires $\Omega(n)$ probes, while the
+exact sample uses polylogarithmic work
+(Proposition~\ref{prop:evaluation}); we do not claim that every
+individual network needs the $\Theta(Dn^2)$ operations of dense
+evaluation.
+
+\input{figures/thresholds}
+
+\subsection{A sharp critical law at bounded input rank}
+
+If the first matrix has rank $r$, choose a bounded maximum-volume
+basis of $r$ rows. Each basis row defines an unknown scalar mean of the input.
+The subsequent signed network is a known function of these few
+means. Preprocessing can therefore treat the composite function
+on a fixed-dimensional box.
+
+\Needspace{11\baselineskip}
+\begin{theorem}[Critical networks with fixed first-layer rank]
+\label{thm:main-bottleneck}
+Fix $r\ge1$. For a zero-bias, norm-one network whose first matrix
+has rank at most $r$, exact sampling uses $O_r(\sqrt{D+1})$
+expected input probes and
+$O_r(B^{\max\{4,r+2\}}\sqrt{D+1})$ expected bit operations. At
+$D=\lceil\log_2n\rceil$ and $b=O(\log n)$, preprocessing
+and storage fit $O_r(Dn^2\log^6n)$.
+If $n\ge D+1$ and $b\ge\lceil\log_2(D+1)\rceil$ on the
+coefficient grid $2^{-b}\mathbb Z$, the worst-case query order
+is $\Theta_r(\sqrt D)$. The constants and online bit exponent
+depend on the fixed rank cap.
+\end{theorem}
+
+Theorem~\ref{thm:fixed-rank-critical} proves this statement.
+The output magnitude is $O(D^{-1/2})$. Open a dyadic gate of
+that order and, on its open branch, sample a bounded normalized
+function. The corrected scalar Bernstein operator is
+\[
+ T_m f=B_m\left(f-\frac{p(1-p)}{2m}f''\right),
+\]
+where $B_m$ averages a function over the empirical bias of $m$
+coin flips. Exact degree elevation makes successive dyadic
+corrections $O(m^{-2})$. In several coordinates, we telescope the
+product of the corrected operators one coordinate at a time, so
+coefficient work does not multiply across coordinates. Derivative
+bounds through order $2r+2$ give $O_r(D)$ sources on the open gate,
+hence the square-root bound. The coefficient oracle is compiled on
+$O_r(D^{r/2})$ Taylor patches and batched before each dense layer by
+rectangular matrix multiplication~\cite{legall2012rect}, within the
+original preprocessing budget (Appendix~\ref{sec:fixed-rank-batching});
+its constants may be enormous. Rare unresolved comparisons are refined
+directly and paid for by their probability. For
+first-layer rank at most three, after general-depth preprocessing,
+a rare full-input read also gives the finite-width law
+$\Theta(\min\{\sqrt D,n/\sqrt D\})$ in expected
+probes when $b\ge\lceil\log_2\min\{n,D+1\}\rceil$
+(Corollary~\ref{cor:rank-three-finite-input}, with the lower
+bound from Theorem~\ref{thm:finitecritical}).
+
+\paragraph{A sufficient condition without a rank bound.}
+The column envelope $C_{\rm col}=\sum_j\max_i|w_{1,ij}|$ gives
+a second sharp subclass and a uniform upper bound. Put
+$K_{\rm col}=\max\{1,C_{\rm col}\}$.
+Theorem~\ref{thm:column-envelope-critical} proves
+\[
+ \E Q=O(K_{\rm col}^2\sqrt{D+1}),
+ \qquad \E W=O(K_{\rm col}^7\sqrt{D+1}\,B^{40})
+\]
+within the original preprocessing budget at logarithmic depth.
+For example, a Hadamard matrix divided by its width has full rank
+and column envelope one. A single weighted coordinate probe represents
+an entire bounded random vector with the required mean. A corrected
+empirical average and sampled fourth derivatives give the exact coin.
+The large bit exponent is a conservative implementation bound.
+
+\input{figures/recursion}
+
+\section{What an input lower bound measures}
+\label{sec:lower-main}
+
+Fix a network and let $f(x)$ be its output sign mean. Supply its
+input coordinates independently with mean $t\in(-1,1)$, and set
+$H(t)=\E_t f(X)$. An exact sampler returns a sign $Y$ with this
+mean. Repeated input probes can be memoized without revealing new
+information. If $Q$ is the number of distinct coordinates exposed,
+the transcript score is
+\[
+ Z=\sum_{\text{newly exposed }i}\frac{X_i-t}{1-t^2}.
+\]
+The finite input population gives exact identities
+\begin{equation}
+ \E_t Z^2=\frac{\E_t Q}{1-t^2},\qquad
+ H'(t)=\E_t(YZ).
+ \label{eq:main-score}
+\end{equation}
+Each new input is independent of the preceding transcript.
+Consequently the score increments are orthogonal martingale
+differences. The output identity follows by differentiating the
+finite input distribution, followed by conditioning on the transcript.
+There is no assumption that the sampler's internal arithmetic has
+an exponential tail.
+
+Since $\E_tZ=0$, also $H'(t)=\E_t[(Y-H(t))Z]$, and Cauchy--Schwarz gives,
+when $|H(t)|<1$,
+\begin{equation}
+ \E_t Q\ge
+ \frac{(1-t^2)H'(t)^2}{1-H(t)^2}.
+ \label{eq:main-information}
+\end{equation}
+A second differentiation gives the curvature bound
+$|H''(t)|\le 2\E_tQ/(1-t^2)$. Lemma~\ref{lem:transcript} proves the
+identities~\eqref{eq:main-score}, the bound~\eqref{eq:main-information}
+as~\eqref{eq:transcript-variance}, and the curvature bound. Lemma~\ref{lem:new-finite-score} gives
+the first-score identity for unknown-coin factories from a finite
+first moment alone. The transcript-score method is prior work, with
+classical precedents in Wolfowitz's sequential Cram\'er--Rao
+inequality and Mendo's Bernoulli-factory lower
+bound~\cite{wolfowitz1947,mendo2019}.
+
+A complementary bound applies to two fixed inputs. Couple the
+algorithm's random tapes on $x$ and on $x^{(i)}$, which differs
+only at coordinate $i$. Until that coordinate is queried, the
+transcripts agree. Therefore
+\begin{equation}
+ \PP_x(i\text{ is queried})
+ \ge \TV(\mathcal L_x(Y),\mathcal L_{x^{(i)}}(Y)),
+ \label{eq:main-coupling}
+\end{equation}
+as proved in Lemma~\ref{lem:attentioncoupling}. Summing this
+inequality over many possible changes can force search through a
+context.
+
+Preprocessing determines when these arguments apply. A weight-only
+index is identical on $x$ and $x^{(i)}$, so the coupling remains
+valid. A cache index built from the context can differ before the
+query starts. The coupling then gives no online lower bound.
+For example, if all keys are identical, a prefill computation can
+store the average value. A lower bound obtained by hiding an
+exceptional value in a fresh context disappears under that
+preprocessing. The indexed lower bound in Section~\ref{sec:index-main}
+uses a different reduction.
+
+\input{main_attention}
+\input{main_decoder}
+\input{main_normalization}
+\input{checkpoint_applicability}
+\input{main_perspective}
+
+\paragraph{AI disclosure.}
+GPT-6 Astra Pro and Claude models assisted with the mathematical proofs
+and the Lean formalization.
+
+\label{page:main-end}
+\clearpage
+\bibliographystyle{plain}
+\bibliography{references}
+\clearpage
+\appendix
+\renewcommand{\baselinestretch}{1}\small
+\input{appendix_guide}
+\input{appendix_tanh}
+\input{appendix_attention}
+\input{appendix_normalization}
+\input{appendix_instance}
+\input{checkpoint_certificates}
+\input{appendix_related}
+\input{appendix_checks}
+\end{document}

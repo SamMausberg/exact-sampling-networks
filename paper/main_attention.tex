@@ -1,0 +1,272 @@
+\section{Attention before a cache index is available}
+\label{sec:attention-main}
+
+Attention is already an average. The unknown part is its
+query-dependent sampling distribution. Suppose that $|a_j|\le A$
+and that an independent sign of mean $a_j/A$ is available.
+Choose a position $j$ uniformly, draw $N\sim\Pois(2A)$, and test
+$N$ independent bits of bias $(1+a_j/A)/2$. Accept the position
+if every test succeeds; stop at the first failure otherwise.
+The acceptance probability is exactly
+\begin{equation}
+ \E\left(\frac{1+a_j/A}{2}\right)^N
+ =\exp(a_j-A).
+ \label{eq:main-poisson}
+\end{equation}
+Conditioning on acceptance therefore gives the attention law
+$\pi_j$. A fresh value sign at the accepted position completes
+the sample.
+
+This identity does not require evaluating a score. For
+$a_j=\beta\langle Qh_t,Kh_j\rangle/n$, choose a coordinate uniformly
+and multiply independent query and key signs. Each score test uses
+at most two predecessor requests. The stopped test count over the
+whole race is at most $e^{2A}-1$ in expectation, so the complete
+attention sign uses at most
+\[
+ 2e^{2A}-1
+\]
+expected predecessor requests and $O(B^4e^{2A})$ auxiliary bit work
+(Theorem~\ref{thm:attentionprimitive}).
+The Poisson variable is generated through finite-bit procedures;
+large numerical means are handled in blocks with stopping before
+unused blocks are drawn.
+
+A softmax over logits $z_k\in[-1,1]$ uses the same construction
+with $A=1$. One proposal selects a token uniformly and accepts
+with probability $e^{z_k-1}$. The expected proposal count is
+at most $e^2$, and the expected total number of logit-sign
+requests is at most $e^2-1$ (Theorem~\ref{thm:boundedsoftmaxinterface}).
+Thus a bounded categorical output
+adds a constant expected number of logit requests and an
+address cost of order $\log V$.
+
+\begin{theorem}[Attention with bounded scores, and its search boundary]
+\label{thm:main-attention}
+If all needed score radii, value radii, and recursively supplied
+sign costs are bounded independently of $T$, one exact attention
+output sample has no linear dependence on $T$.
+The local expected factor is at most $2e^{2A}-1$ source requests.
+
+For $\beta\ge0$, there is a one-block binary family with row norms at most $s\ge1$
+and convex residual weight $\alpha$ whose optimal worst-context
+probe cost satisfies
+\begin{equation}
+ Q^*_{\rm bin}=\Theta(1+\alpha\min\{T,e^{2\beta s^2}\}).
+ \label{eq:main-binary-law}
+\end{equation}
+Its exact bit upper bound is
+$O(B^4[1+\alpha\min\{T,e^{2\beta s^2}\}])$.
+These bounds allow weight-only preprocessing.
+\end{theorem}
+
+Theorem~\ref{thm:attentionprimitive} proves the first part and
+Theorem~\ref{thm:binaryattentionlaw} the second.
+
+To see the lower mechanism, let a position contain a hidden sign
+$x_j$, give it score $Ax_j$, and use the same sign as its value.
+At the all-negative input, changing one position raises its
+attention mass to $e^{2A}/(T-1+e^{2A})$. The final token probability
+changes by a constant times this mass and $\alpha$. Summing the
+coupling inequality~\eqref{eq:main-coupling} proves the lower bound.
+The full proof keeps both residual sublayers and the bounded
+softmax head.
+
+Under standard scaling, $A=\sqrt n\,s^2$ in this family.
+Consequently $2\sqrt n\,s^2\ge\log T$ can force
+$\Omega(\alpha T)$ expected context probes. A bounded coordinate
+range does not by itself give a context-length-independent
+guarantee at standard scaling. When $n$ is fixed, this score bound
+is also fixed; a uniform statement in growing $n$ must retain
+the dependence on $A$.
+
+Several blocks compose through their expected source counts, as in
+Section~\ref{sec:tanh-main}. Shared centers can improve this product:
+the score term common to every position cancels, and the uncertainty
+radius shrinks through critical tanh layers.
+
+\section{Exact sampling after prefill}
+\label{sec:index-main}
+
+\subsection{A lower bound for arbitrary fresh queries}
+
+The randomized Orthogonal Vectors Hypothesis, abbreviated randomized
+OVH, says that for every $\eta>0$ there is a constant $c>0$ such
+that no bounded-error randomized algorithm solves balanced
+Orthogonal Vectors on two sets of $N$ vectors in
+$\{0,1\}^{c\log N}$ in time $O(N^{2-\eta})$.
+Randomized SETH implies this hypothesis. We state the randomized
+assumption because the sampler and the prefill algorithm may
+both use randomness.
+
+Haverbeck et al.~\cite[Theorem 4.1]{haverbeck2026attention} already
+prove a constant-error attention lower bound after arbitrary
+polynomial KV preprocessing; the hardness principle and the
+dummy-key separation below are theirs.
+
+\begin{theorem}[A polynomial index does not remove the general barrier]
+\label{thm:main-index-hard}
+Assume randomized OVH. For every fixed polynomial prefill bound
+and every $\epsilon>0$, there is no uniform algorithm which,
+for every static bounded cache and every fresh query, samples the
+bounded-logit final token in expected time
+$T^{1-\epsilon}\poly(n,B)$.
+This holds at
+\[
+ n=O(\log^2T),\qquad \beta=\sqrt n,
+\]
+with row norms at most one, sign or zero cache coordinates, and
+a binary output. It also holds if the returned law may have
+total-variation error at most $1/64$.
+\end{theorem}
+
+Theorem~\ref{thm:indexedlowerlogtwo} proves this statement, and
+Corollary~\ref{cor:indexedlogtwoblock} realizes it with a row-norm-one
+block. An exact scan takes $O(TnB^4)$ expected bit work
+(Lemma~\ref{lem:newcachescan}), so the conditional
+lower bound matches the power of $T$ at these widths. The statement
+is a fine-grained conditional barrier. It is not an unconditional
+$\Omega(T)$ data-structure lower bound.
+
+The reduction places candidate keys against dummy keys. A witness
+makes the total candidate weight large; without a witness it is
+small. A legal tanh layer and binary softmax preserve a constant
+probability gap. Coordinate repetition and Rubinstein's
+gap-Hamming reduction~\cite{rubinstein2018ann} give the stated
+bounded-coordinate width, and bucketing one side of the hard instance
+handles every fixed polynomial prefill budget.
+Section~\ref{sec:prior-main} compares this bound with earlier
+attention and kernel-density lower bounds.
+
+\subsection{An index that accepts new keys}
+
+Fixed-dimensional key geometry permits both cheap queries and
+cheap maintenance. The next theorem assumes finite dyadic records.
+Section~\ref{sec:full-decoder-main} includes their neural construction.
+
+\begin{theorem}[Appendable fixed-rank attention]
+\label{thm:main-fixed-rank}
+\label{thm:main-dynamic}
+Fix $r\ge1$ and dyadic coordinate bounds $K,Q_{\max}>0$. Keys belong
+to $[-K,K]^n$, queries to $[-Q_{\max},Q_{\max}]^n$, and every cache prefix
+has affine rank at most $r$. Records and queries have at most
+$b$ bits per scalar. Let $\beta$ be nonnegative dyadic or
+$\sqrt n$, and choose dyadic $\beta\le\bar\beta\le2\beta$
+when $\beta>0$, and set $\bar\beta=0$ when $\beta=0$.
+Queries use a nonempty cache, $T\ge1$. There is an exact index with
+\[
+\begin{aligned}
+ \text{worst-case append work}&=O_r((n+\log(T+2))B^3),\\
+ \text{stored bits}&=O_r((T+1)nB),\\
+ \text{expected query work}&=O_r((n+M_T+\log(T+2))B^4),
+\end{aligned}
+\]
+where
+\[
+ M_T\le\min\{T,(r+1)(5+32r\bar\beta Q_{\max}K)^r\}.
+\]
+A query uses fewer than $17/8$ proposals in expectation and
+returns an index with the exact attention probabilities.
+The result holds conditionally on every adaptive legal history.
+At $\beta=0$, uniform index sampling suffices.
+\end{theorem}
+
+Theorem~\ref{thm:dynamicfixedrank} proves this statement.
+
+At standard scaling and fixed $r,K,Q_{\max}$, the query bound is
+$O_r((n+n^{r/2}+\log(T+2))B^4)$. Appending a record never
+scans its predecessors. These bounds settle the maintenance
+question in the fixed-rank, bounded-coordinate regime.
+
+To construct the index, choose a rational coordinate chart whose
+reconstruction coefficients have magnitude at most two. A row swap
+that increases a coefficient beyond two doubles a nonzero minor, so
+integer determinant bounds limit the number of swaps
+(Lemma~\ref{lem:dynamicchart}).
+On a grid where scores within a cell differ by at most $1/4$ for every
+legal query, cell representatives give a constant-factor rejection
+envelope (Lemma~\ref{lem:dynamiccellenvelope}). When an append
+increases the rank, we keep the earlier charts and their records and
+start a new chart for future records. Rank increases at most $r$
+times, so a query combines at most $r+1$ chart indices and a large
+degenerate prefill causes no later migration. The keys may also lie
+within a small certified distance of a fixed subspace
+(Corollary~\ref{cor:dynamicapproximatespace}). For rank one, an ordered
+tree with blocks of sizes $1,1,2,4,\ldots$ and the classical monotone
+envelope~\cite{chewi2022} give polylogarithmic context cost at every
+numerical temperature (Theorem~\ref{thm:newrankone} and
+Corollary~\ref{cor:dynamicrankone}).
+
+\subsection{An implicit rank-one query and a worked example}
+
+Reading all $n$ query coordinates is unnecessary in some regimes.
+Suppose the relevant scalar projection is available through
+independent coins of unknown bias $p$. A rank-one cache gives
+an attention-coordinate function
+\begin{equation}
+ u(p)=\frac{\sum_{j=1}^T v_j e^{a_jp+c_j}}
+            {\sum_{j=1}^T e^{a_jp+c_j}},
+ \qquad |v_j|\le1,\quad |a_j|\le\Lambda .
+ \label{eq:main-scalar-attention}
+\end{equation}
+The parameters have rational encodings, or the slopes and offsets
+share the specified factor $1/\sqrt n$. The offsets need no magnitude bound.
+The scalar corrected Bernstein factory returns a sign of mean
+$u(p)/2$ in $O((1+\Lambda^2)B^4)$ expected auxiliary work and
+$O(1+\Lambda^2)$ source requests. Its certified table has
+polynomial prefill cost in $T$ and the numerical slope bound
+$\Lambda$ (Theorem~\ref{thm:implicitrankone}). This interface
+samples a value coordinate; an explicit attention index has a
+different output.
+
+For raw sign queries, combine this construction with reading the
+whole query and using the explicit rank-one index. Consider dyadic
+rank-one caches with keys in $[-1,1]^n$ and scalar values in $[-1,1]$.
+For dyadic $\beta\ge1$ and for $\beta=\sqrt n$, the worst-cache
+query law for the unit tanh and binary softmax head becomes
+\begin{equation}
+ Q^*_{\mathrm{rank}\,1}
+   =\Theta(\min\{n,\beta^2\}).
+ \label{eq:main-rankone-law}
+\end{equation}
+The upper bit cost is
+$O((1+\min\{n,\beta^2\}+\log T)B^4)$
+(Theorem~\ref{thm:rankone-worstlaw}). The implicit table
+is built only when $12000\beta^2<n$, which keeps preprocessing
+polynomial in $T,n,b$ even when the encoded temperature is
+numerically very large.
+
+\paragraph{Worked example.}
+Let half the $T$ keys equal $\mathbf1$ and half equal
+$-\mathbf1$, with corresponding values $+1$ and $-1$.
+For a fresh sign query $x\in\{-1,1\}^n$, put
+$M=n^{-1}\sum_i x_i$. Its attention value is exactly
+$u=\tanh(\beta M)$. A unit tanh update followed by logits
+$\pm\tanh u$ gives final sign mean
+\[
+ f(x)=\tanh(\tanh(\tanh(\beta M))).
+\]
+Prefill stores two groups. Appending another key from these
+groups changes one group count;
+the index then handles any new query from those counts. Nevertheless, the score lower bound forces
+$\Omega(\min\{n,\beta^2\})$ fresh-query probes.
+At $\beta=\sqrt n$ this is $\Theta(n)$, with an upper bound
+$O(nB^4)$, for every even $T$. At fixed $\beta$, the expected
+probe count is constant (Theorem~\ref{thm:rankonequerylaw}). This
+example separates cache length from the amount of information needed
+from a new query.
+
+\subsection{A known finite query list}
+
+A second static positive case requires no rank bound. Suppose the
+permitted queries are a known list of size $M$, each specified
+online by its list identifier. If all $V$ probabilities of one
+candidate can be enclosed to width $2^{-t}$ in $H(B+t)^d$ bit
+operations, with fixed $d\ge2$ and $H\ge V$, then
+Theorem~\ref{thm:finite-query-list} gives
+$O(MH[B+\log(VH+2)]^d)$ prefill work and
+$O([B+\log(VH+2)]^d)$ expected work per exact sample. The table
+leaves a residual mass of order $1/H$; a certified full calculation
+on that branch pays for itself in expectation. Such a table is specific
+to one cache; the decoder in the next section maintains one causal
+evaluator as the history and the required precision change.

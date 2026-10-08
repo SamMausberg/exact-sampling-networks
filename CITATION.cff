@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the manuscript as below and identify the repository commit used."
+title: "Exact Sampling from Neural Networks: Depth, Attention, and Decoding"
+type: software
+authors:
+  - family-names: Mausberg
+    given-names: Samuel
+    affiliation: Independent Researcher
+    email: samuelmausberg@gmail.com
+version: "1.0"
+date-released: "2026-10-08"
+repository-code: "https://github.com/SamMausberg/exact-sampling-networks"
+url: "https://github.com/SamMausberg/exact-sampling-networks"
+license: MIT
+keywords:
+  - exact sampling
+  - Bernoulli factories
+  - neural networks
+  - attention
+  - autoregressive decoding
+  - Lean 4
+abstract: >-
+  Manuscript (conference and full versions), finite exact-arithmetic checks, and a
+  Lean 4 formalization with Mathlib for exact sampling from neural networks: query
+  and bit complexity of sampling tanh networks, indexed attention over finite caches,
+  RMS normalization, and an exact maintained autoregressive decoder.
+preferred-citation:
+  type: unpublished
+  title: "Exact Sampling from Neural Networks: Depth, Attention, and Decoding"
+  authors:
+    - family-names: Mausberg
+      given-names: Samuel
+      affiliation: Independent Researcher
+  year: 2026
+  month: 10
+  notes: "Manuscript, full version, 8 October 2026."
+  url: "https://github.com/SamMausberg/exact-sampling-networks"

@@ -1,0 +1,165 @@
+\subsection{Finite-bit realization}\label{sec:bits}
+
+The recursive description contains known real probabilities and one
+countable distribution. This section gives finite algorithms for both.
+All interval endpoints used by the implementation are rational.
+
+\begin{lemma}[Exact comparison with a computable probability]\label{lem:lazy}
+Suppose an oracle gives a rational interval containing
+\(p\in[0,1]\) of width at most \(2^{-m}\) at stage \(m\), in
+\(O((B+m)^c)\) bit operations. A fair-bit algorithm samples
+\(\Bern(p)\) exactly with \(O(B^c+1)\) expected bit work.
+It terminates almost surely, including when \(p=0\), \(p=1\), or
+\(p\) is dyadic.
+\end{lemma}
+\paragraph{Proof idea.}
+Compare one uniform binary expansion with successively narrower certified
+intervals for the probability. A comparison remains undecided only when the
+uniform value lies close to the target, so its geometric probability tail
+pays for precision refinement.
+
+\begin{proof}
+Reveal a uniform binary expansion \(U\), maintaining its length-\(m\)
+dyadic interval. Stop when the two intervals are disjoint, and output
+whether \(U<p\). If no decision has been made at stage \(m\), then
+\(|U-p|\le2^{1-m}\). This event has probability at most
+\(4\,2^{-m}\). The equality event has probability zero.
+Summing the stage costs against this geometric tail proves the
+expectation bound. Rational choices among finitely many categories
+are handled either by an integer rejection draw or by successive
+conditional coins.
+\end{proof}
+
+On bounded real arguments, certified Taylor sums with rounding
+after each operation give tanh intervals of width \(2^{-m}\)
+in \(O((B+m)^4)\) bit operations. Section~\ref{sec:fixedprecision}
+gives the error analysis, first for the less immediate countable
+distribution and then for the elementary functions.
+
+For a nonzero row, \(\rho=\sigma r_{\ell-1}\) is a positive
+rational of \(O(\bits)\) bits. In particular,
+\(\rho\ge2^{-O(\bits)}\). Dividing by \(\tanh\rho\), \(r_\ell\),
+or \(R\) requires only \(O(\bits)\) guard bits: on the bounded
+argument range, \(\tanh\rho\) and \(R\) are at least a constant
+multiple of \(\rho\). For \(R\), use
+\(R=\frac12\int_{a-\rho}^{a+\rho}\sech^2u\,du\) and
+\(|a|+\rho\le5\).
+Zero denominators are avoided by the explicit zero-row branch.
+
+\subsubsection{An exact arity draw}
+
+For \(0<\rho\le2\), positivity gives
+\[
+F_\rho(5/4)=\sec^2(\rho/2)\le4,\qquad
+d_k\le4(4/5)^k.
+\]
+Here \(\cos1\ge1/2\).
+Also \(\rho/\tanh\rho\le7/3<3\) and \(C_k\ge1\), so
+\begin{equation}\label{eq:arityenvelope}
+\pi_k\le12(4/5)^k.
+\end{equation}
+Propose \(k\ge0\) with probability
+\(\gamma_k=(1/5)(4/5)^k\), and accept with probability
+\(\pi_k/(60\gamma_k)\). Each trial succeeds with probability
+\(1/60\). Its accepted index has law \(\pi\).
+No source signs are requested before acceptance.
+
+\input{tanh_fixed_precision.tex}
+
+\paragraph{Proof idea.}
+Preprocessing supplies short rational row descriptions and sampling tables.
+At every reached call, the scalar routines have a uniform expected cost.
+Predictable charging then sums those costs over the random recursion tree.
+
+\begin{proof}[Completion of Theorem~\ref{thm:upper}]
+Every stored parameter has \(O(\bits)\) bits because
+\(P=O(\bits)\). A dense center sum costs \(O(n\bits^2)\);
+the bounded scalar endpoints cost \(O(\bits^4)\).
+The prefix tables and all row data are obtained within
+\(O(Dn^2\bits^6)\) time and \(O(Dn^2\bits)\) storage.
+
+A child index is drawn from the absolute integer weights by an
+integer rejection draw of success probability at least \(1/2\)
+and binary search in the stored prefix sums. This costs
+\(O(\bits^2)\) expected bit operations, including the address.
+All other scalar work per reached call is
+\(O(\bits^4)\) in expectation, uniformly over its context
+and the prior history. Lemma~\ref{lem:stopping}, summed over the
+recursion, bounds total bit work by
+\(O(\bits^4\E N_{\rm calls})\).
+No independence between the duration and output of a child is used.
+The exactness identities in Sections~\ref{sec:algorithm}--\ref{sec:bias}
+and almost sure termination prove the required output law.
+\end{proof}
+
+For completeness, a dense exact sampler is available for every fixed
+\(s\). Evaluate the network with certified intervals and compare its
+output probability to one uniform binary expansion.
+To obtain output width \(2^{-m}\), it suffices to use internal
+precision
+\[
+m+O\bigl(b+\log(nD)+D\log^+s\bigr).
+\]
+This follows by propagating interval errors through the
+\(s\)-Lipschitz rows. At \(D=L\), \(b=20L\), Lemma~\ref{lem:lazy}
+gives \(\widetilde O_s(n^2)\) expected bit work.
+\paragraph{One uniform choice of sampler.}
+At \(D=L\), the refined bounds and the dense upper bound can be
+attained by one weight-only selection rule. If \(S>2\), choose
+the dense algorithm. Otherwise, after finding \(S\),
+consider the rational comparison gains \(q=1+k/D\), \(1\le k\le D\),
+and the additional gain \(1+2^{-16}\), retaining those at least
+\(\max\{1,S\}\). Evaluate the bounds of
+Propositions~\ref{prop:fixedrate}
+and~\ref{prop:fusedrate} where applicable, together with the uniform recursive bound, the
+critical bound when \(S\le1\), and the dense envelope \(n^2\).
+Approximate the logarithm of each envelope by a certified upper
+value within one, and select the recursive or dense algorithm
+corresponding to the smallest value, using the original or fused
+factory as required. The common finite-bit factors
+are powers of \(\log n\), so this choice achieves the minimum of
+the displayed envelopes up to such a factor. The recursive preprocessing is performed once, with reference gain
+\(\max\{1,S\}\); the other gains are used only to compare bounds.
+The fused factory uses the same stored data and a fixed cutoff.
+
+This selection costs \(O(D\bits^6)\) preprocessing operations.
+For completeness, write \(w=u_*^2\) and invert
+\[
+\Phi(w)=\sqrt w\coth\sqrt w
+=\frac{\sum_{j\ge0}w^j/(2j)!}
+       {\sum_{j\ge0}w^j/(2j+1)!},\qquad 0\le w\le4.
+\]
+Its derivative is at least \(1/12\): with \(u=\sqrt w\),
+\[
+\Phi'(w)=\frac{\sinh(2u)-2u}{4u\sinh^2u}\ge\frac1{12},
+\]
+using \(\sinh(2u)-2u\ge4u^3/3\) and
+\(\sinh u/u\le\sinh2/2<2\); the value at zero is removable.
+Certified interval bisection therefore encloses \(w\) to the
+required accuracy without an exact equality test. When the midpoint
+value interval overlaps the target, the derivative bound encloses
+the root in a shorter interval about that midpoint. The smallest
+positive candidate gap is at least \(\min\{D^{-1},2^{-16}\}\),
+and the fixed-point estimates give
+\(w\ge3(q-1)\) and \(1-\lambda\ge(q-1)/2\).
+Thus all inverse and logarithmic operations need only \(O(\bits)\)
+guard bits. The geometric denominators are bounded below by constant
+multiples of the same gap. Logarithms of the large prefactors are
+evaluated directly, using stable log-sum formulas and bounds on
+small negative exponentials; the prefactors themselves are never
+formed.
+
+For any fixed \(1<s\le2\), the candidate
+\(q_D=\lceil sD\rceil/D\) is eligible and satisfies
+\(s\le q_D<s+1/D\). The fixed-point rates are smooth for
+\(s>1\), and their prefactors are locally bounded. Thus replacing
+\(s\) by \(q_D\) changes the rate multiplied by \(D\) by
+\(O_s(1)\). The same argument applies to the fused rate for
+\(s<1+2^{-16}\); the added endpoint covers equality. Consequently
+the refined minima with the dense bound hold for this single
+uniform algorithm. The selection is completed before the context
+is revealed.
+
+The chosen sampler therefore retains its exact output law.
+This proves the upper side of Corollary~\ref{cor:threshold}, including
+the refined fixed-norm minima.

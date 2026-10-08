@@ -1,0 +1,486 @@
+
+\subsection{An exact attention primitive}\label{sec:attentionprimitive}
+
+The arithmetic of attention can be sampled through bounded signs.  Let
+$H_j\in[-R,R]^n$, let $Q,K,V$ be dyadic matrices with every row having
+$\ell_1$ norm at most $s$, and fix a causal position $t$.  Write
+\[
+ q=QH_t,\qquad k_j=KH_j,\qquad v_j=VH_j,\qquad
+ a_j=\frac{\beta}{n}\langle q,k_j\rangle,\qquad
+ A=|\beta|s^2R^2.
+\]
+Here $R,s\ge0$ are rational bounds. For the finite-bit claims,
+$\beta$ is rational or is the standard value $\sqrt n$, and its
+finite encoding is included in $B$. For $sR=0$, define the normalized output to be zero and return an
+independent fair sign.  In the remaining case the desired coordinate is
+\begin{equation}\label{eq:attentiontarget}
+ y_i=\frac{\sum_{j=1}^t e^{a_j}v_{j,i}}{
+                    \sum_{j=1}^t e^{a_j}},\qquad |y_i|\le sR.
+\end{equation}
+A child request means an independent sign of prescribed mean
+$H_{j,k}/R$.  Its own cost is excluded from the local arithmetic charge.
+Fresh requests remain independent conditional on the deterministic context.
+Repeated input addresses may be cached.
+
+\begin{theorem}[Attention from bounded signs]\label{thm:attentionprimitive}
+After rational row-prefix preprocessing, there is a uniform exact sign
+sampler of mean $y_i/(sR)$.  It uses at most
+\begin{equation}\label{eq:attentionoffspring}
+ M_A=2e^{2A}-1
+\end{equation}
+expected child requests and at most $e^{2A}$ expected proposals of a causal
+position.  If $B\ge16$ bounds all rational input lengths and
+$\log_2(n+t+2)$, the expected local finite-bit work is
+\begin{equation}\label{eq:attentionlocalbits}
+ O(B^4e^{2A}).
+\end{equation}
+The constants in the $O$ notation are absolute.  Input probes, fair bits,
+integer addresses, arithmetic, and precision refinement are charged.
+There is no exact-real primitive.  For $A=0$, one uniform position and one
+linear-row sign request suffice.
+\end{theorem}
+
+\paragraph{Linear and score signs.}
+For a row $w$ with $\sum_k|w_k|\le s$, choose index $k$ with probability
+$|w_k|/s$, return $\operatorname{sgn}(w_k)$ times a fresh child sign, and
+use an independent fair sign for the remaining probability.  The returned
+sign has mean $wH_j/(sR)$ and uses at most one child request.  Prefix sums
+of the rational masses implement this choice exactly.
+
+For $A>0$, choose $I$ uniformly from $\{1,\ldots,n\}$, independently
+sample signs of means $q_I/(sR)$ and $k_{j,I}/(sR)$, and multiply them.
+Complement the result if $\beta<0$.  The resulting sign $S_j$ satisfies
+\[
+ \mathbb E S_j=a_j/A.
+\]
+Thus $C_j=(1+S_j)/2$ is a coin with bias
+\begin{equation}\label{eq:attentionscorecoin}
+ p_j=\frac{1+a_j/A}{2}\in[0,1].
+\end{equation}
+A score-coin test uses at most two child requests.  Independence of the
+query and key signs is needed even when their addresses agree.
+
+\paragraph{The race.}
+Propose $J$ uniformly from $\{1,\ldots,t\}$.  Draw
+$N\sim\operatorname{Poisson}(2A)$ and test $N$ independent $p_J$-coins,
+stopping at the first failure.  Accept the position if every test succeeds;
+when $N=0$, accept without a score test.  Repeat after rejection.  After
+acceptance, return a fresh linear-row sign of mean $v_{J,i}/(sR)$.
+
+\begin{lemma}[Acceptance and first accepted position]
+\label{lem:attentionraceexact}
+A proposal of $j$ is accepted with probability
+\[
+ r_j=\exp(a_j-A).
+\]
+The procedure terminates almost surely.  Its accepted position has
+probability $e^{a_j}/\sum_k e^{a_k}$, and its returned sign has the mean
+in Theorem~\ref{thm:attentionprimitive}.
+\end{lemma}
+\paragraph{Proof idea.}
+The Poisson probability generating function turns repeated score-coin successes into the required exponential weight.  Conditioning on the first successful proposal then cancels the common scale, and a fresh value sign supplies the attention mean.
+
+\begin{proof}
+The Poisson generating function gives
+\[
+ \mathbb E p_j^N
+ =e^{-2A}\sum_{k=0}^\infty\frac{(2Ap_j)^k}{k!}
+ =e^{-2A(1-p_j)}=e^{a_j-A}.
+\]
+The series is absolutely convergent, including the endpoint coin biases.
+Every proposal succeeds with probability
+$\overline r=t^{-1}\sum_jr_j\ge e^{-2A}>0$.
+The number of proposals is geometric with mean $1/\overline r$.
+For every $j$, summing over the first successful trial yields
+\[
+ \Pr(J_{\rm accepted}=j)
+ =\sum_{m=0}^{\infty}(1-\overline r)^m\frac{r_j}{t}
+ =\frac{r_j}{\sum_kr_k}
+ =\frac{e^{a_j}}{\sum_ke^{a_k}}.
+\]
+The final value sign is sampled with fresh randomness, after the index is
+accepted.  Conditioning on that index proves the mean identity.
+\end{proof}
+
+The first failure rule removes a factor of $A$ from the work bound.
+
+\begin{lemma}[Stopped Poisson tests]\label{lem:stoppedpoissonattention}
+For a coin of bias $p\in[0,1]$ and $N\sim\operatorname{Poisson}(\lambda)$,
+let $G$ be the number of coins inspected before the first failure or the
+completion of all $N$ tests.  Then
+\[
+ \mathbb E G=
+ \begin{cases}
+ (1-e^{-\lambda(1-p)})/(1-p),&p<1,\\
+ \lambda,&p=1.
+ \end{cases}
+\]
+Moreover, for $\lambda\ge0$,
+\begin{equation}\label{eq:stoppedpoissonratio}
+ \mathbb E G\le(e^\lambda-1)e^{-\lambda(1-p)}.
+\end{equation}
+\end{lemma}
+\paragraph{Proof idea.}
+Condition on the Poisson count and sum the probabilities that each test is reached.  Convexity of the exponential compares this stopped count directly with the proposal acceptance probability.
+
+\begin{proof}
+Conditional on $N=k$, the inspection count has mean
+$\sum_{r=0}^{k-1}p^r$.  For $p<1$, the finite geometric sum and the Poisson
+generating function give the formula.  At $p=1$, all $N$ coins are read.
+For $q=1-p\in(0,1]$, inequality~\eqref{eq:stoppedpoissonratio} is equivalent
+to
+\[
+ \frac{e^{\lambda q}-1}{q}\le e^\lambda-1.
+\]
+Convexity of the exponential function gives
+$e^{\lambda q}\le(1-q)+qe^\lambda$.  At $q=0$, the required inequality is
+$\lambda\le e^\lambda-1$.
+\end{proof}
+
+\paragraph{Proof idea.}
+Charge a score test only when its proposal is reached.  The preceding ratio bound survives averaging over proposed positions, so dividing by the success probability bounds the whole race.
+
+\begin{proof}[Child-request bound in Theorem~\ref{thm:attentionprimitive}]
+Let $g_j$ be the mean number of inspected score coins in a proposal of
+$j$.  The stopped-work identity gives
+\[
+ \mathbb E[\hbox{all score tests}]
+ =\frac{t^{-1}\sum_jg_j}{\overline r}
+ \le e^{2A}-1.
+\]
+One can justify this equality without assuming the desired finite mean:
+truncate after $m$ proposals, sum the predictable charges, and then apply
+monotone convergence.  The displayed bound is uniform in the truncation.
+Each score test uses at most two children, and the final value uses at most
+one.  This proves~\eqref{eq:attentionoffspring}.
+\end{proof}
+
+\subsubsection{A finite-bit implementation without a large Poisson draw}
+
+Generating all of $N$ before inspecting the coins would impose avoidable
+work on rejected proposals.  The implementation instead partitions the
+Poisson time $2A$ into $m=\lfloor2A\rfloor$ unit intervals and one final
+interval of length $\theta=2A-m\in[0,1)$.  In a reached interval, generate
+its Poisson count, test the corresponding score coins, and stop the entire
+proposal on the first failure.  Unvisited intervals are never generated.
+Independent Poisson increments give exactly the same acceptance law and
+inspection count as above. The loop counter has $O(B)$ bits, even when
+$A$ is large. For $\beta=\sqrt n$, the integer part of $2A$ is
+obtained by an integer square-root computation after clearing rational
+denominators; the final interval length is a rational plus a rational
+multiple of $\sqrt n$.
+
+\begin{lemma}[Small Poisson draws]\label{lem:smallpoissonattention}
+For $\theta\in[0,1]$ that is rational, or a rational plus a rational
+multiple of $\sqrt n$, with total encoding length and $\log_2(n+2)$
+at most $B$, a
+$\operatorname{Poisson}(\theta)$ variable can be generated exactly with
+$O(B^4)$ expected bit operations.  Its auxiliary proposal lengths and
+precision refinements have uniformly bounded fourth moments after adding
+$B$.
+\end{lemma}
+\paragraph{Proof idea.}
+A geometric proposal dominates the small-parameter Poisson probabilities by a constant factor.  Both the proposed count and the precision needed for its acceptance decision have geometric tails, which pay for finite arithmetic.
+
+\begin{proof}
+For $\theta=0$, return zero.  Otherwise propose $k\ge0$ with probability
+$2^{-k-1}$ and accept with probability
+\[
+ a_k=e^{-\theta}\frac{(2\theta)^k}{4k!}.
+\]
+Since $(2\theta)^k/k!\le e^{2\theta}$,
+$a_k\le e^\theta/4<1$.  The product of proposal and acceptance masses is
+$\frac18e^{-\theta}\theta^k/k!$, so acceptance has probability $1/8$ and
+the accepted count has exactly the Poisson law.  The proposal length has a
+geometric tail.  All polynomial moments of the total work over the mean
+eight proposals are bounded by the corresponding one-proposal moments.
+
+In the quadratic case, exact comparisons in the quadratic field detect
+$\theta=0$, and rational bisection of $\sqrt n$ supplies certified
+intervals for $\theta$ to any required absolute precision. The
+numerator magnitude requires only $O(B)$ extra guard bits.
+Here are sufficient elementary precision bounds. At requested absolute
+error $2^{-r}$, use
+\[
+ V=32(B+k+r+1)
+\]
+working bits.  Evaluate $e^{-\theta}$ by its alternating Taylor series
+through degree $2V$.  Its omitted tail is at most $1/(2V+1)!<2^{-V}$.
+Compute $(2\theta)^k/k!$ by $k$ rational multiplications and divisions,
+retaining $V$ fractional bits and propagating interval endpoints.  Its
+exact magnitude is at most $e^2<8$, while each partial product is bounded
+by $e^2$.  Enlarging every intermediate interval by
+$2^{-V+4k+\lceil\log_2(2V+2)\rceil+8}$ covers all accumulated rounding
+error, including the sum of the Taylor terms.  With the displayed choice of $V$, the
+final acceptance interval has width less than $2^{-r-4}$.
+There are $O(V)$ operations on $O(V)$-bit numbers; schoolbook arithmetic
+therefore gives an $O(V^3)$ enclosure cost, and $O(V^4)$ is a common bound
+for both this calculation and address bookkeeping.
+
+Lemma~\ref{lem:newprecisionstop}, with $d=4$ and $B+k+1$ in place of
+$B$, compares the acceptance probability exactly with one lazy uniform
+variable.  Its expected work is $O((B+k+1)^4)$ for every value of $a_k$,
+including values arbitrarily close to zero or one, and its precision
+tail is geometric.  Averaging over the geometric tail of $k$ proves the
+result.
+\end{proof}
+
+\begin{lemma}[Expected number of reached Poisson intervals]
+\label{lem:lazyattentionblocks}
+Across the complete attention race, the expected number of reached unit
+intervals and nonempty final intervals is at most $3e^{2A}$.
+\end{lemma}
+\paragraph{Proof idea.}
+Every reached unit interval has a fixed positive chance of requesting at least one score coin.  Charging intervals to these requests bounds their total number; the final partial interval contributes at most one per proposal.
+
+\begin{proof}
+Conditional on reaching a unit interval and on its chosen position, its
+inspection count is at least the indicator that its Poisson count is
+positive.  Its conditional mean is therefore at least $1-e^{-1}$,
+regardless of the coin bias.  Predictable charging and
+Lemma~\ref{lem:stoppedpoissonattention} bound the expected number of unit
+intervals by
+\[
+ \frac{e^{2A}-1}{1-e^{-1}}.
+\]
+At most one final interval is visited in each position proposal, giving
+at most $e^{2A}$ additional intervals in expectation.  Since
+$(1-e^{-1})^{-1}<2$, the sum is less than $3e^{2A}$.
+\end{proof}
+
+\paragraph{Proof idea.}
+All local choices have polynomial bit cost.  Summing those costs over reached score tests and reached Poisson intervals gives the total, including the work of unsuccessful proposals.
+
+\begin{proof}[Bit bound in Theorem~\ref{thm:attentionprimitive}]
+Uniform integer sampling in $\{1,\ldots,t\}$ and
+$\{1,\ldots,n\}$ uses binary rejection and $O(B)$ expected fair bits.
+A rational row choice uses a random integer in the common denominator,
+followed by binary search through a prefix table.  It requires $O(B^3)$
+expected bit work with the conservative representation above.
+Each score test consequently costs $O(B^4)$ local work in addition to
+its child calls.  Small Poisson generation has the bound in
+Lemma~\ref{lem:smallpoissonattention}.  The counter and arithmetic cost
+per reached interval is also $O(B^4)$, and
+Lemma~\ref{lem:lazyattentionblocks} bounds the expected number of
+reached intervals.  Combining the expected number of
+proposals, score tests, and intervals proves~\eqref{eq:attentionlocalbits}.
+All choices have countable discrete outputs; the comparisons terminate
+almost surely.  The geometric race then terminates almost surely.
+\end{proof}
+
+The race is the exponential Bernoulli race of
+Dughmi, Hartline, Kleinberg, and Niazadeh~\cite{dughmi2017} applied to a
+random coordinate product.  Their fast race gives another dependence on
+the number of alternatives and the temperature.  The bound here uses the
+known score range and records first-failure and bit costs because these
+quantities control recursive composition.
+
+\subsubsection{A bounded categorical output}\label{sec:boundedoutputprimitive}
+
+\begin{theorem}[Bounded softmax interface]\label{thm:boundedsoftmaxinterface}
+Suppose independent signs of means $z_1,\ldots,z_K\in[-1,1]$ are available.
+An exact softmax sample uses at most $e^2-1$ expected sign requests,
+$e^2$ expected proposals, and $O(B^4)$ local expected bit work, where $B$
+also includes $\log_2(K+2)$.  Its probability of category $k$ is
+$e^{z_k}/\sum_j e^{z_j}$.
+\end{theorem}
+\paragraph{Proof idea.}
+The same Poisson test applies directly to a logit sign.  Its success probability is an exponential of the logit with a common shift, so the accepted category has the softmax law.
+
+\begin{proof}
+Propose $k$ uniformly, test a Poisson number of mean two of the coin with
+bias $(1+z_k)/2$, and accept if all tests succeed.  A test is exactly a
+request for a logit sign followed by checking whether it is positive.
+Its acceptance probability is $e^{z_k-1}$.  Apply
+Lemmas~\ref{lem:attentionraceexact}, \ref{lem:stoppedpoissonattention},
+and~\ref{lem:smallpoissonattention} with $A=1$.
+\end{proof}
+
+This theorem is an interface condition: the logits must come with sign
+samplers, as in Section~\ref{sec:models}.  Coordinate logits and
+appropriately normalized bounded-row linear heads supply them.
+
+\subsection{Positional search when the context is fresh}\label{sec:attentionsearchlower}
+
+The following bounds apply when preprocessing is independent of the
+context. They therefore concern fresh context probes; an index built from
+that context is handled by the separate static-cache theorems. We give
+a lower bound for the final categorical output of one complete block.  All weights used below are shared across positions.  Let $n\ge2$,
+$s\ge1$, $\beta\ge0$, and $\alpha\in[0,1]$, with the chosen weights legal
+on the parameter grid.  Fix a coordinate to one at every position and
+write another coordinate as $x_j\in\{-1,1\}$.  Every query row selects the
+fixed coordinate with coefficient $s$; every key row selects $x_j$ with
+coefficient $s$.  The value row of interest selects $x_j$ with coefficient
+one.  Other value rows may be zero.  Then, at position $T$,
+\begin{equation}\label{eq:binaryattentionfamily}
+ A=\beta s^2,\quad E=e^{2A},\quad
+ Y(x)=\frac{\sum_{j=1}^T e^{Ax_j}x_j}{\sum_{j=1}^T e^{Ax_j}},\quad
+ U(x)=(1-\alpha)x_T+\alpha Y(x).
+\end{equation}
+Apply a tanh row of weight one and bias zero through the second residual
+sublayer, giving
+\[
+ Z(x)=(1-\alpha)U(x)+\alpha\tanh U(x).
+\]
+The two output logits are $Z(x)$ and $-Z(x)$.  Both lie in $[-1,1]$, as do
+the streams in the relevant coordinate.  The token-one probability is
+\begin{equation}\label{eq:binaryattentiontoken}
+ P(x)=\frac{1+\tanh Z(x)}2.
+\end{equation}
+The fixed coordinates define an input subcube.  A lower bound on this
+subcube also lower-bounds a sampler required to handle every context.
+
+\begin{lemma}[A transcript coupling bound]\label{lem:attentioncoupling}
+Let $x$ and $x^{(j)}$ differ at one input coordinate.  If an algorithm
+terminates almost surely and samples the required output distribution
+exactly on both inputs, then
+\[
+ \Pr_x(\hbox{coordinate $j$ is queried})
+ \ge \operatorname{TV}(\mathcal L_x(\mathrm{output}),
+                        \mathcal L_{x^{(j)}}(\mathrm{output})).
+\]
+Arbitrary weight-only preprocessing and adaptive arithmetic are allowed.
+\end{lemma}
+\paragraph{Proof idea.}
+Run both inputs with the same random tape.  Their executions can separate only after reading the changed coordinate, so the probability of that read must cover the difference between the output laws.
+
+\begin{proof}
+Use the same preprocessing randomness and the same online random tape on
+both inputs.  The transcripts agree until coordinate $j$ is queried.
+If the run on $x$ terminates without that query, the other run follows the
+same transcript and returns the same output.  The probability of unequal
+outputs in this coupling is therefore at most the query probability on
+$x$.  Total variation is at most the disagreement probability of any
+coupling.  Almost-sure termination handles all finite transcripts; a
+null set of nonterminating tapes does not affect the inequality.
+\end{proof}
+
+\begin{theorem}[A positional lower bound for the final token]
+\label{thm:attentionpositionlower}
+On the all-negative context, every exact sampler for
+\eqref{eq:binaryattentiontoken} has expected input-query cost at least
+\begin{equation}\label{eq:attentionpositionlower}
+ \frac{1}{16}\left[(1-\alpha)+
+       \alpha\frac{TE}{T-1+E}\right]
+ \ge\frac{1+\alpha\min\{T,E\}}{64}.
+\end{equation}
+If $x_T$ is fixed in advance and only positions $j<T$ are counted, the
+bound is
+\begin{equation}\label{eq:attentionpositionlowerprefix}
+ \frac{\alpha}{32}\min\{T-1,E\}.
+\end{equation}
+In particular, $\beta s^2\ge\tfrac12\log T$ forces
+$\Omega(\alpha T)$ expected probes of context positions in this class.
+\end{theorem}
+\paragraph{Proof idea.}
+A single positive position changes the attention mean by an explicitly known amount.  The two subsequent scalar maps have derivatives bounded below on the relevant interval.  Summing the resulting coupling bounds over one common baseline input gives the search cost.
+
+\begin{proof}
+Let $x^-$ have every $x_j=-1$, and let $x^{(j)}$ flip only coordinate $j$.
+Put
+\[
+ p=\frac{E}{T-1+E}.
+\]
+Then $Y(x^-)=-1$ and $Y(x^{(j)})=-1+2p$.  Consequently
+\[
+ U(x^{(j)})-U(x^-)
+ =2\alpha p+2(1-\alpha)\mathbf1_{\{j=T\}}.
+\]
+Both endpoints lie in $[-1,1]$.  On that interval,
+\[
+ \frac{d}{du}\bigl[(1-\alpha)u+\alpha\tanh u\bigr]
+ =(1-\alpha)+\alpha\sech^2u\ge\frac14,
+\]
+and, on $[-1,1]$,
+\[
+ \frac{d}{dz}\frac{1+\tanh z}{2}=\frac12\sech^2z\ge\frac18.
+\]
+The inequalities follow from $\cosh1<2$.  Integrating the derivatives gives
+\[
+ P(x^{(j)})-P(x^-)
+ \ge\frac1{16}\left[
+ \alpha p+(1-\alpha)\mathbf1_{\{j=T\}}\right].
+\]
+Lemma~\ref{lem:attentioncoupling} lower-bounds the chance of querying each
+coordinate on the same baseline context.  Summing these probabilities
+proves the first expression in~\eqref{eq:attentionpositionlower}.
+For positive $a,b$, $ab/(a+b)\ge\frac12\min\{a,b\}$, whence
+$TE/(T-1+E)\ge\frac12\min\{T,E\}$.
+Writing $M=\min\{T,E\}\ge1$, the inequality
+\[
+ \frac{1-\alpha}{16}+\frac{\alpha M}{32}
+ \ge\frac{1+\alpha M}{64}
+\]
+follows from $3-4\alpha+\alpha M\ge0$.
+If position $T$ is fixed, sum only over $T-1$ possible flips and use
+$(T-1)E/(T-1+E)\ge\frac12\min\{T-1,E\}$.
+\end{proof}
+
+\begin{theorem}[A matching law for the binary attention family]
+\label{thm:binaryattentionlaw}
+Let $Q^*_{\rm bin}$ be the optimum worst-context expected number of distinct
+$x_j$ probes for the family~\eqref{eq:binaryattentionfamily}, with the fixed
+coordinate known.  Then
+\begin{equation}\label{eq:binaryattentionlaw}
+ \frac{1+\alpha\min\{T,e^{2\beta s^2}\}}{64}
+ \le Q^*_{\rm bin}
+ \le 1+32\alpha\min\{T,e^{2\beta s^2}\}.
+\end{equation}
+There is a uniform finite-bit sampler with expected work
+\[
+ O\!\left(B^4[1+\alpha\min\{T,e^{2\beta s^2}\}]\right).
+\]
+Thus the law is sharp up to the displayed constants in queries and up to
+polylogarithmic encoding and address factors in bit work.
+\end{theorem}
+\paragraph{Proof idea.}
+The residual choice makes an attention request only with probability proportional to its coefficient.  Answer such a request either by the exponential race or by reading and counting the entire context.  Selecting the cheaper method matches the lower bound.
+
+\begin{proof}
+The lower bound is Theorem~\ref{thm:attentionpositionlower}.
+For the upper bound, cache $x_T$ when it is first needed.  A sign of mean
+$U$ is obtained by choosing $x_T$ with probability $1-\alpha$ and a sign of
+mean $Y$ with probability $\alpha$.  A sign of mean $Z$ chooses a $U$ sign
+with probability $1-\alpha$ and a sign of mean $\tanh U$ with probability
+$\alpha$.  Lemma~\ref{lem:unittanhfour} gives at most four expected
+$U$-sign requests, including this residual choice.  Applying the same
+lemma once more produces the sign whose positive probability is
+$P(x)=(1+\tanh Z(x))/2$.  The construction uses at most sixteen expected
+$U$-sign requests and at most $16\alpha$ expected requests for $Y$.
+This is a predictable charge: each request is reached before its fresh
+residual-choice coin is drawn.
+
+There are two ways to answer a $Y$ request.  Theorem~\ref{thm:attentionprimitive}
+uses at most $2E-1$ probes, with repetitions counted.  Alternatively, on
+the first such request read all $T$ bits, cache their number $k$ of positive
+values, and use
+\begin{equation}\label{eq:countattentionformula}
+ Y=\frac{k-(T-k)e^{-2A}}{k+(T-k)e^{-2A}}.
+\end{equation}
+When $k=0$, the answer is exactly $-1$.  The chance of ever making this
+first request is at most the expected number of requests.  Thus the
+second implementation has expected probe cost at most
+$16\alpha T$ beyond the cached $x_T$.  Choosing the better
+implementation proves the upper query bound.
+
+For a uniform bit implementation, the choice need only be within a
+factor two: compare $2A$ with an approximation to $\log T$ of absolute
+error at most $1/4$.  Either choice has cost within a factor two of the
+smaller alternative.  In~\eqref{eq:countattentionformula}, $k\ge1$ gives a
+denominator at least one, so $Y$ has derivative at most $2T$ in
+$e^{-2A}$.  To compute $Y$ to error $2^{-r}$,
+Lemma~\ref{lem:newnegativeexp} encloses $e^{-2A}$ to width
+$2^{-r-\lceil\log_2(T+2)\rceil-2}$ in $O((B+r)^4)$ bit work.  The sign
+comparison has a geometric refinement
+tail.  The cached count requires $O(TB)$ bit work, incurred only if a
+$Y$ request is reached.  The remaining scalar and categorical factories
+have constant expected arity and polynomial moments at their fixed
+argument bounds.  Predictable charging yields the stated bit bound.
+\end{proof}
+
+If the coordinate used by the query is also supplied as an unknown input,
+its sign can be cached on the first attention request.  Complementing all
+key signs when this bit is negative reduces the calculation to the same
+family.  This changes the upper bound by an absolute constant and leaves
+the lower bound unchanged.
+

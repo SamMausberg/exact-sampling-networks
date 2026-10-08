@@ -1,0 +1,14 @@
+{
+  "status": "all finite exact checks passed",
+  "seed": 20261008,
+  "arithmetic": "fractions.Fraction, no floating point",
+  "counts": {
+    "hypergeometric_moment_cases": 624,
+    "outward_ratio_checks": 4900,
+    "coefficient_bounds": 3960,
+    "elevation_identities": 800,
+    "mass_bounds": 40,
+    "quotient_constants": 4
+  },
+  "limitations": "finite identities and bounds, not a sampler benchmark or proof"
+}

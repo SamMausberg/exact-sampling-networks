@@ -1,0 +1,4 @@
+# The checkpoint worksheet and exact-rational checks use only the standard library.
+# Optional dependencies for recorded high-precision checks and PDF structure checks.
+mpmath==1.3.0
+PyMuPDF==1.26.6

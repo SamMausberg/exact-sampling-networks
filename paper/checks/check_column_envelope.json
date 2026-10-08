@@ -1,0 +1,45 @@
+{
+  "status": "FINITE EXACT CHECKS; NOT A PROOF OR FORMAL VERIFICATION",
+  "arithmetic": "Python fractions.Fraction; no floating-point arithmetic",
+  "empirical_correction": {
+    "rational_populations": 27,
+    "full_antithetic_identities": 27,
+    "within_half_pair_covariance_identities": 1728,
+    "centered_covariance_third_moment_entries": 324,
+    "dimensions": [
+      1,
+      2,
+      3
+    ],
+    "half_sample_sizes": [
+      2,
+      3,
+      4
+    ],
+    "maximum_polynomial_degree": 5,
+    "maximum_exact_residual": "0"
+  },
+  "doob_tilts": {
+    "nondegenerate_exact_tilt_laws": 90,
+    "enumerated_signed_endpoints": 2232,
+    "orders": [
+      2,
+      4
+    ],
+    "sign_counts": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "all_distributions_sum_to": "1",
+    "maximum_exact_residual": "0"
+  },
+  "limitations": [
+    "No full-network sampling run is performed.",
+    "These finite examples do not establish the derivative majorants.",
+    "These finite examples do not establish a stopping or complexity bound.",
+    "The manuscript's complete mathematical proof justifies the theorem."
+  ]
+}

@@ -1,0 +1,210 @@
+\subsection{Instance query complexity and input influence}\label{sec:instance}
+
+The norm threshold concerns the worst network in a class. A useful
+bound for a particular network would also recognize cancellation and
+the direction in which its inputs affect the output.  The following
+examples show why both are necessary.
+
+\begin{proposition}[Equal weight magnitudes, different sampling costs]
+\label{prop:magnitude-obstruction}
+Let \(D\ge2\), let \(m=2^k\le n\) with \(m\ge2\), and let
+\(a=A2^{-r}>0\), where \(A,r\) are nonnegative integers.  Suppose
+\(b\ge r+k+1\).  There are two width-\(n\), depth-\(D\) networks
+with zero biases, row norms at most \(a\), and identical matrices
+\((|w_{\ell,ij}|)\) at every layer, whose outputs are respectively
+\[
+  0\qquad\text{and}\qquad
+  F_{a,D}\left(\frac1m\sum_{i=1}^m x_i\right).
+\]
+The first output can be sampled with no input probes and one fair bit.
+Every exact sampler for the second satisfies the lower
+bound~\eqref{eq:lowerexact} and, if \(a>1\), the lower
+bound~\eqref{eq:lowersuper}, with this \(m\).
+\end{proposition}
+
+\paragraph{Proof idea.}
+Duplicate one signal along two paths and subtract them at the
+output. Negating one path changes cancellation into addition while preserving
+every absolute weight. The amplified mean-chain lower bound separates the
+two sampling costs.
+
+\begin{proof}
+Only neurons 1 and 2 can be nonzero before the output layer.
+In both networks the first row of the first layer has weights
+\(a/m\) on the first \(m\) input coordinates.  In the first network,
+the second row is identical.  In the second network, every weight
+in that row is negated.  Every other first-layer entry is zero.
+For \(2\le\ell\le D-1\), set
+\(w_{\ell,11}=w_{\ell,22}=a\), and set all other weights to zero.
+At layer \(D\), set
+\[
+  w_{D,11}=a/2,\qquad w_{D,12}=-a/2,
+\]
+and again set every other entry to zero.  When \(D=2\), the
+intermediate range of layers is empty.
+
+Write \(u=m^{-1}\sum_{i=1}^m x_i\).  In the first network the two
+active neurons at layer \(D-1\) both equal \(F_{a,D-1}(u)\), so
+the last preactivation is zero.  In the second network their values
+are \(F_{a,D-1}(u)\) and \(-F_{a,D-1}(u)\), because tanh is odd.
+The last preactivation is therefore \(aF_{a,D-1}(u)\).
+This proves the two output identities.
+
+The construction changes signs only.  Its nonzero row norms are
+\(a\), and its parameters belong to the grid \(2^{-b}\mathbb Z\):
+the only divisions of \(a\) are by \(m=2^k\) and by 2.
+The mean-chain lower bound in Theorem~\ref{thm:lower}, which holds
+for every power of two \(m\le n\) by
+Remark~\ref{rem:lower-general-m}, applies unchanged to the second
+network, regardless of the preprocessing.
+\end{proof}
+
+For \(D=\lceil\log_2n\rceil\) and fixed dyadic \(a>1\), this
+is a polynomial separation.  Thus row norms, absolute path products,
+and even the complete sequence of entrywise absolute weight matrices
+cannot determine instance sampling cost within polylogarithmic
+factors.  The output of the first network is a fair coin; a uniform
+algorithm can detect this displayed cancellation during preprocessing.
+
+\begin{proposition}[A zero product profile can conceal a hard network]
+\label{prop:profile-obstruction}
+Let \(m\le n\) be even, and define
+\[
+ f(x)=F_{a,D}\left(
+ \frac1m\sum_{i=1}^{m/2}x_i-
+ \frac1m\sum_{i=m/2+1}^{m}x_i\right).
+\]
+Whenever \(a\) and \(a/m\) belong to the parameter grid, this is
+the output of a legal width-\(n\), depth-\(D\) network with row
+norms at most \(a\) and zero biases.  Its optimal worst-input
+expected query cost equals that of the unsigned mean chain.
+Nevertheless, under independent input signs of common mean \(t\),
+\[
+ H_f(t)=\E_t f(X)=0\qquad(-1\le t\le1).
+\]
+Consequently all derivatives of this one-parameter profile vanish.
+\end{proposition}
+
+\paragraph{Proof idea.}
+Flipping half the input signs preserves the query problem but
+changes the direction of its hard average. Exchanging the two halves leaves
+the common-mean input distribution invariant and negates the output, forcing
+that one-dimensional profile to vanish.
+
+\begin{proof}
+Use weights \(a/m\) on the first half of the first row and
+\(-a/m\) on its second half.  Subsequent distinguished rows
+have their sole nonzero weight equal to \(a\).  All other weights
+and all biases are zero.  This realizes the displayed function.
+
+Replacing \(x_i\) by \(-x_i\) in the second half maps this
+function to the unsigned mean chain.  A query to either input can
+be answered by one query to its image and a deterministic sign flip.
+The map is an involution, so it gives reductions in both directions
+without changing the number of probes.
+
+To compute the product profile, exchange the first and second input
+halves.  The common-mean product law is invariant under this
+permutation.  The argument of \(F_{a,D}\) is negated, and the
+function \(F_{a,D}\) is odd.  Hence \(\E_t f(X)=-\E_t f(X)\).
+The profile is zero.  It is a polynomial in \(t\), so every
+derivative is also zero.
+\end{proof}
+
+This example rules out every instance statistic that uses only the
+single profile \(t\mapsto\E_t f(X)\), including all of its
+derivatives.  It leaves the multivariate product extension available.
+
+\subsubsection{A multivariate information certificate}
+
+For \(\boldsymbol t\in(-1,1)^m\), let
+\[
+ \mathcal H(\boldsymbol t)=
+ \sum_{x\in\{-1,1\}^m} f(x)
+ \prod_{i=1}^m\frac{1+t_ix_i}{2}.
+\]
+Let \(q_i(\boldsymbol t)\) be the probability that an arbitrary
+exact sampler probes coordinate \(i\) under this product law.
+Repeated queries can be answered from a cache.  For a direction
+\(v\in\mathbb R^m\), put
+\[
+ I_v(\boldsymbol t)=\sum_{i=1}^m
+ \frac{v_i^2}{1-t_i^2}\,q_i(\boldsymbol t).
+\]
+
+\begin{lemma}[Directional transcript inequalities]
+\label{lem:multivariate-transcript}
+Every almost surely terminating exact sign sampler satisfies
+\begin{align}
+ \bigl(v\cdot\nabla\mathcal H(\boldsymbol t)\bigr)^2
+ &\le (1-\mathcal H(\boldsymbol t)^2)I_v(\boldsymbol t),
+ \label{eq:multivariate-information}\\
+ \left|v^{\mathsf T}\nabla^2\mathcal H(\boldsymbol t)v\right|
+ &\le2I_v(\boldsymbol t).
+ \label{eq:multivariate-curvature}
+\end{align}
+The assertions allow arbitrary weight-only preprocessing and require
+no moment bound on arithmetic time.
+\end{lemma}
+
+\paragraph{Proof idea.}
+Perturb all input biases in a chosen direction and differentiate
+the transcript likelihood. Fresh-coordinate scores are orthogonal martingale
+increments. Their variance controls the first derivative, and the second
+likelihood derivative controls curvature.
+
+\begin{proof}
+Follow the finite decision-tree reduction used in
+Lemma~\ref{lem:transcript}.  On a neighborhood of zero, perturb the
+input mean vector to \(\boldsymbol t+uv\).  At \(u=0\), the
+first and negative second log-likelihood derivatives of a leaf are
+\[
+ Z=\sum_{i\text{ queried}}\frac{v_iX_i}{1+t_iX_i},
+ \qquad
+ A=\sum_{i\text{ queried}}\frac{v_i^2}{(1+t_iX_i)^2}.
+\]
+A new coordinate retains its product law conditional on the past.
+Its score has conditional mean zero and conditional second moment
+\(v_i^2/(1-t_i^2)\).  The same expression is the conditional
+mean of its contribution to \(A\).  There are at most \(m\)
+distinct probes, and therefore
+\[
+ \E Z=0,\qquad \E Z^2=\E A=I_v(\boldsymbol t).
+\]
+Finite likelihood differentiation gives
+\[
+ v\cdot\nabla\mathcal H=\E[YZ],\qquad
+ v^{\mathsf T}\nabla^2\mathcal H v=\E[Y(Z^2-A)].
+\]
+Since \(\E Z=0\), the first expectation equals
+\(\E[(Y-\mathcal H)Z]\).  Cauchy--Schwarz and
+\(\operatorname{Var}(Y)=1-\mathcal H^2\) prove
+\eqref{eq:multivariate-information}.  The inequalities
+\(|Y|=1\) and \(|Z^2-A|\le Z^2+A\) prove
+\eqref{eq:multivariate-curvature}.
+\end{proof}
+
+For a nonconstant \(f\), the product extension lies in \((-1,1)\)
+at every interior point.  Taking directions with
+\(v_i^2\le1-t_i^2\) gives the instance lower bound
+\begin{equation}\label{eq:instance-certificate}
+ \sup_x\E[Q\mid x]\ge
+ \sup_{\boldsymbol t\in(-1,1)^m}
+ \max\left\{
+ \frac{\left(\sum_i\sqrt{1-t_i^2}
+                  |\partial_i\mathcal H(\boldsymbol t)|\right)^2}
+      {1-\mathcal H(\boldsymbol t)^2},
+ \frac12\sup_{v_i^2\le1-t_i^2}
+ \left|v^{\mathsf T}\nabla^2\mathcal H(\boldsymbol t)v\right|
+ \right\}.
+\end{equation}
+The first term follows by choosing each \(v_i\) with the sign of
+\(\partial_i\mathcal H\).  The second term follows directly
+from \eqref{eq:multivariate-curvature}.  If \(f\) is constant,
+both terms are defined to be zero.
+
+This certificate recognizes the signed mean chain: take
+\(t_i=t\) in its positive half and \(t_i=-t\) in its negative
+half, then differentiate in the corresponding signed direction.
+Computing the displayed extension by its definition entails
+\(2^m\) network evaluations.

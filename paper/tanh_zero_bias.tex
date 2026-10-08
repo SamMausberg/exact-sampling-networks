@@ -1,0 +1,58 @@
+\subsection{A linear depth bound with zero biases}
+
+\begin{theorem}[Unrestricted zero-bias critical networks]
+\label{thm:zero-bias-linear}
+For any zero-bias network with absolute row sums at most one, there
+is an exact sampler with the preprocessing bounds of
+Theorem~\ref{thm:upper} and
+\[
+ \E N_{\rm calls}\le128(D+1),\qquad
+ \E[\hbox{online bit work}]=O(\bits^4(D+1)).
+\]
+Weights can have arbitrary signs. The bound is uniform in the context.
+\end{theorem}
+\paragraph{Proof idea.}
+With zero biases, every stored center is zero and no bias race is needed.
+The output-radius gate and the majority costs then telescope to a linear
+bound in depth.
+
+\begin{proof}
+Use reference gain one and the stored radii of
+\eqref{eq:rounded}. Store every center as exactly zero, which is
+valid because all biases are zero and tanh is odd. At a row of
+radius $\rho$, the normalized call has an active gate
+$\tanh\rho/r_\ell\le1$, followed by the majority factory of
+Lemma~\ref{lem:arity}; there is no bias race. Its expected number
+of reached children is at most
+\[
+ 1+\rho^2+\rho^4\le\exp(r_{\ell-1}^2+r_{\ell-1}^4).
+\]
+The actual top output retains its gate $\tanh\rho\le r_D$.
+
+Write $q_j=3/(2j+3)$. Lemma~\ref{lem:rounding} gives
+$0\le r_j^2-R_j^2\le6D\varepsilon$ and $r_j\le1$.
+The derivative of $v+v^2$ on $[0,1]$ is at most three, so the
+rounding contribution to any suffix logarithm is at most
+$18D^2\varepsilon<1/50$.
+The integral estimates in \eqref{eq:qsums} give, for $0\le k<D$,
+\[
+ \sum_{j=k}^{D-1}(r_j^2+r_j^4)
+ \le \frac32\log\frac{D+1}{k+1}+\frac9{4(k+1)}+\frac1{50}
+ \le \frac32\log\frac{D+1}{k+1}+3.
+\]
+The conditional charging lemma therefore bounds the expected total
+number of calls, with the top call charged separately, by
+\[
+ 1+r_D\sum_{k=0}^{D-1}
+       e^3\left(\frac{D+1}{k+1}\right)^{3/2}
+ \le1+2e^3(D+1)\sum_{k\ge1}k^{-3/2}
+ \le128(D+1).
+\]
+Here $r_D\le2/\sqrt{D+1}$, $\sum k^{-3/2}\le3$, and $e^3<21$.
+The scalar and index implementations in Section~\ref{sec:bits}
+cost $O(\bits^4)$ conditionally per reached call. Their geometric
+refinement tails and Lemma~\ref{lem:stopping} give the bit bound.
+The majority identity proves exactness; finite depth and almost
+sure termination of each scalar call prove almost sure termination
+of the entire sampler.
+\end{proof}

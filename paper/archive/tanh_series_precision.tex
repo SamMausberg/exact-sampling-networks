@@ -1,0 +1,83 @@
+\subsection{Stable scaled power-series arithmetic}
+\label{sec:scaled-series}
+
+\begin{lemma}[Coefficient computation with rounded arithmetic]
+\label{lem:scaled-series-stability}
+Consider a zero-bias tanh network with $D$ layers, width $n$, and
+absolute row sums at most one. Let each input be an affine polynomial
+in a complex variable $u$. Suppose that on $|u|\le2$ all exact neuron
+values and preactivations have modulus at most two, that
+$|e^{2s}|\le e^4$, and that $|(1+e^{2s})^{-1}|\le1$ for every
+preactivation $s$. For each neuron, all Taylor coefficients through
+degree $K$ can be enclosed to width $2^{-S}$ using
+\[
+ O\bigl(D[n^2K+nK^2+nM]M^2\bigr)
+\]
+bit operations, where it suffices to take
+\[
+ M=S+64D+\lceil\log_2(256nD(K+2)^6)\rceil+b+64.
+\]
+The coefficients are stored in the scaled variable $u$; there is no
+inverse power of the original disk radius in this bound.
+\end{lemma}
+\paragraph{Proof idea.}
+Work with coefficients in a scaled variable and their sum norm. Residual
+identities for the exponential and reciprocal recurrences control local
+rounding, while the row norm bounds propagation between layers.
+
+\begin{proof}
+For truncated series write $\|A\|=\sum_{j=0}^K|[u^j]A|$.
+This is a submultiplicative norm on the quotient algebra modulo
+$u^{K+1}$. Cauchy's estimate on the radius-two disk bounds the
+exact coefficient norms of neurons, preactivations, exponentials,
+and inverses respectively by $4,4,2e^4,2$.
+
+Round each coefficient operation outward to $M$ fractional bits.
+For $E=e^A$, compute the constant coefficient by a certified
+bounded-argument exponential and use
+\[
+ e_0=e^{a_0},\qquad
+ k e_k=\sum_{j=1}^k j a_j e_{k-j}\quad(1\le k\le K).
+\]
+Each coefficient equation has at most $K$ rounded products with
+integer factor at most $K$. Its residual in $E'-A'E$ has norm at
+most $4(K+2)^3 2^{-M}$. Solving this residual equation by
+multiplication by $e^{-A}$, coefficientwise integration, and
+multiplication by $e^A$ gives total error at most
+$2^{32}(K+2)^4 2^{-M}$ whenever $\|A\|\le9$.
+Indeed both exponential norms are at most $e^9$, and integration
+has norm at most one; the initial constant error fits this bound.
+The inverse is computed from its triangular product recurrence.
+Its product residual has the same polynomial bound. Multiplication
+by the exact inverse bounds the error; a perturbation of norm below
+$1/4$ keeps the perturbed inverse norm at most four.
+
+For propagation between rows use
+\[
+ \|e^{A+E}-e^A\|\le e^{\|A\|+\|E\|}\|E\|,\qquad
+ (U+E)^{-1}-U^{-1}=-(U+E)^{-1}EU^{-1}.
+\]
+Since $\|2s\|\le8$, these inequalities and
+$\tanh s=1-2/(1+e^{2s})$ bound error amplification through a
+nonlinear layer by $2^{20}$. A linear row does not amplify the
+incoming norm error, since its absolute row sum is at most one.
+Local rounded linear sums and nonlinear operations contribute at
+most $2^{32}n(K+2)^4 2^{-M}$. Induction therefore bounds the error
+at any layer by
+\[
+ D2^{20D+32}n(K+2)^4 2^{-M}.
+\]
+The displayed choice of $M$ makes this smaller than $2^{-S-4}$,
+and also verifies inductively each $1/4$ perturbation margin used
+above. Adding rational outward error bounds gives intervals of
+width at most $2^{-S}$. The initial affine coefficients and dyadic
+weights are represented exactly, or enclosed with the same error
+budget if division is needed to describe the affine input.
+
+There are $O(n^2DK)$ linear coefficient operations and
+$O(nDK^2)$ nonlinear coefficient operations. Under the norm bounds,
+integer parts have $O(M)$ bits. Schoolbook arithmetic costs
+$O(M^2)$ per operation. Each constant exponential has
+$O(M^3)$ bit cost by a rounded Taylor expansion and bounded range
+reduction. These counts give the claimed bound.
+\end{proof}

@@ -1,0 +1,503 @@
+\subsection{A lower bound after preprocessing the keys and values}
+\label{sec:indexedlower}
+
+The context-probe bounds proved earlier concern preprocessing that is
+independent of the context.  An index built during prefill is a different
+model.  The index can already contain every input sign, so changing one
+sign can change the index before a query begins.  The earlier coupling
+argument gives no query lower bound in this model.
+
+We therefore use randomized OVH (Section~\ref{sec:index-main}) in
+the following precise form: for each $\eta>0$ there is a constant $c>0$
+such that no randomized algorithm, with error at most $1/3$, decides
+whether two sets of $N$ vectors in $\{0,1\}^{\lceil c\log_2N\rceil}$
+contain an orthogonal pair in $O(N^{2-\eta})$ bit operations.
+The randomized form is needed because sampling a bounded-logit token
+gives a randomized decision algorithm.  The standard split-and-list
+reduction from randomized SETH gives randomized OVH.  The constant-gap
+attention obstruction with polynomial prefill is also established by
+Haverbeck et al.~\cite[Theorem 4.1 and Lemma A.5]{haverbeck2026attention}; the
+direct reduction below keeps sign-valued coordinates and the
+finite-bit stopping conditions explicit.
+
+Our indexed attention problem has a static cache
+$\mathcal C=((k_i,v_i))_{i=0}^{T-1}$ and an online query $q$.  It must
+sample the binary token with probability
+\begin{equation}
+ \pi_{\mathcal C}(q)
+ =\frac{1+\tanh(\tanh u_{\mathcal C}(q))}{2},
+ \qquad
+ u_{\mathcal C}(q)
+ =\frac{\sum_{i=0}^{T-1}e^{\langle q,k_i\rangle/\sqrt n}v_i}
+ {\sum_{i=0}^{T-1}e^{\langle q,k_i\rangle/\sqrt n}}.
+ \label{eq:indexedtarget}
+\end{equation}
+This is a scalar attention coordinate, a unit tanh row, and a softmax
+over the two logits $\pm\tanh u_{\mathcal C}(q)$.  Both logits lie in
+$[-1,1]$ whenever $|v_i|\le1$.
+
+\begin{theorem}[Polynomial prefill does not give uniformly sublinear queries]
+\label{thm:indexedlower}
+Assume randomized OVH.  For every fixed $a\ge1$, $b\ge0$, and
+$\epsilon\in(0,1)$, there is a constant $C>0$ such that no uniform
+randomized data structure has both of the following guarantees on all
+caches of width $n\le C\log^4(T+2)$:
+\begin{enumerate}
+ \item it preprocesses the complete cache in expected
+ $O(T^a(n+\log T)^b)$ bit operations;
+ \item for every query it samples \eqref{eq:indexedtarget} in expected
+ $O(T^{1-\epsilon}(n+\log T)^b)$ additional bit operations.
+\end{enumerate}
+The conclusion already holds when $n$ is a perfect square,
+$q\in\{0,1\}^n$, $k_i\in\{-1,0\}^n$, and $v_i\in\{-1,1\}$.
+In particular $\|q\|_2,\|k_i\|_2\le\sqrt n$ and all input numbers have
+constant bit length.  The only score scaling is the standard
+$1/\sqrt n$.
+
+The same conclusion holds if the marginal law of each sample may have
+total variation distance at most $1/64$ from the required token law.
+It suffices to require the query guarantee for a fresh query to a fresh
+index.  Correctness conditional on a random prefill state, or on an
+adaptive query history, is not needed for this lower bound.
+\end{theorem}
+
+The constant $C$ is allowed to depend on the proposed preprocessing
+degree and the claimed query saving.  This is the usual uniform
+quantification in indexed fine-grained lower bounds.  The theorem
+excludes a uniform $\operatorname{poly}(n,\log T)$ query algorithm after
+any fixed polynomial prefill budget.  It does not give an unconditional
+query lower bound, nor a lower bound for each individual cache.
+
+\begin{remark}[Translating entry bounds into width]
+The parameter regimes can be compared directly. Suppose old vectors
+have dimension $d$, coordinate magnitudes at most $B_0$, and scores
+$\langle q,k\rangle/d$. Choose an integer $H\ge\max\{1,B_0^2/d\}$.
+Divide each coordinate by $\sqrt{dH}$ and repeat it $dH^2$ times.
+The new width is $n=(dH)^2$, the coordinate bound is one, and
+\[
+ \frac{\langle q_{\rm new},k_{\rm new}\rangle}{\sqrt n}
+ =\frac{dH^2}{dH\sqrt n}\langle q,k\rangle
+ =\frac{\langle q,k\rangle}{d}.
+\]
+Thus $d=O(\log T)$ and $B_0=O(\sqrt{\log T})$, with
+$B_0^2/d=O(1)$, translate to $n=O(\log^2T)$ at standard scaling.
+Rounding the new coordinates within
+$\eta\le1/(100\sqrt n)$, while keeping their magnitudes at most one,
+changes every score by at most
+$\sqrt n(2\eta+\eta^2)\le0.03$.
+The dummy keys can remain exactly zero. These bounded perturbations
+preserve a scalar separation tending to zero and one, since they
+multiply all non-dummy exponential weights by factors in
+$[e^{-0.03},e^{0.03}]$. Replacing scalar values $v\in\{0,1\}$ by
+$2v-1$ then gives attention mean $u=2y-1$. Once the two cases have
+$u\ge1/2$ and $u\le-1/2$, the token map in
+\eqref{eq:indexedtarget} separates them by $9/16$ and $7/16$, using the
+inequality $\tanh(\tanh x)\ge x/4$ on $[0,1]$ shown in the proof of
+Lemma~\ref{lem:indexedgadget}.
+\end{remark}
+
+\subsubsection{A constant token gap from orthogonality}
+
+\begin{lemma}[Dummy-key gap]
+\label{lem:indexedgadget}
+Given $m\ge1$ vectors $a_1,\ldots,a_m\in\{0,1\}^d$, $d\ge1$, define
+\[
+ L=\lceil\log_2(16m)\rceil,\qquad
+ H=dL,\qquad n=H^2,\qquad r=dL^2.
+\]
+Repeat every coordinate of $-a_j$ exactly $r$ times to form $k_j$, and
+repeat every coordinate of a query $b\in\{0,1\}^d$ exactly $r$ times
+to form $q$.  Let $k_0=0$, $v_0=-1$, and $v_j=1$ for $j\ge1$.
+Then
+\[
+ \langle q,k_j\rangle/\sqrt n=-L\langle a_j,b\rangle.
+\]
+If some $a_j$ is orthogonal to $b$, then
+$\pi_{\mathcal C}(q)\ge1/2$.  If none is orthogonal, then
+$\pi_{\mathcal C}(q)\le1/2-15/136<7/16$.
+\end{lemma}
+
+\paragraph{Proof idea.}
+A zero dummy key gives a known reference weight.  An orthogonal vector matches that weight; without one, all real-key weights are exponentially suppressed.  Coordinate repetition realizes the needed penalty at standard scaling with sign entries.
+
+\begin{proof}
+There are $dr=d^2L^2=n$ coordinates, and $r/H=L$, proving the score
+identity.  Put
+\[
+ W=\sum_{j=1}^m e^{-L\langle a_j,b\rangle}.
+\]
+The dummy has weight one, so the attention output is
+$u=(W-1)/(W+1)$.  An orthogonal vector contributes one and gives
+$W\ge1$, hence $u\ge0$.  Otherwise every dot product is at least one,
+and
+\[
+ 0\le W\le m e^{-L}\le m2^{-L}\le1/16.
+\]
+It follows that $u\le-15/17$.
+
+For $0\le x\le1$, concavity of tanh on this interval and
+$\tanh1\ge1/2$ give $\tanh x\ge x/2$.  The endpoint inequality follows
+from $e^2\ge3$.  Applying this inequality twice gives
+$\tanh(\tanh x)\ge x/4$.  Oddness and monotonicity therefore imply
+\[
+ \frac{1+\tanh(\tanh u)}2
+ \le\frac12-\frac{15}{136}<\frac7{16}.
+\]
+All computations specifying the cache and query use integers.  The
+reduction never evaluates an exponential, tanh, or an exact real number.
+\end{proof}
+
+\subsubsection{Absorbing every fixed polynomial preprocessing degree}
+
+\paragraph{Proof idea.}
+Partition the hard instance into small buckets so any fixed preprocessing degree is affordable.  Independent index copies amplify the token gap, and a global runtime cutoff converts the expected query guarantee into a bounded-time randomized decision algorithm.
+
+\begin{proof}[Proof of Theorem~\ref{thm:indexedlower}]
+Suppose the proposed data structure exists.  We may enlarge $a$ and
+$b$ to integers and decrease $\epsilon$ to a positive rational if
+necessary.  Set
+\[
+ \gamma=\frac1{2(a+1)},\qquad m=\lceil N^\gamma\rceil.
+\]
+Take a balanced randomized-OVH instance $A,B$, each of size $N$, in
+dimension $d=\lceil c\log_2N\rceil$.  Partition $A$ into at most
+$\lceil N/m\rceil$ buckets of size at most $m$.  Apply
+Lemma~\ref{lem:indexedgadget} to each bucket.  Empty buckets are omitted.
+For a smaller final bucket one may duplicate any of its vectors until
+its size is $m$; orthogonality existence is unchanged.
+
+Each index has $T=m+1$ entries and width
+$n=(d\lceil\log_2(16m)\rceil)^2=O(\log^4N)=O(\log^4T)$.
+The constant in this relation may depend on $c$ and $\gamma$.
+For each $b\in B$, query every bucket.  There is an orthogonal pair
+in $A\times B$ precisely when at least one bucket-query pair is in
+the yes case of Lemma~\ref{lem:indexedgadget}.
+
+Let
+\[
+ K=2048\left\lceil\log_2(24N^2)\right\rceil.
+\]
+Build $K$ mutually independent copies of each bucket index, and obtain
+one sample for a fixed bucket-query pair from each independent copy.
+For this fixed pair, the $K$ outputs are independent even when prefill
+is randomized.  If the data structure can alter its index during a
+query, record every changed cell and restore its old contents afterwards.
+Every query to a given copy then starts in its original prefill state.
+We bound the logging overhead after imposing a global time cutoff below;
+this avoids any assumption on higher moments of a query's runtime.
+No correctness assumption conditional on earlier outputs is being
+introduced.
+
+In the yes case each output has success probability at least $31/64$,
+even with total variation error $1/64$.  In the no case it has success
+probability at most $29/64$.  Classify a pair as yes if its empirical
+mean is at least $15/32$.  Hoeffding's inequality bounds its error by
+\[
+ \exp(-2K(1/64)^2)\le\frac1{24N^2}.
+\]
+There are at most $N^2$ bucket-query pairs.  A union bound gives total
+decision error at most $1/24$ before runtime truncation.  Outputs from
+different pairs may be correlated; the union bound needs no
+independence between pairs.
+
+The expected preprocessing cost, including the independent copies, is
+\[
+ \widetilde O\left(\frac Nm m^a\right)
+ =\widetilde O\left(N^{1+\gamma(a-1)}\right),
+\]
+and the total expected query cost is
+\[
+ \widetilde O\left(\frac{N^2}{m}m^{1-\epsilon}\right)
+ =\widetilde O\left(N^{2-\gamma\epsilon}\right).
+\]
+Here the tilde hides only fixed powers of $\log N$.  Construction of
+the explicit caches, formation of the explicit query vectors, sampling,
+counting, and comparison are included.  In
+particular the query vectors cost $O(n)$ bits each; this is absorbed
+by the polylogarithmic factors.
+
+Since $\gamma(a-1)<1/2$ and $\gamma\epsilon<1/4$, the total expected
+original charged work is bounded by
+$F(N)=O(N^{2-3\gamma\epsilon/4})$ for all sufficiently large $N$.
+Simulate at most $24F(N)$ original charged steps, returning an
+arbitrary answer on timeout.  Logging and undoing each memory write
+then has at most an $O(\log(F(N)+2))=O(\log N)$ overhead in the
+charged-address bit model: the log contains at most $24F(N)$ entries,
+and the original address and changed bits were already charged.
+The complete bounded simulation therefore takes
+$O(F(N)\log N)=O(N^{2-\gamma\epsilon/2})$ bit operations.
+Markov's inequality, applied to the original work, adds at most
+$1/24$ error.  No bound on $\mathbb E[Q\log Q]$ is used.
+We have obtained a
+worst-case $O(N^{2-\gamma\epsilon/2})$-time randomized OV algorithm
+with error at most $1/12$, contradicting randomized OVH for the
+corresponding constant $c$.
+\end{proof}
+
+\subsubsection{Realization by row-norm-one transformer maps}
+
+\begin{corollary}[The hard cache is realized by one legal block]
+\label{cor:indexedblock}
+The caches and queries in Theorem~\ref{thm:indexedlower} arise from a
+one-block causal transformer with sign inputs, query, key, value, and
+tanh row norms at most one, residual parameter $\alpha=1$, and
+standard scaling $\beta=\sqrt n$.  The current position's own key and
+value supply the dummy.  Consequently the lower bound applies to an
+index over the already computed prefix keys and values.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Separate the raw coordinates used by cached keys from those used by the fresh query.  Shared half-sum rows select the appropriate role, and the current position contributes the same dummy key for every query.
+
+\begin{proof}
+Reserve two groups of $d$ input coordinates, a constant coordinate,
+and a value marker.  There is room because
+$n=d^2L^2\ge2d+2$.  Fill all unused input coordinates with $+1$.
+At cache position $a_j$, put $2a_j-1$ in the first group, $-1$ in
+the second, $+1$ in the constant coordinate, and $+1$ in the marker.
+At the current query position $b$, put $-1$ in the first group,
+$2b-1$ in the second, $+1$ in the constant coordinate, and $-1$ in
+the marker.
+
+For every one of the $r$ output rows assigned to original coordinate
+$i$, let the query map be one half of the second-group coordinate
+plus one half of the constant coordinate.  Let the key map be minus
+one half of the first-group coordinate minus one half of the constant
+coordinate.  These rows have $\ell_1$ norm one.  They produce exactly
+the repeated query $b$ and repeated keys $-a_j$ in the lemma.
+The current position has key zero.  Let the value map send the marker
+to a chosen output coordinate and send zero to all other coordinates.
+The selected attention output is $u$.  With $\alpha=1$, a unit tanh
+row gives $\tanh u$, and the signed-coordinate head gives
+\eqref{eq:indexedtarget}.  All coefficients lie in
+$\{0,\pm1/2,\pm1\}$.
+
+Only the first $m$ positions depend on the prefill input.  The key zero
+and value $-1$ at the query position are the same for every query, so
+an index may include this dummy during prefill.  No future query
+information is used to build it.
+\end{proof}
+
+\subsubsection{A well-conditioned pre-norm additive realization}
+
+\begin{corollary}[Normalization and additive residuals preserve the obstruction]
+\label{cor:indexedprenorm}
+The conclusion of Theorem~\ref{thm:indexedlower} also holds for a
+single pre-norm additive attention block
+\[
+ h\longmapsto h+\operatorname{Att}(\operatorname{RMS}_0(h)),
+\]
+followed by a zero feed-forward update and a two-logit affine head
+whose rows have $\ell_1$ norm at most one.  The RMS denominator before
+attention equals one on every constructed input, and its squared
+denominator after attention is at least $(n-1)/n$.  Thus the lower
+bound does not rely on a vanishing normalization denominator.
+\end{corollary}
+
+\paragraph{Proof idea.}
+All constructed raw streams are sign vectors, so normalization initially does nothing.  Store the attention output in the marker coordinate; an affine readout cancels the known residual offset and preserves a constant token gap.
+
+\begin{proof}
+Use the sign inputs and maps of Corollary~\ref{cor:indexedblock}.
+Each sign vector has mean squared coordinate one, so
+$\operatorname{RMS}_0(h)=h$.  Choose the marker itself as the output
+coordinate of the value map.  The current marker is initially $-1$,
+so after the additive attention update it is $-1+u$.  The constant
+coordinate stays equal to one.  Their quarter-sum is
+$z=u/4\in[-1/4,1/4]$.  Use logits $\pm z$; the token probability is
+$(1+\tanh(u/4))/2$.  This dyadic readout also satisfies the bounded-logit
+promise on the entire sign cube: the updated marker has magnitude at
+most two and the unchanged constant coordinate has magnitude one,
+so the quarter-sum has magnitude at most $3/4$ even outside the
+restricted hard family.
+
+For $0\le x\le1/4$, one has
+$\tanh x\ge x-x^3/3\ge(7/8)x$.
+Indeed $0\le\tanh x\le x$ gives
+$\tanh'(x)=1-\tanh^2x\ge1-x^2$, and integration proves the first
+inequality.  The second follows from $x^2\le1/16$.
+The no case has $u\le-15/17$, hence
+\[
+ (1+\tanh(u/4))/2\le1/2-105/1088<7/16;
+\]
+the yes case is at least $1/2$.  The same amplification proof
+therefore applies.  All other
+coordinates are unchanged signs.  At every position after attention,
+their contribution to the mean square is $(n-1)/n$.  Set the
+subsequent tanh feed-forward map to zero.  Its normalization is
+well-defined with the displayed floor, and the update is zero.
+\end{proof}
+
+For a fixed positive dyadic stabilizer $\epsilon_0$, the same construction
+rescales query and key vectors by $1/\sqrt{1+\epsilon_0}$.
+Replacing $L$ by an integer at least
+$(1+\epsilon_0)\lceil\log_2(16m)\rceil$ restores the score gap.
+The value amplitude is reduced by the fixed factor
+$1/\sqrt{1+\epsilon_0}$, leaving a positive constant token gap.
+The number of independent copies changes by a constant depending on
+$\epsilon_0$.  All matrix coefficients remain rational constants.
+The reduction does no normalization arithmetic; the exact sampler
+performs it.
+For exact sampling this proves the conclusion for every fixed
+$\epsilon_0>0$.  A fixed total-variation tolerance must be chosen
+smaller than a constant multiple of
+$(1+\epsilon_0)^{-1/2}$; the particular tolerance $1/64$ continues
+to work, with the displayed thresholds, whenever $0\le\epsilon_0\le1$.
+
+\subsubsection{\texorpdfstring{Width $O(\log^2 T)$}{Quadratic logarithmic width} from Hamming-distance gaps}
+
+The elementary orthogonality construction used a penalty for a single
+violated coordinate.  A known gap reduction gives a stronger dimension
+bound.  We state the imported hardness fact precisely before using it.
+
+\begin{lemma}[Gap Hamming hardness, extracted from Rubinstein]
+\label{lem:gaphamminghardness}
+Assume randomized OVH.  For every $\rho>0$, there are fixed positive
+constants $\zeta,c_0,C_0$ such that the following promise problem has
+no randomized $O(N^{2-\rho})$-time algorithm with error at most $1/3$.
+Given two lists $A,B$ of $N$ vectors in $\{0,1\}^d$, with
+$c_0\log_2N\le d\le C_0\log_2N$, and an integer
+$d/4\le t\le d/2$, distinguish
+\[
+ \min_{a\in A,b\in B}\operatorname{dist}_H(a,b)\le t
+ \quad\hbox{from}\quad
+ \min_{a\in A,b\in B}\operatorname{dist}_H(a,b)\ge(1+\zeta)t.
+\]
+The gap constant may be chosen rational.
+\end{lemma}
+
+This is the Hamming part of Rubinstein's deterministic reduction in
+the proof of Theorem~4.1 of~\cite{rubinstein2018ann}.  In its notation,
+the output dimension is $d=2T'm_0$, the yes distance is
+$t=(T'-1)m_0$, and the no distance is at least $T'm_0$, where $T'\ge2$
+is constant.  These formulas give $d/4\le t<d/2$ and a fixed rational
+gap.  The verifier's random tapes become vector coordinates; they are
+enumerated by the reduction.  Its deterministic construction therefore
+also transfers hardness against randomized algorithms.  Duplicating
+vectors balances the two output sets without changing the distances.
+
+\begin{theorem}[Indexed lower bound at quadratic logarithmic width]
+\label{thm:indexedlowerlogtwo}
+Under randomized OVH, Theorem~\ref{thm:indexedlower} remains true with
+$n\le C\log^2(T+2)$, allowing $q,k_i\in\{-1,0,1\}^n$.
+The queries and all non-dummy keys can in fact have every coordinate
+in $\{-1,1\}$, so their Euclidean norms equal $\sqrt n$.
+The total-variation tolerance $1/64$ is unchanged.
+\end{theorem}
+
+\paragraph{Proof idea.}
+A Hamming-distance gap turns the required score penalty into a constant number of coordinate repetitions.  The same dummy-key separation and bucket amplification then give the sharper width bound.
+
+\begin{proof}
+Fix proposed preprocessing degree $a$ and query saving $\epsilon$,
+and set $\gamma=1/[2(a+1)]$ as before.  Use
+Lemma~\ref{lem:gaphamminghardness} with
+$\rho=\gamma\epsilon/2$; let its constants be $\zeta,c_0,C_0$.
+Take one of its instances of size $N$, and partition $A$ into buckets
+of size $m=\lceil N^\gamma\rceil$, duplicating the final bucket's
+elements if necessary.
+
+For the known threshold $t$, fix a vector $c_t\in\{-1,1\}^d$
+with exactly $t$ positive entries.  Given $a,b\in\{0,1\}^d$, form
+\[
+ \widehat k_a=(2a-1,c_t),\qquad
+ \widehat q_b=(2b-1,\boldsymbol1)
+ \quad\hbox{in }\{-1,1\}^{2d}.
+\]
+Their dot product is exactly
+\begin{equation}
+ \langle\widehat q_b,\widehat k_a\rangle
+ =d-2\operatorname{dist}_H(a,b)+(2t-d)
+ =2(t-\operatorname{dist}_H(a,b)).
+ \label{eq:gaphammingdot}
+\end{equation}
+Let $L=\lceil\log_2(16m)\rceil$ and choose
+\[
+ H=\max\{1,\lceil L/(2\zeta t)\rceil\},\qquad
+ r=2dH^2,\qquad n=(2dH)^2.
+\]
+The gap constant is a fixed rational number, so this choice uses only
+rational arithmetic and an integer ceiling.  Repeat every coordinate
+of $\widehat k_a$ and $\widehat q_b$ exactly $r$ times.  Since
+$2dr=n$ and $r/\sqrt n=H$, the standard-scaled score is
+\[
+ \frac{\langle q_b,k_a\rangle}{\sqrt n}
+ =2H(t-\operatorname{dist}_H(a,b)).
+\]
+Append a zero dummy key with value $-1$ and give all real keys value
+$+1$.
+
+In a yes bucket-query pair some real key has score at least zero,
+so its total real-key weight $W$ is at least one.  In a no instance,
+every real score is at most $-2H\zeta t\le-L$, and every bucket has
+$W\le m e^{-L}\le1/16$.  The dummy-key argument gives exactly the
+same constant token gap as Lemma~\ref{lem:indexedgadget}.
+
+Here $t\ge d/4\ge(c_0/4)\log_2N$, whereas
+$L\le\gamma\log_2N+O(1)$.  Therefore $H$ is bounded by a constant
+depending only on $\gamma,\zeta,c_0$.  Consequently
+\[
+ n=O(d^2)=O(\log^2N)=O(\log^2T).
+\]
+All input coordinates are $0$ or signs; the scaling denominator
+$\sqrt n=2dH$ is an integer.
+
+Use the independent prefill copies, sample threshold, union bound,
+and runtime truncation from Theorem~\ref{thm:indexedlower}.  A yes
+instance has at least one yes bucket-query pair.  A no instance has
+only no pairs.  Under the promise, these are the only cases needed;
+intermediate distances in a yes instance can produce arbitrary
+additional yes classifications without affecting the decision.
+The expected time is
+\[
+ \widetilde O\left(N^{1+\gamma(a-1)}
+                 +N^{2-\gamma\epsilon}\right),
+\]
+which after truncation is
+$O(N^{2-\gamma\epsilon/2})$.  This contradicts
+Lemma~\ref{lem:gaphamminghardness}.
+\end{proof}
+
+This matches the exponent of the straightforward scan.  At width
+$n=O(\log^2T)$ and input bit lengths polylogarithmic in $T$,
+Lemma~\ref{lem:newcachescan} samples \eqref{eq:indexedtarget} exactly
+in $T\operatorname{polylog}T$ expected bit operations.  Thus the lower
+and upper bounds agree in the power of $T$, under the stated
+hypothesis.
+
+\begin{corollary}[Quadratic-logarithmic hard blocks]
+\label{cor:indexedlogtwoblock}
+The row-norm-one block realization and the well-conditioned pre-norm
+additive realization in Corollaries~\ref{cor:indexedblock} and
+\ref{cor:indexedprenorm} also hold for the
+$n=O(\log^2T)$ lower bound of Theorem~\ref{thm:indexedlowerlogtwo}.
+\end{corollary}
+
+\paragraph{Proof idea.}
+Opposite sign pairs encode a coordinate at its intended position and give zero at the other role.  Fixed padding and the marker coordinate complete the Hamming-gap gadget using only rows of absolute sum one.
+
+\begin{proof}
+For $d\ge2$, reserve $4d+2$ source coordinates, which fit in
+$n=(2dH)^2$.  For each $i\le d$, use two key-source coordinates and
+two query-source coordinates.  At a cache position $a$, the key pair
+is $(2a_i-1,1-2a_i)$ and the query pair is $(1,1)$.  At the current
+position $b$, the key pair is $(1,1)$ and the query pair is
+$(2b_i-1,1-2b_i)$.  Half the difference of each pair gives the
+required bipolar key or query coordinate; it is zero on the other
+role.  Reserve a constant coordinate $c=1$ and a marker $v$ that is
+$+1$ on cache positions and $-1$ on the query position.
+
+The $i$th fixed padding coordinate of a key is
+$(c_t)_i(c+v)/2$, and the corresponding query padding coordinate is
+$(c-v)/2$.  Thus cache keys have padding $c_t$, the query has padding
+$\boldsymbol1$, and its own key is zero.  Replicate every one of
+these $2d$ output rows $r$ times.  Each row has absolute sum one.
+The marker supplies the scalar value.  All raw source coordinates
+are signs, including the unused coordinates, which are set to one.
+
+The remainder of Corollary~\ref{cor:indexedblock}, or respectively
+Corollary~\ref{cor:indexedprenorm}, now applies verbatim.  The
+asymptotic hardness instances have $d\ge2$; finitely many smaller
+instances have no effect on the contradiction.
+\end{proof}
+
